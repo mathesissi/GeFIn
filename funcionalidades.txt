@@ -1,0 +1,28 @@
+link para acesso da equipe: https://prod.liveshare.vsengsaas.visualstudio.com/join?D3E360F02D142DE59ABF9F8798485FCEC56A
+
+Cadastrar e Informar > SETUP
+Informar débitos e créditos > Livro Diário
+Balancete e Balanço Patrimonial > Relatórios Automatizados.
+
+Tipos de Contas - Descrição - Grupos e Subgrupos:
+
+Ativo:
+
+    Ativo Circulante
+    Ativo Não Circulante
+        Realizavel a Longo Prazo
+        Investimento
+        Imobilizado
+        Intangível
+
+Passivo:
+
+    Passivo Circulante
+    Passivo Não Circulante
+
+Patrimônio Líquido
+
+Despesa
+
+Receita
+
