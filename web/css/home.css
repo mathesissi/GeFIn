@@ -1,0 +1,175 @@
+:root {
+    --primary-blue: #1a73e8; /* Cor principal, pode ser ajustada */
+    --light-blue-bg: #e6f0ff;
+    --dark-text: #202124;
+    --light-text: #5f6368;
+    --border-color: #dadce0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--light-blue-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.app-container {
+    display: flex;
+    width: 95vw;
+    height: 95vh;
+    max-width: 1400px;
+    max-height: 900px;
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Barra de Navegação Lateral --- */
+.sidebar {
+    width: 250px;
+    background-color: #fff;
+    border-right: 1px solid var(--border-color);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo-area {
+    padding-bottom: 20px;
+}
+
+.logo {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-blue);
+}
+
+.main-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.main-nav li {
+    margin-bottom: 10px;
+}
+
+.nav-item {
+    display: block;
+    padding: 12px 15px;
+    color: var(--light-text);
+    text-decoration: none;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-item.active {
+    background-color: var(--primary-blue);
+    color: #fff;
+    font-weight: bold;
+}
+
+.nav-item:hover {
+    background-color: #f1f3f4;
+    color: var(--dark-text);
+}
+
+.logout {
+    font-size: 1rem;
+    color: var(--light-text);
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+.logout:hover {
+    color: var(--dark-text);
+}
+
+/* --- Área de Conteúdo Principal --- */
+.content-area {
+    flex-grow: 1;
+    background-color: #f4f7f9;
+    border-radius: 0 20px 20px 0;
+    padding: 30px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--dark-text);
+    margin: 0;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-name {
+    font-size: 1rem;
+    color: var(--dark-text);
+    margin-right: 15px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #000;
+    border-radius: 50%;
+}
+
+/* --- Área Vazia do Dashboard --- */
+.dashboard-area {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: var(--light-text);
+    /* Remova o fundo para que o conteúdo possa ser adicionado aqui */
+}
+
+/* --- Botão Flutuante (FAB) --- */
+.fab {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary-blue);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+}

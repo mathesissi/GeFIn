@@ -1,7 +1,6 @@
 import { Conta, TipoConta, SubtipoAtivo } from '../model/Contas';
-import { Balancete } from '../model/balancetes';
-import { Lancamento } from '../model/lancamentos';
-
+import { Lancamento } from '../model/Lancamento';
+import { Balancete } from "../model/balancete";
 
 // 1. Criando uma conta de ativo
 const contaCaixa = new Conta(
