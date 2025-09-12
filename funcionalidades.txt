@@ -1,4 +1,4 @@
-link para acesso da equipe: https://prod.liveshare.vsengsaas.visualstudio.com/join?FA150BEA954DE54C3FD8AE42B786A9CB1B98
+link para acesso da equipe: https://prod.liveshare.vsengsaas.visualstudio.com/join?B7D2D7B9D9275C8C845A8B2401A4E2033B18
 
 Cadastrar e Informar > SETUP
 Informar débitos e créditos > Livro Diário
