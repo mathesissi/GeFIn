@@ -1,6 +1,5 @@
-/**
- * Tipos principais de conta.
- */
+//Tipos principais de conta.
+
 export enum TipoConta {
   Ativo = 'Ativo',
   Passivo = 'Passivo',
@@ -9,9 +8,9 @@ export enum TipoConta {
   Despesa = 'Despesa'
 }
 
-/**
- * Subtipos para contas do tipo "Ativo".
- */
+
+//Subtipos para contas do tipo "Ativo".
+
 export enum SubtipoAtivo {
   Circulante = 'Ativo Circulante',
   NaoCirculante_Realizavel = 'Realizável a Longo Prazo',
@@ -20,24 +19,24 @@ export enum SubtipoAtivo {
   NaoCirculante_Intangivel = 'Intangível'
 }
 
-/**
- * Subtipos para contas do tipo "Passivo".
- */
+
+// Subtipos para contas do tipo "Passivo".
+
 export enum SubtipoPassivo {
   Circulante = 'Passivo Circulante',
   NaoCirculante = 'Passivo Não Circulante'
 }
 
-/**
- * Subtipos para Patrimônio Líquido.
- */
+
+//Subtipos para Patrimônio Líquido.
+
 export enum SubtipoPatrimonioLiquido {
   Geral = 'Patrimônio Líquido'
 }
 
-/**
- * Representa uma conta contábil com seus atributos e lógica de validação.
- */
+
+ //Representa uma conta contábil com seus atributos e lógica de validação.
+
 export class Conta {
   id_conta: number;
   nome_conta: string;
@@ -45,14 +44,7 @@ export class Conta {
   subtipo_conta?: string;
   codigo_conta: string;
 
-  /**
-   * Construtor para criar uma nova instância de Conta.
-   * @param id_conta Identificador único da conta.
-   * @param nome_conta Nome descritivo da conta.
-   * @param tipo_conta O tipo principal da conta (Ativo, Passivo, etc.).
-   * @param codigo_conta O código da conta contábil.
-   * @param subtipo_conta O subtipo da conta (opcional).
-   */
+
   constructor(
     id_conta: number,
     nome_conta: string,
@@ -71,13 +63,6 @@ export class Conta {
       throw new Error(`Subtipo inválido "${subtipo_conta}" para o tipo "${tipo_conta}"`);
     }
   }
-
-  /**
-   * Valida se o subtipo fornecido é válido para o tipo de conta.
-   * @param tipo O tipo de conta.
-   * @param subtipo O subtipo a ser validado.
-   * @returns `true` se o subtipo for válido, `false` caso contrário.
-   */
   private validarSubtipo(tipo: TipoConta, subtipo: string): boolean {
     switch (tipo) {
       case TipoConta.Ativo:
@@ -91,9 +76,7 @@ export class Conta {
     }
   }
 
-  /**
-   * Exibe as informações da conta no console.
-   */
+
   exibirConta(): void {
     console.log(`ID: ${this.id_conta}`);
     console.log(`Nome: ${this.nome_conta}`);
@@ -104,27 +87,3 @@ export class Conta {
     console.log(`Código: ${this.codigo_conta}`);
   }
 }
-
-/* Exemplo de uso da classe Conta
-const contaAtivo = new Conta(
-  101,
-  'Caixa',
-  TipoConta.Ativo,
-  '1.1.1.01.0001',
-  SubtipoAtivo.Circulante
-);
-
-
-const contaReceita = new Conta(
-  401,
-  'Vendas de Produtos',
-  TipoConta.Receita,
-  '4.1.1.01.0001'
-);
-
-console.log('Dados da Conta Ativo:');
-contaAtivo.exibirConta();
-
-console.log('\nDados da Conta Receita:');
-contaReceita.exibirConta();
-*/
