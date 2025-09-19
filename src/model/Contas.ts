@@ -63,6 +63,7 @@ export class Conta {
       throw new Error(`Subtipo inválido "${subtipo_conta}" para o tipo "${tipo_conta}"`);
     }
   }
+  
   private validarSubtipo(tipo: TipoConta, subtipo: string): boolean {
     switch (tipo) {
       case TipoConta.Ativo:

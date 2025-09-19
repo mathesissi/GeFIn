@@ -24,6 +24,7 @@ export class Lancamento {
     this.id_conta_credito = id_conta_credito;
   }
 
+
   exibirLancamento(): void {
     console.log(`ID: ${this.id_lancamento}`);
     console.log(`Data: ${this.data.toLocaleDateString()}`);

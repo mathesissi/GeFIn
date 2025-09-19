@@ -1,5 +1,5 @@
 :root {
-    --primary-blue: #1a73e8; /* Cor principal, pode ser ajustada */
+    --primary-blue: #1a73e8; 
     --light-blue-bg: #e6f0ff;
     --dark-text: #202124;
     --light-text: #5f6368;
@@ -28,7 +28,6 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* --- Barra de Navegação Lateral --- */
 .sidebar {
     width: 250px;
     background-color: #fff;
@@ -94,7 +93,6 @@ body {
     color: var(--dark-text);
 }
 
-/* --- Área de Conteúdo Principal --- */
 .content-area {
     flex-grow: 1;
     background-color: #f4f7f9;
@@ -139,7 +137,6 @@ body {
     border-radius: 50%;
 }
 
-/* --- Área Vazia do Dashboard --- */
 .dashboard-area {
     flex-grow: 1;
     display: flex;
@@ -147,10 +144,9 @@ body {
     align-items: center;
     font-size: 2rem;
     color: var(--light-text);
-    /* Remova o fundo para que o conteúdo possa ser adicionado aqui */
+   
 }
 
-/* --- Botão Flutuante (FAB) --- */
 .fab {
     position: absolute;
     bottom: 30px;

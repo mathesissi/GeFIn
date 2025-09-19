@@ -2,7 +2,7 @@
  * Representa um balancete com seus saldos de início e fim do período.
  */
 export class Balancete {
-  id_balancete: string;
+  id_balancete: number;
   mes: number;
   ano: number;
   id_conta: string;
@@ -19,7 +19,7 @@ export class Balancete {
    * @param saldo_final O saldo da conta no final do mês.
    */
   constructor(
-    id_balancete: string,
+    id_balancete: number,
     mes: number,
     ano: number,
     id_conta: string,
