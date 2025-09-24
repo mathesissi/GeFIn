@@ -1,8 +1,6 @@
 import { Lancamento } from "../model/Lancamento";
-import { executarComandoSQL } from "../database/MySql"; 
+import { executarComandoSQL } from "../database/MySql";
 
-// Interface que reflete a estrutura exata da tabela 'lancamentos' no banco de dados
-// As chaves primárias e estrangeiras são numéricas, não strings
 export interface LancamentoDbRow {
   id_lancamento: number;
   data: Date;
@@ -13,133 +11,130 @@ export interface LancamentoDbRow {
 }
 
 export class LancamentosRepository {
-  /**
-   * Create: Salva um novo lançamento no banco de dados.
-   * @param lancamento O objeto Lancamento a ser salvo.
-   * @returns O lançamento salvo com o ID gerado pelo banco.
-   */
+  private static instance: LancamentosRepository;
+
+  private constructor() {
+    this.createTable();
+  }
+
+  public static getInstance(): LancamentosRepository {
+    if (!LancamentosRepository.instance) {
+      LancamentosRepository.instance = new LancamentosRepository();
+    }
+    return LancamentosRepository.instance;
+  }
+
+  private async createTable(): Promise<void> {
+    const sql = `
+      CREATE TABLE IF NOT EXISTS lancamentos (
+        id_lancamento INT AUTO_INCREMENT PRIMARY KEY,
+        data DATE NOT NULL,
+        descricao VARCHAR(255) NOT NULL,
+        valor DECIMAL(10, 2) NOT NULL,
+        id_conta_debito INT NOT NULL,
+        id_conta_credito INT NOT NULL,
+        FOREIGN KEY (id_conta_debito) REFERENCES contas(id_conta),
+        FOREIGN KEY (id_conta_credito) REFERENCES contas(id_conta)
+      );
+    `;
+    try {
+      await executarComandoSQL(sql, []);
+      console.log('Tabela "lancamentos" criada ou já existente.');
+    } catch (error) {
+      console.error('Erro ao criar tabela "lancamentos":', error);
+    }
+  }
+
+  private rowToLancamento(row: LancamentoDbRow): Lancamento {
+    const data = row.data instanceof Date ? row.data : new Date(row.data);
+    if (isNaN(data.getTime())) {
+      throw new Error("Formato de data inválido no banco de dados.");
+    }
+    return new Lancamento(
+      row.id_lancamento,
+      data,
+      row.descricao,
+      row.valor,
+      row.id_conta_debito,
+      row.id_conta_credito
+    );
+  }
+
   public async Create(lancamento: Lancamento): Promise<Lancamento> {
     const sql = `
       INSERT INTO lancamentos (data, descricao, valor, id_conta_debito, id_conta_credito)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id_lancamento;
+      VALUES (?, ?, ?, ?, ?);
     `;
     const params = [
-      lancamento.data,
-      lancamento.descricao,
-      lancamento.valor,
-      parseInt(lancamento.id_conta_debito), 
-      parseInt(lancamento.id_conta_credito),
-    ];
-
-    const result = await executarComandoSQL(sql, params);
-    const newId = result.rows[0].id_lancamento;
-
-  
-    return new Lancamento(
-      String(newId),
       lancamento.data,
       lancamento.descricao,
       lancamento.valor,
       lancamento.id_conta_debito,
-      lancamento.id_conta_credito
-    );
-  }
-
-  /**
-   * Select: Busca um único lançamento por seu ID.
-   * @param id O ID do lançamento a ser buscado.
-   * @returns O lançamento encontrado ou 'undefined' se não existir.
-   */
-  public async Select(id: string): Promise<Lancamento | undefined> {
-    const sql = "SELECT * FROM lancamentos WHERE id_lancamento = $1;";
-    const params = [parseInt(id)]; 
+      lancamento.id_conta_credito,
+    ];
 
     const result = await executarComandoSQL(sql, params);
-    const row: LancamentoDbRow | undefined = result.rows[0];
+    const newId = result.insertId;
 
-    if (row) {
-      return new Lancamento(
-        String(row.id_lancamento),
-        new Date(row.data),
-        row.descricao,
-        row.valor,
-        String(row.id_conta_debito),
-        String(row.id_conta_credito)
-      );
+    const createdLancamento = await this.Select(newId);
+    if (!createdLancamento) {
+      throw new Error("Erro ao criar lançamento.");
     }
-    return undefined;
+    return createdLancamento;
   }
 
-  /**
-   * SelectAll: Busca todos os lançamentos no banco de dados.
-   * @returns Uma lista de todos os lançamentos.
-   */
-  public async SelectAll(): Promise<Lancamento[]> {
+  public async Select(id: number): Promise<Lancamento | null> {
+    const sql = "SELECT * FROM lancamentos WHERE id_lancamento = ?;";
+    const params = [id];
+    const result = await executarComandoSQL(sql, params);
+    if (result.length > 0) {
+      return this.rowToLancamento(result[0]);
+    }
+    return null;
+  }
+
+  public async findAll(): Promise<Lancamento[]> {
     const sql = "SELECT * FROM lancamentos;";
     const result = await executarComandoSQL(sql, []);
-
-    return result.rows.map(
-      (row: LancamentoDbRow) =>
-        new Lancamento(
-          String(row.id_lancamento),
-          new Date(row.data),
-          row.descricao,
-          row.valor,
-          String(row.id_conta_debito),
-          String(row.id_conta_credito)
-        )
-    );
+    return result.map((row: any) => this.rowToLancamento(row));
   }
 
-  /**
-   * Update: Atualiza um lançamento existente no banco de dados.
-   * @param lancamento O objeto Lancamento com os dados a serem atualizados.
-   * @returns O lançamento atualizado ou 'null' se não encontrado.
-   */
   public async Update(lancamento: Lancamento): Promise<Lancamento | null> {
     const sql = `
       UPDATE lancamentos
-      SET data = $1, descricao = $2, valor = $3, id_conta_debito = $4, id_conta_credito = $5
-      WHERE id_lancamento = $6
-      RETURNING *;
+      SET data = ?, descricao = ?, valor = ?, id_conta_debito = ?, id_conta_credito = ?
+      WHERE id_lancamento = ?;
     `;
     const params = [
       lancamento.data,
       lancamento.descricao,
       lancamento.valor,
-      parseInt(lancamento.id_conta_debito),
-      parseInt(lancamento.id_conta_credito),
-      parseInt(lancamento.id_lancamento),
+      lancamento.id_conta_debito,
+      lancamento.id_conta_credito,
+      lancamento.id_lancamento,
     ];
 
-    const result = await executarComandoSQL(sql, params);
-    if (result.rows.length > 0) {
-      const updatedRow: LancamentoDbRow = result.rows[0];
-      return new Lancamento(
-        String(updatedRow.id_lancamento),
-        updatedRow.data,
-        updatedRow.descricao,
-        updatedRow.valor,
-        String(updatedRow.id_conta_debito),
-        String(updatedRow.id_conta_credito)
-      );
-    }
-    return null;
+    await executarComandoSQL(sql, params);
+    return this.Select(lancamento.id_lancamento);
   }
 
-  /**
-   * Delete: Deleta um lançamento do banco de dados por seu ID.
-   * @param id O ID do lançamento a ser deletado.
-   * @returns 'true' se o lançamento foi deletado, 'false' caso contrário.
-   */
-  public async Delete(id: string): Promise<boolean> {
-    const sql = "DELETE FROM lancamentos WHERE id_lancamento = $1;";
-    const params = [parseInt(id)];
+  public async Delete(id: number): Promise<boolean> {
+    const sql = "DELETE FROM lancamentos WHERE id_lancamento = ?;";
+    const params = [id];
 
     const result = await executarComandoSQL(sql, params);
-    // Em uma lib real, 'result.rowCount' indica o número de linhas afetadas.
-    // Se for 1, significa que a linha foi deletada.
-    return result.rowCount > 0;
+    return result.affectedRows > 0;
+  }
+
+  public async findByContaAndPeriodo(id_conta: number, mes: number, ano: number): Promise<Lancamento[]> {
+    const sql = `
+      SELECT * FROM lancamentos
+      WHERE (id_conta_debito = ? OR id_conta_credito = ?)
+      AND MONTH(data) = ?
+      AND YEAR(data) = ?;
+    `;
+    const params = [id_conta, id_conta, mes, ano];
+    const result = await executarComandoSQL(sql, params);
+    return result.map((row: any) => this.rowToLancamento(row));
   }
 }

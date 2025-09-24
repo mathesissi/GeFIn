@@ -32,11 +32,6 @@ var SubtipoPatrimonioLiquido;
 })(SubtipoPatrimonioLiquido || (exports.SubtipoPatrimonioLiquido = SubtipoPatrimonioLiquido = {}));
 //Representa uma conta contábil com seus atributos e lógica de validação.
 class Conta {
-    id_conta;
-    nome_conta;
-    tipo_conta;
-    subtipo_conta;
-    codigo_conta;
     constructor(id_conta, nome_conta, tipo_conta, codigo_conta, subtipo_conta) {
         this.id_conta = id_conta;
         this.nome_conta = nome_conta;
@@ -72,4 +67,3 @@ class Conta {
     }
 }
 exports.Conta = Conta;
-//# sourceMappingURL=Contas.js.map

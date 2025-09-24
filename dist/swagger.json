@@ -1,0 +1,880 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"Lancamento": {
+				"description": "Representa uma transação contábil.",
+				"properties": {
+					"id_lancamento": {
+						"type": "number",
+						"format": "double"
+					},
+					"data": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"descricao": {
+						"type": "string"
+					},
+					"valor": {
+						"type": "number",
+						"format": "double"
+					},
+					"id_conta_debito": {
+						"type": "number",
+						"format": "double"
+					},
+					"id_conta_credito": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id_lancamento",
+					"data",
+					"descricao",
+					"valor",
+					"id_conta_debito",
+					"id_conta_credito"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"TipoConta": {
+				"enum": [
+					"Ativo",
+					"Passivo",
+					"Patrimônio Líquido",
+					"Receita",
+					"Despesa"
+				],
+				"type": "string"
+			},
+			"Conta": {
+				"properties": {
+					"id_conta": {
+						"type": "number",
+						"format": "double"
+					},
+					"nome_conta": {
+						"type": "string"
+					},
+					"tipo_conta": {
+						"$ref": "#/components/schemas/TipoConta"
+					},
+					"subtipo_conta": {
+						"type": "string"
+					},
+					"codigo_conta": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id_conta",
+					"nome_conta",
+					"tipo_conta",
+					"codigo_conta"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Partial_Conta_": {
+				"properties": {
+					"id_conta": {
+						"type": "number",
+						"format": "double"
+					},
+					"nome_conta": {
+						"type": "string"
+					},
+					"tipo_conta": {
+						"$ref": "#/components/schemas/TipoConta"
+					},
+					"subtipo_conta": {
+						"type": "string"
+					},
+					"codigo_conta": {
+						"type": "string"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
+			"Balancete": {
+				"description": "Representa um balancete com seus saldos de início e fim do período.",
+				"properties": {
+					"id_balancete": {
+						"type": "number",
+						"format": "double"
+					},
+					"mes": {
+						"type": "number",
+						"format": "double"
+					},
+					"ano": {
+						"type": "number",
+						"format": "double"
+					},
+					"id_conta": {
+						"type": "number",
+						"format": "double"
+					},
+					"saldo_inicial": {
+						"type": "number",
+						"format": "double"
+					},
+					"saldo_final": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id_balancete",
+					"mes",
+					"ano",
+					"id_conta",
+					"saldo_inicial",
+					"saldo_final"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "API Documentação",
+		"version": "1.0.0",
+		"description": "Documentação da API usando Swagger"
+	},
+	"paths": {
+		"/lancamentos": {
+			"post": {
+				"operationId": "CriarLancamento",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Lancamento"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Lançamentos"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"id_conta_credito": {
+										"type": "number",
+										"format": "double"
+									},
+									"id_conta_debito": {
+										"type": "number",
+										"format": "double"
+									},
+									"valor": {
+										"type": "number",
+										"format": "double"
+									},
+									"descricao": {
+										"type": "string"
+									},
+									"data": {
+										"type": "string",
+										"format": "date-time"
+									}
+								},
+								"required": [
+									"id_conta_credito",
+									"id_conta_debito",
+									"valor",
+									"descricao",
+									"data"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "ListarLancamentos",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Lancamento"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Lançamentos"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/lancamentos/{id}": {
+			"get": {
+				"operationId": "BuscarLancamentoPorId",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Lancamento"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Lançamentos"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "AtualizarLancamento",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Lancamento"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Lançamentos"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"id_conta_credito": {
+										"type": "number",
+										"format": "double"
+									},
+									"id_conta_debito": {
+										"type": "number",
+										"format": "double"
+									},
+									"valor": {
+										"type": "number",
+										"format": "double"
+									},
+									"descricao": {
+										"type": "string"
+									},
+									"data": {
+										"type": "string",
+										"format": "date-time"
+									}
+								},
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeletarLancamento",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Lançamentos"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/contas": {
+			"post": {
+				"operationId": "CriarConta",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Conta"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Contas"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"subtipo_conta": {
+										"type": "string"
+									},
+									"codigo_conta": {
+										"type": "string"
+									},
+									"tipo_conta": {
+										"$ref": "#/components/schemas/TipoConta"
+									},
+									"nome_conta": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"codigo_conta",
+									"tipo_conta",
+									"nome_conta"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			},
+			"get": {
+				"operationId": "ListarContas",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Conta"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Contas"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/contas/{id}": {
+			"get": {
+				"operationId": "BuscarContaPorId",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Conta"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Contas"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "AtualizarConta",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Conta"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Contas"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Partial_Conta_"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeletarConta",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Contas"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/balancetes": {
+			"get": {
+				"operationId": "GetBalancetes",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/Balancete"
+											},
+											"type": "array"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Balancetes"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "mes",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ano",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/balancetes/gerar": {
+			"post": {
+				"operationId": "PostGerarBalancetes",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"items": {
+												"$ref": "#/components/schemas/Balancete"
+											},
+											"type": "array"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Balancetes"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"ano": {
+										"type": "number",
+										"format": "double"
+									},
+									"mes": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"required": [
+									"ano",
+									"mes"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "http://localhost:3040/api",
+			"description": "Servidor de Desenvolvimento"
+		}
+	]
+}

@@ -1,48 +1,86 @@
+import { Controller, Get, Post, Put, Delete, Route, Body, Path, TsoaResponse, Res, Tags } from 'tsoa';
 import { Lancamento } from '../model/Lancamento';
 import { LancamentosService } from '../service/LancamentosService';
 
-export class LancamentosController {
+@Route("lancamentos")
+@Tags("Lançamentos")
+export class LancamentosController extends Controller {
   private lancamentosService: LancamentosService;
-  
+
   constructor() {
+    super();
     this.lancamentosService = new LancamentosService();
   }
-  
-  public async criarLancamento(dadosLancamento: any): Promise<Lancamento> {
+
+  @Post()
+  public async criarLancamento(
+    @Body() dadosLancamento: {
+      data: Date;
+      descricao: string;
+      valor: number;
+      id_conta_debito: number;
+      id_conta_credito: number;
+    },
+    @Res() badRequestResponse: TsoaResponse<400, { message: string }>
+  ): Promise<Lancamento | void> {
     try {
-      const lancamentoCriado = await this.lancamentosService.criarLancamento(dadosLancamento);
-      return lancamentoCriado;
-    } catch (error) {
-      console.error('Erro ao criar lançamento:', error);
-      throw error;
+      this.setStatus(201); // Created
+      return this.lancamentosService.criarLancamento(dadosLancamento);
+    } catch (error: any) {
+      return badRequestResponse(400, { message: error.message });
     }
   }
-  
+
+  @Get()
   public async listarLancamentos(): Promise<Lancamento[]> {
-    return await this.lancamentosService.listarLancamentos();
+    return this.lancamentosService.listarLancamentos();
   }
 
-  public async buscarLancamentoPorId(id: string): Promise<Lancamento | undefined> {
-    return await this.lancamentosService.buscarLancamentoPorId(id);
+  @Get("{id}")
+  public async buscarLancamentoPorId(
+    @Path() id: number,
+    @Res() notFoundResponse: TsoaResponse<404, { message: string }>
+  ): Promise<Lancamento | void> {
+    const lancamento = await this.lancamentosService.buscarLancamentoPorId(id);
+    if (!lancamento) {
+      return notFoundResponse(404, { message: "Lançamento não encontrado." });
+    }
+    return lancamento;
   }
 
-  public async atualizarLancamento(id: string, dadosAtualizados: any): Promise<Lancamento | null> {
+  @Put("{id}")
+  public async atualizarLancamento(
+    @Path() id: number,
+    @Body() dadosAtualizados: {
+      data?: Date;
+      descricao?: string;
+      valor?: number;
+      id_conta_debito?: number;
+      id_conta_credito?: number;
+    },
+    @Res() notFoundResponse: TsoaResponse<404, { message: string }>,
+    @Res() badRequestResponse: TsoaResponse<400, { message: string }>
+  ): Promise<Lancamento | void> {
     try {
       const lancamentoAtualizado = await this.lancamentosService.atualizarLancamento(id, dadosAtualizados);
+      if (!lancamentoAtualizado) {
+        return notFoundResponse(404, { message: "Lançamento não encontrado." });
+      }
       return lancamentoAtualizado;
-    } catch (error) {
-      console.error('Erro ao atualizar lançamento:', error);
-      throw error;
+    } catch (error: any) {
+      return badRequestResponse(400, { message: error.message });
     }
   }
 
-  public async deletarLancamento(id: string): Promise<boolean> {
-    try {
-      const sucesso = await this.lancamentosService.deletarLancamento(id);
-      return sucesso;
-    } catch (error) {
-      console.error('Erro ao deletar lançamento:', error);
-      throw error;
+  @Delete("{id}")
+  public async deletarLancamento(
+    @Path() id: number,
+    @Res() notFoundResponse: TsoaResponse<404, { message: string }>
+  ): Promise<void> {
+    const deletado = await this.lancamentosService.deletarLancamento(id);
+    if (!deletado) {
+      return notFoundResponse(404, { message: "Lançamento não encontrado." });
     }
+    this.setStatus(204); // No Content
   }
 }

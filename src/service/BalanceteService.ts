@@ -1,65 +1,59 @@
-// src/service/BalanceteService.ts
-
 import { Balancete } from "../model/balancete";
 import { BalanceteRepository } from "../repository/BalanceteRepository";
-import { ContaRepository } from "../repository/ContasRepository"; // Necessário para pegar as contas
-import { LancamentosRepository } from "../repository/LancamentosRepository"; // Necessário para pegar os lançamentos
+import { ContaRepository } from "../repository/ContasRepository";
+import { LancamentosRepository } from "../repository/LancamentosRepository";
+import { Conta } from "../model/Contas";
 
 export class BalanceteService {
     private balanceteRepo: BalanceteRepository;
     private contaRepo: ContaRepository;
     private lancamentoRepo: LancamentosRepository;
 
-    constructor(
-        balanceteRepo: BalanceteRepository,
-        contaRepo: ContaRepository,
-        lancamentoRepo: LancamentosRepository
-    ) {
-        this.balanceteRepo = balanceteRepo;
-        this.contaRepo = contaRepo;
-        this.lancamentoRepo = lancamentoRepo;
+    constructor() {
+        this.balanceteRepo = BalanceteRepository.getInstance();
+        this.contaRepo = ContaRepository.getInstance();
+        this.lancamentoRepo = LancamentosRepository.getInstance();
     }
 
     /**
      * Busca os balancetes de um período específico.
+     * @param mes O mês de referência.
+     * @param ano O ano de referência.
+     * @returns Uma lista de balancetes.
      */
-    async getBalancetesPorPeriodo(mes: number, ano: number): Promise<Balancete[]> {
+    async getBalancetePorPeriodo(mes: number, ano: number): Promise<Balancete[]> {
+        if (typeof mes !== 'number' || mes < 1 || mes > 12) {
+            throw new Error("Mês inválido. Deve ser um número entre 1 e 12.");
+        }
+        if (typeof ano !== 'number' || ano < 1900 || ano > 2100) {
+            throw new Error("Ano inválido.");
+        }
         return this.balanceteRepo.findByMesEAno(mes, ano);
     }
 
     /**
-     * Busca um balancete por ID.
+     * Gera o balancete para todas as contas em um determinado período.
+     * @param mes Mês de referência.
+     * @param ano Ano de referência.
+     * @returns Uma lista dos balancetes criados.
      */
-    async getBalancetePorId(id: number): Promise<Balancete | null> {
-        return this.balanceteRepo.findById(id);
-    }
-
-    /**
-     * Calcula o saldo final de cada conta e gera um novo balancete para o mês.
-     * @returns Uma lista com os balancetes recém-criados.
-     */
-    async calcularEGerarBalancetes(mes: number, ano: number): Promise<Balancete[]> {
+    public async gerarBalancete(mes: number, ano: number): Promise<Balancete[]> {
         const contas = await this.contaRepo.findAll();
         const balancetesCriados: Balancete[] = [];
-        
-        for (const conta of contas) {
-            // Lógica para obter saldo inicial do mês anterior (se existir)
-            const saldoAnterior = await this.getSaldoFinalMesAnterior(conta.id_conta, mes, ano);
 
-            // Busca todos os lançamentos da conta no período
+        for (const conta of contas) {
             const lancamentos = await this.lancamentoRepo.findByContaAndPeriodo(conta.id_conta, mes, ano);
+            const saldoAnterior = await this.getSaldoFinalMesAnterior(conta.id_conta, mes, ano);
 
             let saldoFinal = saldoAnterior;
             for (const lancamento of lancamentos) {
                 if (lancamento.id_conta_debito === conta.id_conta) {
-                    saldoFinal += lancamento.valor; // Contas de ativo aumentam com débito
-                }
-                if (lancamento.id_conta_credito === conta.id_conta) {
-                    saldoFinal -= lancamento.valor; // Contas de ativo diminuem com crédito
+                    saldoFinal -= lancamento.valor;
+                } else if (lancamento.id_conta_credito === conta.id_conta) {
+                    saldoFinal += lancamento.valor;
                 }
             }
 
-            // Cria um novo balancete e o salva no repositório
             const novoBalancete = new Balancete(0, mes, ano, conta.id_conta, saldoAnterior, saldoFinal);
             const balanceteSalvo = await this.balanceteRepo.create(novoBalancete);
             balancetesCriados.push(balanceteSalvo);
@@ -68,8 +62,14 @@ export class BalanceteService {
         return balancetesCriados;
     }
 
+    /**
+     * Busca o saldo final do mês anterior para uma conta específica.
+     * @param id_conta ID da conta.
+     * @param mes Mês atual.
+     * @param ano Ano atual.
+     * @returns O saldo final do mês anterior.
+     */
     private async getSaldoFinalMesAnterior(id_conta: number, mes: number, ano: number): Promise<number> {
-        // Lógica para obter o mês e ano anterior
         let mesAnterior = mes - 1;
         let anoAnterior = ano;
         if (mesAnterior === 0) {
@@ -78,9 +78,15 @@ export class BalanceteService {
         }
 
         const balanceteAnterior = await this.balanceteRepo.findByMesEAnoAndConta(mesAnterior, anoAnterior, id_conta);
-        if (balanceteAnterior) {
-            return balanceteAnterior.saldo_final;
+        return balanceteAnterior ? balanceteAnterior.saldo_final : 0;
+    }
+
+    public async atualizarBalancete(balancete: Balancete): Promise<Balancete | null> {
+        if (!balancete.id_balancete || typeof balancete.id_balancete !== 'number' || balancete.id_balancete <= 0) {
+            throw new Error("ID do balancete inválido para atualização.");
         }
-        return 0; // Saldo inicial é zero se não houver balancete anterior
+        // Validações adicionais de negócio podem ser inseridas aqui
+
+        return this.balanceteRepo.update(balancete);
     }
 }

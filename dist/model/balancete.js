@@ -5,12 +5,6 @@ exports.Balancete = void 0;
  * Representa um balancete com seus saldos de início e fim do período.
  */
 class Balancete {
-    id_balancete;
-    mes;
-    ano;
-    id_conta;
-    saldo_inicial;
-    saldo_final;
     /**
      * Construtor para criar uma nova instância de Balancete.
      * @param id_balancete O ID único do balancete.
@@ -47,4 +41,3 @@ class Balancete {
     }
 }
 exports.Balancete = Balancete;
-//# sourceMappingURL=balancete.js.map

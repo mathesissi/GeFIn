@@ -5,7 +5,7 @@ export class Balancete {
   id_balancete: number;
   mes: number;
   ano: number;
-  id_conta: string;
+  id_conta: number;
   saldo_inicial: number;
   saldo_final: number;
 
@@ -22,7 +22,7 @@ export class Balancete {
     id_balancete: number,
     mes: number,
     ano: number,
-    id_conta: string,
+    id_conta: number,
     saldo_inicial: number,
     saldo_final: number
   ) {

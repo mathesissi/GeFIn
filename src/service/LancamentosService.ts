@@ -3,88 +3,99 @@ import { LancamentosRepository } from '../repository/LancamentosRepository';
 
 export class LancamentosService {
   private lancamentosRepository: LancamentosRepository;
-  
+
   constructor() {
-    this.lancamentosRepository = new LancamentosRepository();
+    this.lancamentosRepository = LancamentosRepository.getInstance();
   }
-  
+
+  /**
+   * Cria um novo lançamento após validação dos dados.
+   * @param dadosLancamento Objeto com os dados para criar o lançamento.
+   * @returns O lançamento criado, incluindo o ID do banco de dados.
+   */
   public async criarLancamento(dadosLancamento: any): Promise<Lancamento> {
-    if (dadosLancamento.valor <= 0) {
-      throw new Error('O valor do lançamento deve ser maior que zero.');
+    const { data, descricao, valor, id_conta_debito, id_conta_credito } = dadosLancamento;
+
+    if (!data || !descricao || valor === undefined || !id_conta_debito || !id_conta_credito) {
+      throw new Error("Dados incompletos: data, descrição, valor, conta de débito e conta de crédito são obrigatórios.");
     }
-    
+    if (typeof valor !== 'number' || valor <= 0) {
+      throw new Error("O valor do lançamento deve ser um número positivo.");
+    }
+    if (id_conta_debito === id_conta_credito) {
+      throw new Error("A conta de débito e a conta de crédito não podem ser a mesma.");
+    }
+
     const novoLancamento = new Lancamento(
-      '', 
-      new Date(dadosLancamento.data),
-      dadosLancamento.descricao,
-      dadosLancamento.valor,
-      dadosLancamento.id_conta_debito,
-      dadosLancamento.id_conta_credito
+      0, // O ID será gerado pelo banco de dados
+      new Date(data),
+      descricao,
+      valor,
+      id_conta_debito,
+      id_conta_credito
     );
-    
-    const lancamentoSalvo = await this.lancamentosRepository.Create(novoLancamento);
-    return lancamentoSalvo;
+
+    return this.lancamentosRepository.Create(novoLancamento);
   }
-  
-  public async buscarLancamentoPorId(id: string): Promise<Lancamento | undefined> {
+
+  /**
+   * Busca um lançamento pelo ID.
+   * @param id O ID do lançamento a ser buscado.
+   * @returns O lançamento encontrado ou `null` se não existir.
+   */
+  public async buscarLancamentoPorId(id: number): Promise<Lancamento | null> {
+    if (typeof id !== 'number' || id <= 0) {
+      throw new Error('O ID do lançamento deve ser um número inteiro positivo.');
+    }
     return this.lancamentosRepository.Select(id);
   }
-  
+
+  /**
+   * Lista todos os lançamentos.
+   * @returns Uma lista de todos os lançamentos.
+   */
   public async listarLancamentos(): Promise<Lancamento[]> {
-    return this.lancamentosRepository.SelectAll();
+    return this.lancamentosRepository.findAll();
   }
 
   /**
    * Valida e atualiza um lançamento.
    * @param id O ID do lançamento a ser atualizado.
-   * @param dadosAtualizados Os dados a serem alterados.
-   * @returns O lançamento atualizado.
-   * @throws Um erro se o lançamento não for encontrado ou a validação falhar.
+   * @param dadosAtualizados Os dados a serem atualizados no lançamento.
+   * @returns O lançamento atualizado ou `null` se não for encontrado.
    */
-  public async atualizarLancamento(id: string, dadosAtualizados: any): Promise<Lancamento | null> {
+  public async atualizarLancamento(id: number, dadosAtualizados: any): Promise<Lancamento | null> {
     const lancamentoExistente = await this.lancamentosRepository.Select(id);
-    
+
     if (!lancamentoExistente) {
       return null;
     }
 
-    // Exemplo de lógica de validação no Service
-    if (dadosAtualizados.valor && dadosAtualizados.valor <= 0) {
-      throw new Error('O valor atualizado deve ser maior que zero.');
-    }
-    
-    // Atualiza apenas os campos que foram enviados
-    lancamentoExistente.data = dadosAtualizados.data || lancamentoExistente.data;
-    lancamentoExistente.descricao = dadosAtualizados.descricao || lancamentoExistente.descricao;
-    lancamentoExistente.valor = dadosAtualizados.valor || lancamentoExistente.valor;
-    lancamentoExistente.id_conta_debito = dadosAtualizados.id_conta_debito || lancamentoExistente.id_conta_debito;
-    lancamentoExistente.id_conta_credito = dadosAtualizados.id_conta_credito || lancamentoExistente.id_conta_credito;
-    
-    const lancamentoAtualizado = await this.lancamentosRepository.Update(lancamentoExistente);
-    return lancamentoAtualizado;
+    const lancamentoParaAtualizar = new Lancamento(
+      id,
+      dadosAtualizados.data ? new Date(dadosAtualizados.data) : lancamentoExistente.data,
+      dadosAtualizados.descricao || lancamentoExistente.descricao,
+      dadosAtualizados.valor || lancamentoExistente.valor,
+      dadosAtualizados.id_conta_debito || lancamentoExistente.id_conta_debito,
+      dadosAtualizados.id_conta_credito || lancamentoExistente.id_conta_credito
+    );
+
+    return this.lancamentosRepository.Update(lancamentoParaAtualizar);
   }
 
   /**
    * Deleta um lançamento após validações.
    * @param id O ID do lançamento a ser deletado.
-   * @returns True se a deleção foi bem-sucedida.
-   * @throws Um erro se o lançamento não puder ser deletado (ex: já conciliado).
+   * @returns `true` se a deleção foi bem-sucedida, `false` caso contrário.
    */
-  public async deletarLancamento(id: string): Promise<boolean> {
-    const lancamentoExistente = await this.lancamentosRepository.Select(id);
-
-    if (!lancamentoExistente) {
-      // Retorna false em vez de lançar um erro, pois a não existência não é uma falha inesperada.
-      return false; 
+  public async deletarLancamento(id: number): Promise<boolean> {
+    if (typeof id !== 'number' || id <= 0) {
+      throw new Error('O ID do lançamento deve ser um número inteiro positivo.');
     }
-
-    // Exemplo de lógica de negócio no Service:
-    // Poderíamos verificar aqui se o lançamento está 'conciliado'
-    // if (lancamentoExistente.status === 'conciliado') {
-    //   throw new Error('Não é possível deletar um lançamento já conciliado.');
-    // }
-
-    const sucesso = await this.lancamentosRepository.Delete(id);
-    return sucesso;
+    const lancamentoExistente = await this.lancamentosRepository.Select(id);
+    if (!lancamentoExistente) {
+      return false;
+    }
+    return this.lancamentosRepository.Delete(id);
   }
 }

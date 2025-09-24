@@ -35,7 +35,7 @@ export enum SubtipoPatrimonioLiquido {
 }
 
 
- //Representa uma conta contábil com seus atributos e lógica de validação.
+//Representa uma conta contábil com seus atributos e lógica de validação.
 
 export class Conta {
   id_conta: number;
@@ -63,7 +63,7 @@ export class Conta {
       throw new Error(`Subtipo inválido "${subtipo_conta}" para o tipo "${tipo_conta}"`);
     }
   }
-  
+
   private validarSubtipo(tipo: TipoConta, subtipo: string): boolean {
     switch (tipo) {
       case TipoConta.Ativo:
