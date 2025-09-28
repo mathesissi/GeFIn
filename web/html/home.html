@@ -5,8 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GeFin - Home</title>
-    <link rel="stylesheet" href="css/home.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="../css/home.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
 </head>
 
 <body>
@@ -36,6 +41,59 @@
             </header>
 
             <div class="dashboard-area">
+                <div class="cards-container">
+                    <div class="product-card">
+                        <div class="product-icon"></div>
+                        <span class="product-name">Produto X</span>
+                    </div>
+                    <div class="product-card">
+                        <div class="product-icon"></div>
+                        <span class="product-name">Produto X</span>
+                    </div>
+                    <div class="product-card">
+                        <div class="product-icon"></div>
+                        <span class="product-name">Produto X</span>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-legend">
+                        <span class="legend-item sales">Total de vendas</span>
+                        <span class="legend-item targets">Metas</span>
+                    </div>
+                    <div class="bar-chart">
+                        <div class="y-axis-labels">
+                            <span>R$ 10.000,00</span>
+                            <span>R$ 7.500,00</span>
+                            <span>R$ 5.000,00</span>
+                            <span>R$ 2.500,00</span>
+                            <span>R$ 0,00</span>
+                        </div>
+                        <div class="chart-bars">
+                            <div class="bar-group" style="--sales-height: 40%; --target-height: 75%;">
+                                <div class="bar sales"></div>
+                                <div class="bar targets"></div>
+                                <span class="x-label">Carlos</span>
+                            </div>
+                            <div class="bar-group" style="--sales-height: 75%; --target-height: 50%;">
+                                <div class="bar sales"></div>
+                                <div class="bar targets"></div>
+                                <span class="x-label">Sandro</span>
+                            </div>
+                            <div class="bar-group" style="--sales-height: 60%; --target-height: 50%;">
+                                <div class="bar sales"></div>
+                                <div class="bar targets"></div>
+                                <span class="x-label">Nadylla</span>
+                            </div>
+                            <div class="bar-group" style="--sales-height: 85%; --target-height: 95%;">
+                                <div class="bar sales"></div>
+                                <div class="bar targets"></div>
+                                <span class="x-label">Maiara</span>
+                            </div>
+                        </div>
+                        <span class="x-axis-title">Vendedor</span>
+                    </div>
+                </div>
             </div>
 
             <button class="fab">
