@@ -218,8 +218,7 @@
 										"type": "string"
 									},
 									"data": {
-										"type": "string",
-										"format": "date-time"
+										"type": "string"
 									}
 								},
 								"required": [

@@ -14,6 +14,7 @@ const Lancamento_1 = require("../model/Lancamento");
 const LancamentosRepository_1 = require("../repository/LancamentosRepository");
 class LancamentosService {
     constructor() {
+        // É uma boa prática usar o padrão Singleton para o repositório.
         this.lancamentosRepository = LancamentosRepository_1.LancamentosRepository.getInstance();
     }
     /**
@@ -24,6 +25,7 @@ class LancamentosService {
     criarLancamento(dadosLancamento) {
         return __awaiter(this, void 0, void 0, function* () {
             const { data, descricao, valor, id_conta_debito, id_conta_credito } = dadosLancamento;
+            // --- Validações ---
             if (!data || !descricao || valor === undefined || !id_conta_debito || !id_conta_credito) {
                 throw new Error("Dados incompletos: data, descrição, valor, conta de débito e conta de crédito são obrigatórios.");
             }
@@ -33,8 +35,12 @@ class LancamentosService {
             if (id_conta_debito === id_conta_credito) {
                 throw new Error("A conta de débito e a conta de crédito não podem ser a mesma.");
             }
-            const novoLancamento = new Lancamento_1.Lancamento(0, // O ID será gerado pelo banco de dados
-            new Date(data), descricao, valor, id_conta_debito, id_conta_credito);
+            // --- Criação do Objeto ---
+            // O ID é 0 porque será gerado pelo banco de dados.
+            const novoLancamento = new Lancamento_1.Lancamento(0, new Date(data), // Converte a string para um objeto Date
+            descricao, valor, id_conta_debito, id_conta_credito);
+            // Supondo que o método no repositório se chame 'criarLancamento' ou similar.
+            // Ajuste se o nome for diferente (por exemplo, 'Create').
             return this.lancamentosRepository.Create(novoLancamento);
         });
     }

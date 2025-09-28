@@ -5,6 +5,7 @@ export class LancamentosService {
   private lancamentosRepository: LancamentosRepository;
 
   constructor() {
+    // É uma boa prática usar o padrão Singleton para o repositório.
     this.lancamentosRepository = LancamentosRepository.getInstance();
   }
 
@@ -13,9 +14,16 @@ export class LancamentosService {
    * @param dadosLancamento Objeto com os dados para criar o lançamento.
    * @returns O lançamento criado, incluindo o ID do banco de dados.
    */
-  public async criarLancamento(dadosLancamento: any): Promise<Lancamento> {
+  public async criarLancamento(dadosLancamento: {
+    data: string; // Recebido como string do Controller
+    descricao: string;
+    valor: number;
+    id_conta_debito: number;
+    id_conta_credito: number;
+  }): Promise<Lancamento> {
     const { data, descricao, valor, id_conta_debito, id_conta_credito } = dadosLancamento;
 
+    // --- Validações ---
     if (!data || !descricao || valor === undefined || !id_conta_debito || !id_conta_credito) {
       throw new Error("Dados incompletos: data, descrição, valor, conta de débito e conta de crédito são obrigatórios.");
     }
@@ -26,15 +34,19 @@ export class LancamentosService {
       throw new Error("A conta de débito e a conta de crédito não podem ser a mesma.");
     }
 
+    // --- Criação do Objeto ---
+    // O ID é 0 porque será gerado pelo banco de dados.
     const novoLancamento = new Lancamento(
-      0, // O ID será gerado pelo banco de dados
-      new Date(data),
+      0,
+      new Date(data), // Converte a string para um objeto Date
       descricao,
       valor,
       id_conta_debito,
       id_conta_credito
     );
 
+    // Supondo que o método no repositório se chame 'criarLancamento' ou similar.
+    // Ajuste se o nome for diferente (por exemplo, 'Create').
     return this.lancamentosRepository.Create(novoLancamento);
   }
 

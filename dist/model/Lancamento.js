@@ -16,18 +16,18 @@ class Lancamento {
      * @param id_conta_credito O ID da conta de crédito.
      */
     constructor(id_lancamento, data, descricao, valor, id_conta_debito, id_conta_credito) {
-        if (typeof id_lancamento !== 'number' || id_lancamento <= 0) {
-            throw new Error('O ID do lançamento deve ser um número inteiro positivo.');
-        }
+        // if (typeof id_lancamento !== 'number' || id_lancamento <= 0) {
+        //   throw new Error('O ID do lançamento deve ser um número inteiro positivo.');
+        // }
         if (!(data instanceof Date) || isNaN(data.getTime())) {
             throw new Error('A data fornecida é inválida.');
         }
         if (typeof descricao !== 'string' || descricao.trim() === '') {
             throw new Error('A descrição não pode ser vazia.');
         }
-        if (typeof valor !== 'number' || valor <= 0) {
-            throw new Error('O valor deve ser um número positivo.');
-        }
+        // if (typeof valor !== 'number' || valor <= 0) {
+        //   throw new Error('O valor deve ser um número positivo.');
+        // }
         if (id_conta_debito === id_conta_credito) {
             throw new Error('As contas de débito e crédito devem ser diferentes.');
         }

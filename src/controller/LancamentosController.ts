@@ -15,7 +15,7 @@ export class LancamentosController extends Controller {
   @Post()
   public async criarLancamento(
     @Body() dadosLancamento: {
-      data: Date;
+      data: string;
       descricao: string;
       valor: number;
       id_conta_debito: number;

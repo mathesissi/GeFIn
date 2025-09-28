@@ -1,14 +1,6 @@
 import { Lancamento } from "../model/Lancamento";
 import { executarComandoSQL } from "../database/MySql";
 
-export interface LancamentoDbRow {
-  id_lancamento: number;
-  data: Date;
-  descricao: string;
-  valor: number;
-  id_conta_debito: number;
-  id_conta_credito: number;
-}
 
 export class LancamentosRepository {
   private static instance: LancamentosRepository;
@@ -45,7 +37,7 @@ export class LancamentosRepository {
     }
   }
 
-  private rowToLancamento(row: LancamentoDbRow): Lancamento {
+  private rowToLancamento(row: any): Lancamento {
     const data = row.data instanceof Date ? row.data : new Date(row.data);
     if (isNaN(data.getTime())) {
       throw new Error("Formato de data inválido no banco de dados.");
@@ -138,3 +130,6 @@ export class LancamentosRepository {
     return result.map((row: any) => this.rowToLancamento(row));
   }
 }
+
+
+//<pre>ValidateError<br> &nbsp; &nbsp;at ExpressTemplateService.getValidatedArgs (C:\Users\mathe\Downloads\IMPORTANTE\GeFin\GeFIn\node_modules\@tsoa\runtime\dist\routeGeneration\templates\express\expressTemplateService.js:70:19)<br> &nbsp; &nbsp;at C:\Users\mathe\Downloads\IMPORTANTE\GeFin\GeFIn\dist\route\routes.js:87:49<br> &nbsp; &nbsp;at Generator.next (&lt;anonymous&gt;)<br> &nbsp; &nbsp;at C:\Users\mathe\Downloads\IMPORTANTE\GeFin\GeFIn\dist\route\routes.js:8:71<br> &nbsp; &nbsp;at new Promise (&lt;anonymous&gt;)<br> &nbsp; &nbsp;at __awaiter (C:\Users\mathe\Downloads\IMPORTANTE\GeFin\GeFIn\dist\route\routes.js:4:12)<br> &nbsp; &nbsp;at LancamentosController_criarLancamento (C:\Users\mathe\Downloads\IMPORTANTE\GeFin\GeFIn\dist\route\routes.js:83:16)<br> &nbsp; &nbsp;at Layer.handleRequest (C:\Users\mathe\Downloads\IMPORTANTE\GeFin\GeFIn\node_modules\router\lib\layer.js:152:17)<br> &nbsp; &nbsp;at next (C:\Users\mathe\Downloads\IMPORTANTE\GeFin\GeFIn\node_modules\router\lib\route.js:157:13)<br> &nbsp; &nbsp;at Route.dispatch (C:\Users\mathe\Downloads\IMPORTANTE\GeFin\GeFIn\node_modules\router\lib\route.js:117:3)</pre>
