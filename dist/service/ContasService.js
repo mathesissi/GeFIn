@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContasService = void 0;
 const Contas_1 = require("../model/Contas");
 const ContasRepository_1 = require("../repository/ContasRepository");
+const LancamentosRepository_1 = require("../repository/LancamentosRepository");
 class ContasService {
     constructor() {
         this.contasRepository = ContasRepository_1.ContaRepository.getInstance();
+        this.lancamentosRepository = LancamentosRepository_1.LancamentosRepository.getInstance();
     }
     /**
      * Cria uma nova conta, com validações de dados antes de persistir.
@@ -74,15 +76,33 @@ class ContasService {
         });
     }
     /**
-     * Deleta uma conta pelo ID.
-     * @param id O ID da conta a ser deletada.
-     * @returns `true` se a deleção foi bem-sucedida, `false` caso contrário.
-     */
+         * Deleta uma conta pelo ID, validando se há lançamentos atrelados.
+         * @param id O ID da conta a ser deletada.
+         * @returns `true` se a deleção foi bem-sucedida.
+         * @throws {Error} Se o ID for inválido ou se houver lançamentos atrelados.
+         */
     deletarConta(id) {
         return __awaiter(this, void 0, void 0, function* () {
             if (typeof id !== 'number' || id <= 0) {
                 throw new Error('O ID da conta para deleção é inválido.');
             }
+            // 1. Verificar se há lançamentos atrelados
+            const lancamentosAtrelados = yield this.lancamentosRepository.findLinkedLancamentos(id);
+            if (lancamentosAtrelados.length > 0) {
+                // [4] Lançar um erro customizado com a lista de lançamentos
+                const lancamentosInfo = lancamentosAtrelados.map(l => ({
+                    id: l.id_lancamento,
+                    descricao: l.descricao,
+                    valor: l.valor
+                }));
+                // Lançamos uma string JSON que o Controller deve capturar
+                const errorMessage = JSON.stringify({
+                    message: "Não é possível excluir a conta. Lançamentos atrelados encontrados.",
+                    lancamentos: lancamentosInfo
+                });
+                throw new Error(errorMessage);
+            }
+            // 2. Se não houver lançamentos, procede com a deleção
             return this.contasRepository.delete(id);
         });
     }

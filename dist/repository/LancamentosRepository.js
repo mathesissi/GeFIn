@@ -16,6 +16,21 @@ class LancamentosRepository {
     constructor() {
         this.createTable();
     }
+    // Adicione este método à classe LancamentosRepository
+    findLinkedLancamentos(id_conta) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const sql = `
+    SELECT id_lancamento, descricao, valor
+    FROM lancamentos
+    WHERE id_conta_debito = ? OR id_conta_credito = ?;
+  `;
+            // Repete o ID para verificar os dois campos (débito e crédito)
+            const params = [id_conta, id_conta];
+            const result = yield (0, MySql_1.executarComandoSQL)(sql, params);
+            // Retorna os dados brutos com as colunas solicitadas
+            return result;
+        });
+    }
     static getInstance() {
         if (!LancamentosRepository.instance) {
             LancamentosRepository.instance = new LancamentosRepository();

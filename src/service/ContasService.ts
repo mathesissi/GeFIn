@@ -1,11 +1,14 @@
 import { Conta, TipoConta } from "../model/Contas";
 import { ContaRepository } from "../repository/ContasRepository";
+import { LancamentosRepository } from "../repository/LancamentosRepository";
 
 export class ContasService {
     private contasRepository: ContaRepository;
+    private lancamentosRepository: LancamentosRepository;
 
     constructor() {
         this.contasRepository = ContaRepository.getInstance();
+        this.lancamentosRepository = LancamentosRepository.getInstance();
     }
 
     /**
@@ -71,15 +74,38 @@ export class ContasService {
         return this.contasRepository.update(contaParaAtualizar);
     }
 
-    /**
-     * Deleta uma conta pelo ID.
+/**
+     * Deleta uma conta pelo ID, validando se há lançamentos atrelados.
      * @param id O ID da conta a ser deletada.
-     * @returns `true` se a deleção foi bem-sucedida, `false` caso contrário.
+     * @returns `true` se a deleção foi bem-sucedida.
+     * @throws {Error} Se o ID for inválido ou se houver lançamentos atrelados.
      */
     public async deletarConta(id: number): Promise<boolean> {
         if (typeof id !== 'number' || id <= 0) {
             throw new Error('O ID da conta para deleção é inválido.');
         }
+        
+        // 1. Verificar se há lançamentos atrelados
+        const lancamentosAtrelados = await this.lancamentosRepository.findLinkedLancamentos(id);
+
+        if (lancamentosAtrelados.length > 0) {
+            // [4] Lançar um erro customizado com a lista de lançamentos
+            const lancamentosInfo = lancamentosAtrelados.map(l => ({
+                id: l.id_lancamento,
+                descricao: l.descricao,
+                valor: l.valor
+            }));
+            
+            // Lançamos uma string JSON que o Controller deve capturar
+            const errorMessage = JSON.stringify({ 
+                message: "Não é possível excluir a conta. Lançamentos atrelados encontrados.",
+                lancamentos: lancamentosInfo 
+            });
+
+            throw new Error(errorMessage);
+        }
+
+        // 2. Se não houver lançamentos, procede com a deleção
         return this.contasRepository.delete(id);
     }
 }

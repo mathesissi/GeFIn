@@ -9,6 +9,21 @@ export class LancamentosRepository {
     this.createTable();
   }
 
+  // Adicione este método à classe LancamentosRepository
+public async findLinkedLancamentos(id_conta: number): Promise<any[]> {
+  const sql = `
+    SELECT id_lancamento, descricao, valor
+    FROM lancamentos
+    WHERE id_conta_debito = ? OR id_conta_credito = ?;
+  `;
+  // Repete o ID para verificar os dois campos (débito e crédito)
+  const params = [id_conta, id_conta]; 
+  const result = await executarComandoSQL(sql, params);
+  
+  // Retorna os dados brutos com as colunas solicitadas
+  return result; 
+}
+
   public static getInstance(): LancamentosRepository {
     if (!LancamentosRepository.instance) {
       LancamentosRepository.instance = new LancamentosRepository();
