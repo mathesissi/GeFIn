@@ -1,18 +1,24 @@
 import { getContas, createLancamento, getLancamentos } from './api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // --- Referências aos Elementos ---
     const addPartidaBtn = document.getElementById('add-partida');
     const partidasContainer = document.getElementById('partidas-container');
     const lancamentoForm = document.getElementById('lancamento-form');
-    const lancamentosTbody = document.getElementById('lancamentos-historico-tbody'); // LINHA CORRIGIDA
+    const lancamentosTbody = document.getElementById('lancamentos-historico-tbody');
+    const saveButton = document.getElementById('save-lancamento');
 
     let contasCache = [];
 
     // --- Funções ---
+
+    /**
+     * Carrega as contas da API e as armazena em cache.
+     */
     const loadContas = async () => {
         try {
             contasCache = await getContas();
-            // Adiciona as duas primeiras partidas ao carregar as contas
+            // Adiciona as duas primeiras partidas iniciais
             addPartida();
             addPartida();
         } catch (error) {
@@ -20,8 +26,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    /**
+     * Cria um elemento <select> populado com as contas em cache.
+     * @returns {HTMLSelectElement} O elemento select criado.
+     */
     const createContaSelector = () => {
         const select = document.createElement('select');
+        select.className = 'conta-select'; // Adicionada classe para seleção precisa
         select.required = true;
         select.innerHTML = '<option value="">Selecione uma conta</option>';
         contasCache.forEach(conta => {
@@ -33,6 +44,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         return select;
     };
 
+    /**
+     * Adiciona uma nova linha de partida (débito/crédito) ao formulário.
+     */
     const addPartida = () => {
         const newPartida = document.createElement('div');
         newPartida.classList.add('partidas-grid', 'form-group');
@@ -46,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <option value="credito">Crédito</option>
             </select>
             <input type="number" class="valor-partida" placeholder="0,00" step="0.01" required>
-            <button type="button" class="btn-icon btn-danger remove-partida">
+            <button type="button" class="btn-icon btn-danger remove-partida" title="Remover Partida">
                 <img src="../media/svg/delete.svg" alt="Remover">
             </button>
         `;
@@ -55,6 +69,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateTotals();
     };
 
+    /**
+     * Calcula e exibe os totais de débito, crédito e a diferença.
+     * Habilita/desabilita o botão Salvar.
+     */
     const updateTotals = () => {
         let totalDebito = 0;
         let totalCredito = 0;
@@ -76,15 +94,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const diferenca = totalDebito - totalCredito;
         document.getElementById('diferenca').textContent = `R$ ${diferenca.toFixed(2)}`;
 
-        // Habilita o botão de salvar apenas se os totais forem iguais e maiores que zero
-        const saveButton = document.getElementById('save-lancamento');
-        if (totalDebito > 0 && totalDebito === totalCredito) {
-            saveButton.disabled = false;
-        } else {
-            saveButton.disabled = true;
-        }
+        // Habilita o botão se os totais forem iguais, maiores que zero e a diferença for zero.
+        saveButton.disabled = !(totalDebito > 0 && diferenca === 0);
     };
     
+    /**
+     * Renderiza a tabela de histórico de lançamentos.
+     * @param {Array} lancamentos - A lista de lançamentos vinda da API.
+     */
     const renderLancamentos = (lancamentos) => {
         lancamentosTbody.innerHTML = '';
         lancamentos.forEach(lanc => {
@@ -98,6 +115,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     };
 
+    /**
+     * Busca os lançamentos da API e os renderiza na tabela.
+     */
     const loadAndRenderLancamentos = async () => {
         try {
             const lancamentos = await getLancamentos();
@@ -117,10 +137,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    partidasContainer.addEventListener('input', (e) => {
-        if (e.target.classList.contains('valor-partida') || e.target.classList.contains('tipo-partida')) {
-            updateTotals();
-        }
+    partidasContainer.addEventListener('input', () => {
+        updateTotals();
+    });
+    partidasContainer.addEventListener('change', () => { // Adicionado para capturar mudanças no select de Débito/Crédito
+        updateTotals();
     });
 
     lancamentoForm.addEventListener('submit', async (event) => {
@@ -132,16 +153,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Simplificação para lançamento simples (um débito e um crédito)
         if (debitos.length !== 1 || creditos.length !== 1) {
-            alert('Por enquanto, apenas lançamentos com um débito e um crédito são suportados.');
+            alert('Atenção: Apenas lançamentos com uma única partida de débito e uma de crédito são suportados no momento.');
             return;
         }
 
+        // *** CORREÇÃO APLICADA AQUI ***
+        // Seleciona o '.conta-select' especificamente para débito e crédito.
         const lancamentoData = {
             data: document.getElementById('data').value,
             descricao: document.getElementById('descricao').value,
             valor: parseFloat(debitos[0].querySelector('.valor-partida').value),
-            id_conta_debito: parseInt(debitos[0].querySelector('select').value),
-            id_conta_credito: parseInt(creditos[0].querySelector('select').value),
+            id_conta_debito: parseInt(debitos[0].querySelector('.conta-select').value),
+            id_conta_credito: parseInt(creditos[0].querySelector('.conta-select').value),
         };
 
         try {
@@ -154,7 +177,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadAndRenderLancamentos();
             alert('Lançamento salvo com sucesso!');
         } catch(error) {
-           // Erro já tratado na API
+           // O erro já é exibido na função fetchAPI
         }
     });
 

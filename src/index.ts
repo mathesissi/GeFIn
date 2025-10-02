@@ -1,19 +1,23 @@
 import express from 'express';
-import { setupSwagger } from './config/Swagger';
 import { RegisterRoutes } from './route/routes';
-const app = express();
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/Swagger';
+import cors from 'cors'; // <--- 1. IMPORTE O PACOTE CORS AQUI
 
-const PORT = 3040;
+const app = express();
+const port = 3000;
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const apiRouter = express.Router();
-RegisterRoutes(apiRouter);
+app.use(cors()); // <--- 2. ADICIONE ESTA LINHA AQUI
 
-app.use('/api', apiRouter);
+// Rota para a documentação do Swagger
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 RegisterRoutes(app);
-setupSwagger(app);
 
-
-app.listen(PORT, () => console.log("API online na porta: " + PORT));
+app.listen(port, () => {
+    console.log(`Servidor rodando em http://localhost:${port}`);
+    console.log(`Swagger docs disponíveis em http://localhost:${port}/docs`);
+});
