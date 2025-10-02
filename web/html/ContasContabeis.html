@@ -17,8 +17,7 @@
                 <a href="ContasContabeis.html" class="nav-link active">Plano de Contas</a>
                 <a href="LivroDiario.html" class="nav-link">Lançamentos</a>
                 <a href="Relatorios.html" class="nav-link">Relatórios</a>
-                <!-- <a href="#" class="nav-link">Configurações</a> -->
-            </nav>
+                </nav>
         </aside>
         <main class="main-content">
             <header class="main-header">
@@ -39,7 +38,8 @@
                                 <th>Código</th>
                                 <th>Nome da Conta</th>
                                 <th>Tipo</th>
-                                <th>Subtipo</th>
+                                <th>Subtipo Principal</th>
+                                <th>Subtipo Secundário</th>
                                 <th class="action-cell">Ações</th>
                             </tr>
                         </thead>
@@ -69,15 +69,20 @@
                         <option value="">Selecione um tipo</option>
                         <option value="Ativo">Ativo</option>
                         <option value="Passivo">Passivo</option>
-                        <option value="PatrimonioLiquido">Patrimônio Líquido</option>
-                        <option value="Receita">Receita</option>
+                        <option value="Patrimonio Liquido">Patrimônio Líquido</option> <option value="Receita">Receita</option>
                         <option value="Despesa">Despesa</option>
                     </select>
                 </div>
                 
                 <div class="form-group" id="subtipo-group" style="display: none;">
-                    <label for="subtipo">Subtipo</label>
+                    <label for="subtipo">Subtipo Principal</label>
                     <select id="subtipo">
+                        </select>
+                </div>
+
+                <div class="form-group" id="subtipo-secundario-group" style="display: none;">
+                    <label for="subtipo_secundario">Subtipo Secundário</label>
+                    <select id="subtipo_secundario">
                         </select>
                 </div>
 

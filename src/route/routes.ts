@@ -31,7 +31,7 @@ const models: TsoaRoute.Models = {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "TipoConta": {
         "dataType": "refEnum",
-        "enums": ["Ativo","Passivo","Patrimônio Líquido","Receita","Despesa"],
+        "enums": ["Ativo","Passivo","Patrimonio Liquido","Receita","Despesa"],
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Conta": {
@@ -41,14 +41,15 @@ const models: TsoaRoute.Models = {
             "nome_conta": {"dataType":"string","required":true},
             "tipo_conta": {"ref":"TipoConta","required":true},
             "subtipo_conta": {"dataType":"string"},
+            "subtipo_secundario": {"dataType":"string"},
             "codigo_conta": {"dataType":"string","required":true},
         },
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Partial_Conta_": {
+    "Partial__nome_conta-string--tipo_conta-TipoConta--codigo_conta-string--subtipo_conta_63_-string--subtipo_secundario_63_-string__": {
         "dataType": "refAlias",
-        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"id_conta":{"dataType":"double"},"nome_conta":{"dataType":"string"},"tipo_conta":{"ref":"TipoConta"},"subtipo_conta":{"dataType":"string"},"codigo_conta":{"dataType":"string"}},"validators":{}},
+        "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"nome_conta":{"dataType":"string"},"tipo_conta":{"ref":"TipoConta"},"codigo_conta":{"dataType":"string"},"subtipo_conta":{"dataType":"string"},"subtipo_secundario":{"dataType":"string"}},"validators":{}},
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Balancete": {
@@ -82,7 +83,7 @@ export function RegisterRoutes(app: Router) {
 
     
         const argsLancamentosController_criarLancamento: Record<string, TsoaRoute.ParameterSchema> = {
-                dadosLancamento: {"in":"body","name":"dadosLancamento","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"id_conta_credito":{"dataType":"double","required":true},"id_conta_debito":{"dataType":"double","required":true},"valor":{"dataType":"double","required":true},"descricao":{"dataType":"string","required":true},"data":{"dataType":"datetime","required":true}}},
+                dadosLancamento: {"in":"body","name":"dadosLancamento","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"id_conta_credito":{"dataType":"double","required":true},"id_conta_debito":{"dataType":"double","required":true},"valor":{"dataType":"double","required":true},"descricao":{"dataType":"string","required":true},"data":{"dataType":"string","required":true}}},
                 badRequestResponse: {"in":"res","name":"400","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true}}},
         };
         app.post('/lancamentos',
@@ -237,7 +238,7 @@ export function RegisterRoutes(app: Router) {
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsContasController_criarConta: Record<string, TsoaRoute.ParameterSchema> = {
-                dadosConta: {"in":"body","name":"dadosConta","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"subtipo_conta":{"dataType":"string"},"codigo_conta":{"dataType":"string","required":true},"tipo_conta":{"ref":"TipoConta","required":true},"nome_conta":{"dataType":"string","required":true}}},
+                dadosConta: {"in":"body","name":"dadosConta","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"subtipo_secundario":{"dataType":"string"},"subtipo_conta":{"dataType":"string"},"codigo_conta":{"dataType":"string","required":true},"tipo_conta":{"ref":"TipoConta","required":true},"nome_conta":{"dataType":"string","required":true}}},
                 badRequestResponse: {"in":"res","name":"400","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true}}},
         };
         app.post('/contas',
@@ -329,7 +330,7 @@ export function RegisterRoutes(app: Router) {
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsContasController_atualizarConta: Record<string, TsoaRoute.ParameterSchema> = {
                 id: {"in":"path","name":"id","required":true,"dataType":"double"},
-                dadosAtualizados: {"in":"body","name":"dadosAtualizados","required":true,"ref":"Partial_Conta_"},
+                dadosAtualizados: {"in":"body","name":"dadosAtualizados","required":true,"ref":"Partial__nome_conta-string--tipo_conta-TipoConta--codigo_conta-string--subtipo_conta_63_-string--subtipo_secundario_63_-string__"},
                 notFoundResponse: {"in":"res","name":"404","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true}}},
                 badRequestResponse: {"in":"res","name":"400","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true}}},
         };

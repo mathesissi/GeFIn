@@ -1,47 +1,82 @@
 "use strict";
 //Tipos principais de conta.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Conta = exports.SubtipoPatrimonioLiquido = exports.SubtipoPassivo = exports.SubtipoAtivo = exports.TipoConta = void 0;
+exports.Conta = exports.SubtipoPassivo = exports.SubtipoSecundarioAtivo = exports.SubtipoAtivo = exports.TipoConta = void 0;
 var TipoConta;
 (function (TipoConta) {
     TipoConta["Ativo"] = "Ativo";
     TipoConta["Passivo"] = "Passivo";
-    TipoConta["PatrimonioLiquido"] = "Patrim\u00F4nio L\u00EDquido";
+    TipoConta["PatrimonioLiquido"] = "Patrimonio Liquido";
     TipoConta["Receita"] = "Receita";
     TipoConta["Despesa"] = "Despesa";
 })(TipoConta || (exports.TipoConta = TipoConta = {}));
-//Subtipos para contas do tipo "Ativo".
+//Subtipos principais.
 var SubtipoAtivo;
 (function (SubtipoAtivo) {
     SubtipoAtivo["Circulante"] = "Ativo Circulante";
-    SubtipoAtivo["NaoCirculante_Realizavel"] = "Realiz\u00E1vel a Longo Prazo";
-    SubtipoAtivo["NaoCirculante_Investimento"] = "Investimento";
-    SubtipoAtivo["NaoCirculante_Imobilizado"] = "Imobilizado";
-    SubtipoAtivo["NaoCirculante_Intangivel"] = "Intang\u00EDvel";
+    SubtipoAtivo["NaoCirculante"] = "Ativo Nao Circulante"; // Valor padronizado com espaço
 })(SubtipoAtivo || (exports.SubtipoAtivo = SubtipoAtivo = {}));
+// Novos Subtipos Secundários para "Ativo Não Circulante"
+var SubtipoSecundarioAtivo;
+(function (SubtipoSecundarioAtivo) {
+    SubtipoSecundarioAtivo["RealizavelLongoPrazo"] = "Realizavel a Longo Prazo";
+    SubtipoSecundarioAtivo["Investimento"] = "Investimento";
+    SubtipoSecundarioAtivo["Imobilizado"] = "Imobilizado";
+    SubtipoSecundarioAtivo["Intangivel"] = "Intangivel"; // Valor padronizado
+})(SubtipoSecundarioAtivo || (exports.SubtipoSecundarioAtivo = SubtipoSecundarioAtivo = {}));
 // Subtipos para contas do tipo "Passivo".
 var SubtipoPassivo;
 (function (SubtipoPassivo) {
     SubtipoPassivo["Circulante"] = "Passivo Circulante";
-    SubtipoPassivo["NaoCirculante"] = "Passivo N\u00E3o Circulante";
+    SubtipoPassivo["NaoCirculante"] = "Passivo Nao Circulante"; // Valor padronizado com espaço
 })(SubtipoPassivo || (exports.SubtipoPassivo = SubtipoPassivo = {}));
-//Subtipos para Patrimônio Líquido.
-var SubtipoPatrimonioLiquido;
-(function (SubtipoPatrimonioLiquido) {
-    SubtipoPatrimonioLiquido["Geral"] = "Patrim\u00F4nio L\u00EDquido";
-})(SubtipoPatrimonioLiquido || (exports.SubtipoPatrimonioLiquido = SubtipoPatrimonioLiquido = {}));
 //Representa uma conta contábil com seus atributos e lógica de validação.
 class Conta {
-    constructor(id_conta, nome_conta, tipo_conta, codigo_conta, subtipo_conta) {
+    constructor(id_conta, nome_conta, tipo_conta, codigo_conta, subtipo_conta, subtipo_secundario // Novo parâmetro
+    ) {
         this.id_conta = id_conta;
         this.nome_conta = nome_conta;
         this.tipo_conta = tipo_conta;
         this.codigo_conta = codigo_conta;
-        if (subtipo_conta && this.validarSubtipo(tipo_conta, subtipo_conta)) {
-            this.subtipo_conta = subtipo_conta;
+        // Limpa strings vazias, especialmente para campos opcionais vindos do formulário
+        const primarySubtype = (subtipo_conta === null || subtipo_conta === void 0 ? void 0 : subtipo_conta.trim()) || undefined;
+        const secondarySubtype = (subtipo_secundario === null || subtipo_secundario === void 0 ? void 0 : subtipo_secundario.trim()) || undefined;
+        const isPatrimonioLiquido = tipo_conta === TipoConta.PatrimonioLiquido;
+        const isReceitaDespesa = tipo_conta === TipoConta.Receita || tipo_conta === TipoConta.Despesa;
+        const isSubtypeMandatory = tipo_conta === TipoConta.Ativo || tipo_conta === TipoConta.Passivo;
+        // 1. Validação do Subtipo Principal
+        if (isPatrimonioLiquido || isReceitaDespesa) {
+            this.subtipo_conta = undefined;
         }
-        else if (subtipo_conta) {
-            throw new Error(`Subtipo inválido "${subtipo_conta}" para o tipo "${tipo_conta}"`);
+        else if (isSubtypeMandatory) {
+            if (!primarySubtype) {
+                throw new Error(`Subtipo principal é obrigatório para contas do tipo "${tipo_conta}"`);
+            }
+            if (!this.validarSubtipo(tipo_conta, primarySubtype)) {
+                throw new Error(`Subtipo principal inválido "${primarySubtype}" para o tipo "${tipo_conta}"`);
+            }
+            this.subtipo_conta = primarySubtype;
+        }
+        else if (primarySubtype) {
+            throw new Error(`Subtipo principal não é permitido para o tipo "${tipo_conta}"`);
+        }
+        else {
+            this.subtipo_conta = undefined;
+        }
+        // 2. Validação do Subtipo Secundário
+        const isAtivoNaoCirculante = tipo_conta === TipoConta.Ativo && primarySubtype === SubtipoAtivo.NaoCirculante;
+        if (isAtivoNaoCirculante) {
+            if (!secondarySubtype) {
+                throw new Error(`Subtipo secundário é obrigatório para "${SubtipoAtivo.NaoCirculante}"`);
+            }
+            if (!this.validarSubtipoSecundario(secondarySubtype)) {
+                throw new Error(`Subtipo secundário inválido "${secondarySubtype}" para "${SubtipoAtivo.NaoCirculante}"`);
+            }
+            this.subtipo_secundario = secondarySubtype;
+        }
+        else {
+            // ESSENCIAL: Garante que o campo é ignorado se não for o caso específico
+            this.subtipo_secundario = undefined;
         }
     }
     validarSubtipo(tipo, subtipo) {
@@ -50,11 +85,12 @@ class Conta {
                 return Object.values(SubtipoAtivo).includes(subtipo);
             case TipoConta.Passivo:
                 return Object.values(SubtipoPassivo).includes(subtipo);
-            case TipoConta.PatrimonioLiquido:
-                return Object.values(SubtipoPatrimonioLiquido).includes(subtipo);
             default:
                 return false;
         }
+    }
+    validarSubtipoSecundario(subtipoSecundario) {
+        return Object.values(SubtipoSecundarioAtivo).includes(subtipoSecundario);
     }
     exibirConta() {
         console.log(`ID: ${this.id_conta}`);
@@ -62,6 +98,9 @@ class Conta {
         console.log(`Tipo: ${this.tipo_conta}`);
         if (this.subtipo_conta) {
             console.log(`Subtipo: ${this.subtipo_conta}`);
+        }
+        if (this.subtipo_secundario) {
+            console.log(`Subtipo Secundário: ${this.subtipo_secundario}`);
         }
         console.log(`Código: ${this.codigo_conta}`);
     }

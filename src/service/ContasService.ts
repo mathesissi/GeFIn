@@ -24,6 +24,11 @@ export class ContasService {
             throw new Error(`Tipo de conta inválido: "${conta.tipo_conta}"`);
         }
 
+        const contaExistente = await this.contasRepository.findByCodigoConta(conta.codigo_conta);
+        if (contaExistente) {
+            throw new Error(`Já existe uma conta com o código "${conta.codigo_conta}".`);
+        }
+
         // A validação de subtipo já é realizada no construtor do modelo 'Conta'
         return this.contasRepository.create(conta);
     }
@@ -48,7 +53,7 @@ export class ContasService {
         return this.contasRepository.findAll();
     }
 
-    /**
+ /**
      * Atualiza uma conta com os dados fornecidos.
      * @param id O ID da conta a ser atualizada.
      * @param dadosAtualizados Objeto com os dados para atualizar a conta.
@@ -57,16 +62,24 @@ export class ContasService {
     public async atualizarConta(id: number, dadosAtualizados: Partial<Conta>): Promise<Conta | null> {
         const contaExistente = await this.contasRepository.findById(id);
         if (!contaExistente) {
-            return null; // Ou lançar um erro, dependendo da regra de negócio
+            return null;
         }
 
-        const contaAtualizada = Object.assign(contaExistente, dadosAtualizados);
+        
+        const contaAtualizada = Object.assign({}, contaExistente, dadosAtualizados);
 
-        // Revalida a entidade atualizada
+
+        const tipoAtualizado = contaAtualizada.tipo_conta as TipoConta;
+        const tipoSemSubtipo = [TipoConta.Receita, TipoConta.Despesa].includes(tipoAtualizado);
+
+        if (tipoSemSubtipo && !dadosAtualizados.hasOwnProperty('subtipo_conta')) {
+
+            contaAtualizada.subtipo_conta = undefined;
+        }
         const contaParaAtualizar = new Conta(
             contaAtualizada.id_conta,
             contaAtualizada.nome_conta,
-            contaAtualizada.tipo_conta,
+            contaAtualizada.tipo_conta as TipoConta,
             contaAtualizada.codigo_conta,
             contaAtualizada.subtipo_conta
         );
@@ -97,10 +110,7 @@ export class ContasService {
             }));
             
             // Lançamos uma string JSON que o Controller deve capturar
-            const errorMessage = JSON.stringify({ 
-                message: "Não é possível excluir a conta. Lançamentos atrelados encontrados.",
-                lancamentos: lancamentosInfo 
-            });
+            const errorMessage = "Não é possível excluir a conta. Lançamentos atrelados encontrados.";
 
             throw new Error(errorMessage);
         }

@@ -31,6 +31,10 @@ class ContasService {
             if (!Object.values(Contas_1.TipoConta).includes(conta.tipo_conta)) {
                 throw new Error(`Tipo de conta inválido: "${conta.tipo_conta}"`);
             }
+            const contaExistente = yield this.contasRepository.findByCodigoConta(conta.codigo_conta);
+            if (contaExistente) {
+                throw new Error(`Já existe uma conta com o código "${conta.codigo_conta}".`);
+            }
             // A validação de subtipo já é realizada no construtor do modelo 'Conta'
             return this.contasRepository.create(conta);
         });
@@ -58,19 +62,23 @@ class ContasService {
         });
     }
     /**
-     * Atualiza uma conta com os dados fornecidos.
-     * @param id O ID da conta a ser atualizada.
-     * @param dadosAtualizados Objeto com os dados para atualizar a conta.
-     * @returns A conta atualizada ou `null` se a conta não for encontrada.
-     */
+        * Atualiza uma conta com os dados fornecidos.
+        * @param id O ID da conta a ser atualizada.
+        * @param dadosAtualizados Objeto com os dados para atualizar a conta.
+        * @returns A conta atualizada ou `null` se a conta não for encontrada.
+        */
     atualizarConta(id, dadosAtualizados) {
         return __awaiter(this, void 0, void 0, function* () {
             const contaExistente = yield this.contasRepository.findById(id);
             if (!contaExistente) {
-                return null; // Ou lançar um erro, dependendo da regra de negócio
+                return null;
             }
-            const contaAtualizada = Object.assign(contaExistente, dadosAtualizados);
-            // Revalida a entidade atualizada
+            const contaAtualizada = Object.assign({}, contaExistente, dadosAtualizados);
+            const tipoAtualizado = contaAtualizada.tipo_conta;
+            const tipoSemSubtipo = [Contas_1.TipoConta.Receita, Contas_1.TipoConta.Despesa].includes(tipoAtualizado);
+            if (tipoSemSubtipo && !dadosAtualizados.hasOwnProperty('subtipo_conta')) {
+                contaAtualizada.subtipo_conta = undefined;
+            }
             const contaParaAtualizar = new Contas_1.Conta(contaAtualizada.id_conta, contaAtualizada.nome_conta, contaAtualizada.tipo_conta, contaAtualizada.codigo_conta, contaAtualizada.subtipo_conta);
             return this.contasRepository.update(contaParaAtualizar);
         });
@@ -96,10 +104,7 @@ class ContasService {
                     valor: l.valor
                 }));
                 // Lançamos uma string JSON que o Controller deve capturar
-                const errorMessage = JSON.stringify({
-                    message: "Não é possível excluir a conta. Lançamentos atrelados encontrados.",
-                    lancamentos: lancamentosInfo
-                });
+                const errorMessage = "Não é possível excluir a conta. Lançamentos atrelados encontrados.";
                 throw new Error(errorMessage);
             }
             // 2. Se não houver lançamentos, procede com a deleção
