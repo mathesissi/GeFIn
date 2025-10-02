@@ -20,9 +20,10 @@ export class ContaRepository {
       CREATE TABLE IF NOT EXISTS contas (
         id_conta INT AUTO_INCREMENT PRIMARY KEY,
         nome_conta VARCHAR(255) NOT NULL,
-        tipo_conta ENUM('Ativo', 'Passivo', 'Patrimonio Liquido', 'Receita', 'Despesa') NOT NULL,
+        tipo_conta ENUM('Ativo', 'Passivo', 'PatrimonioLiquido', 'Receita', 'Despesa') NOT NULL,
         codigo_conta VARCHAR(255) NOT NULL UNIQUE,
-        subtipo_conta VARCHAR(255)
+        subtipo_conta VARCHAR(255),
+        subtipo_secundario VARCHAR(255) 
       );
     `;
     try {
@@ -39,19 +40,21 @@ export class ContaRepository {
       row.nome_conta,
       row.tipo_conta as TipoConta,
       row.codigo_conta,
-      row.subtipo_conta || undefined
+      row.subtipo_conta || undefined,
+      row.subtipo_secundario || undefined
     );
   }
 
   async create(conta: Conta): Promise<Conta> {
     const sql = `
-      INSERT INTO contas (nome_conta, tipo_conta, subtipo_conta, codigo_conta)
-      VALUES (?, ?, ?, ?);
+      INSERT INTO contas (nome_conta, tipo_conta, subtipo_conta, subtipo_secundario, codigo_conta)
+      VALUES (?, ?, ?, ?, ?);
     `;
     const params = [
       conta.nome_conta,
       conta.tipo_conta,
       conta.subtipo_conta || null,
+      conta.subtipo_secundario || null, 
       conta.codigo_conta,
     ];
     const result = await executarComandoSQL(sql, params);
@@ -89,13 +92,14 @@ export class ContaRepository {
   async update(conta: Conta): Promise<Conta | null> {
     const sql = `
       UPDATE contas
-      SET nome_conta = ?, tipo_conta = ?, subtipo_conta = ?, codigo_conta = ?
+      SET nome_conta = ?, tipo_conta = ?, subtipo_conta = ?, subtipo_secundario = ?, codigo_conta = ?
       WHERE id_conta = ?;
     `;
     const params = [
       conta.nome_conta,
       conta.tipo_conta,
       conta.subtipo_conta || null,
+      conta.subtipo_secundario || null, 
       conta.codigo_conta,
       conta.id_conta,
     ];

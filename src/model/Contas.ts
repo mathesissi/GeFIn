@@ -3,32 +3,35 @@
 export enum TipoConta {
   Ativo = 'Ativo',
   Passivo = 'Passivo',
-  PatrimonioLiquido = 'Patrimônio Líquido',
+  PatrimonioLiquido = 'Patrimonio Liquido', // Valor padronizado com espaço
   Receita = 'Receita',
   Despesa = 'Despesa'
 }
 
 
-//Subtipos para contas do tipo "Ativo".
+//Subtipos principais.
 
 export enum SubtipoAtivo {
-  Circulante = 'Ativo Circulante',
-  NaoCirculante_Realizavel = 'Realizável a Longo Prazo',
-  NaoCirculante_Investimento = 'Investimento',
-  NaoCirculante_Imobilizado = 'Imobilizado',
-  NaoCirculante_Intangivel = 'Intangível'
+  Circulante = 'Ativo Circulante', // Mantido com espaço
+  NaoCirculante = 'Ativo Nao Circulante' // Valor padronizado com espaço
+}
+
+// Novos Subtipos Secundários para "Ativo Não Circulante"
+
+export enum SubtipoSecundarioAtivo {
+  RealizavelLongoPrazo = 'Realizavel a Longo Prazo', // Valor padronizado com espaços
+  Investimento = 'Investimento',
+  Imobilizado = 'Imobilizado',
+  Intangivel = 'Intangivel' // Valor padronizado
 }
 
 
 // Subtipos para contas do tipo "Passivo".
 
 export enum SubtipoPassivo {
-  Circulante = 'Passivo Circulante',
-  NaoCirculante = 'Passivo Não Circulante'
+  Circulante = 'Passivo Circulante', // Mantido com espaço
+  NaoCirculante = 'Passivo Nao Circulante' // Valor padronizado com espaço
 }
-
-
-// [REMOVIDO: SubtipoPatrimonioLiquido redundante]
 
 
 //Representa uma conta contábil com seus atributos e lógica de validação.
@@ -38,6 +41,7 @@ export class Conta {
   nome_conta: string;
   tipo_conta: TipoConta;
   subtipo_conta?: string;
+  subtipo_secundario?: string; // Novo campo para o segundo nível de subtipo
   codigo_conta: string;
 
 
@@ -46,30 +50,55 @@ export class Conta {
     nome_conta: string,
     tipo_conta: TipoConta,
     codigo_conta: string,
-    subtipo_conta?: string
+    subtipo_conta?: string,
+    subtipo_secundario?: string // Novo parâmetro
   ) {
     this.id_conta = id_conta;
     this.nome_conta = nome_conta;
     this.tipo_conta = tipo_conta;
     this.codigo_conta = codigo_conta;
+    
+    // Limpa strings vazias, especialmente para campos opcionais vindos do formulário
+    const primarySubtype = subtipo_conta?.trim() || undefined; 
+    const secondarySubtype = subtipo_secundario?.trim() || undefined;
 
-    // [MODIFICADO] Se for Patrimônio Líquido, o subtipo deve ser ignorado/aceito como vazio, se não for, valida.
     const isPatrimonioLiquido = tipo_conta === TipoConta.PatrimonioLiquido;
     const isReceitaDespesa = tipo_conta === TipoConta.Receita || tipo_conta === TipoConta.Despesa;
+    const isSubtypeMandatory = tipo_conta === TipoConta.Ativo || tipo_conta === TipoConta.Passivo;
 
-    // Se um subtipo foi fornecido e a conta não é Patrimônio Líquido/Receita/Despesa (onde o subtipo é opcional/ignorado), deve ser validado.
-    if (subtipo_conta && !isPatrimonioLiquido && !isReceitaDespesa && this.validarSubtipo(tipo_conta, subtipo_conta)) {
-      this.subtipo_conta = subtipo_conta;
-    } else if (subtipo_conta && !isPatrimonioLiquido && !isReceitaDespesa) {
-      // Se fornecido e falhou na validação
-      throw new Error(`Subtipo inválido "${subtipo_conta}" para o tipo "${tipo_conta}"`);
-    } else if (isPatrimonioLiquido || isReceitaDespesa) {
-        // Para Patrimônio Líquido, Receita e Despesa, o campo subtipo é opcional/ignorado no back-end,
-        // mas pode ter vindo vazio ou null. Apenas garantimos que ele não seja um subtipo de outro tipo.
+
+    // 1. Validação do Subtipo Principal
+    if (isPatrimonioLiquido || isReceitaDespesa) {
         this.subtipo_conta = undefined;
-    } else if (subtipo_conta) {
-        // Se a conta exige subtipo e ele veio inválido, lança o erro (Ex: Ativo com subtipo inválido)
-        throw new Error(`Subtipo inválido "${subtipo_conta}" para o tipo "${tipo_conta}"`);
+    } else if (isSubtypeMandatory) {
+        if (!primarySubtype) {
+            throw new Error(`Subtipo principal é obrigatório para contas do tipo "${tipo_conta}"`);
+        }
+        
+        if (!this.validarSubtipo(tipo_conta, primarySubtype)) {
+            throw new Error(`Subtipo principal inválido "${primarySubtype}" para o tipo "${tipo_conta}"`);
+        }
+        this.subtipo_conta = primarySubtype;
+    } else if (primarySubtype) {
+         throw new Error(`Subtipo principal não é permitido para o tipo "${tipo_conta}"`);
+    } else {
+        this.subtipo_conta = undefined;
+    }
+
+    // 2. Validação do Subtipo Secundário
+    const isAtivoNaoCirculante = tipo_conta === TipoConta.Ativo && primarySubtype === SubtipoAtivo.NaoCirculante;
+
+    if (isAtivoNaoCirculante) {
+        if (!secondarySubtype) {
+            throw new Error(`Subtipo secundário é obrigatório para "${SubtipoAtivo.NaoCirculante}"`);
+        }
+        if (!this.validarSubtipoSecundario(secondarySubtype)) {
+            throw new Error(`Subtipo secundário inválido "${secondarySubtype}" para "${SubtipoAtivo.NaoCirculante}"`);
+        }
+        this.subtipo_secundario = secondarySubtype;
+    } else {
+        // ESSENCIAL: Garante que o campo é ignorado se não for o caso específico
+        this.subtipo_secundario = undefined;
     }
   }
 
@@ -79,11 +108,13 @@ export class Conta {
         return Object.values(SubtipoAtivo).includes(subtipo as SubtipoAtivo);
       case TipoConta.Passivo:
         return Object.values(SubtipoPassivo).includes(subtipo as SubtipoPassivo);
-      // [REMOVIDO: case TipoConta.PatrimonioLiquido]
       default:
-        // Receita, Despesa e outros não listados não requerem validação específica aqui.
         return false;
     }
+  }
+
+  private validarSubtipoSecundario(subtipoSecundario: string): boolean {
+      return Object.values(SubtipoSecundarioAtivo).includes(subtipoSecundario as SubtipoSecundarioAtivo);
   }
 
 
@@ -93,6 +124,9 @@ export class Conta {
     console.log(`Tipo: ${this.tipo_conta}`);
     if (this.subtipo_conta) {
       console.log(`Subtipo: ${this.subtipo_conta}`);
+    }
+    if (this.subtipo_secundario) {
+      console.log(`Subtipo Secundário: ${this.subtipo_secundario}`);
     }
     console.log(`Código: ${this.codigo_conta}`);
   }

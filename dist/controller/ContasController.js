@@ -34,7 +34,8 @@ let ContasController = class ContasController extends tsoa_1.Controller {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const novaConta = new Contas_1.Conta(0, // O ID será gerado pelo repositório
-                dadosConta.nome_conta, dadosConta.tipo_conta, dadosConta.codigo_conta, dadosConta.subtipo_conta);
+                dadosConta.nome_conta, dadosConta.tipo_conta, dadosConta.codigo_conta, dadosConta.subtipo_conta, dadosConta.subtipo_secundario // Passando novo campo
+                );
                 this.setStatus(201); // Created
                 return this.contasService.criarConta(novaConta);
             }

@@ -3,7 +3,8 @@ CREATE TABLE contas (
     id_conta SERIAL PRIMARY KEY,
     nome_conta VARCHAR(100) NOT NULL,
     tipo_conta VARCHAR(50) NOT NULL,
-    codigo_conta VARCHAR(20) UNIQUE
+    codigo_conta VARCHAR(20) UNIQUE,
+    subtipo_secundario VARCHAR(100)
 );
 
 -- Tabela de balancetes

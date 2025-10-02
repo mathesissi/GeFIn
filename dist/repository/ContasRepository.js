@@ -28,9 +28,10 @@ class ContaRepository {
       CREATE TABLE IF NOT EXISTS contas (
         id_conta INT AUTO_INCREMENT PRIMARY KEY,
         nome_conta VARCHAR(255) NOT NULL,
-        tipo_conta ENUM('Ativo', 'Passivo', 'Patrimonio Liquido', 'Receita', 'Despesa') NOT NULL,
+        tipo_conta ENUM('Ativo', 'Passivo', 'PatrimonioLiquido', 'Receita', 'Despesa') NOT NULL,
         codigo_conta VARCHAR(255) NOT NULL UNIQUE,
-        subtipo_conta VARCHAR(255)
+        subtipo_conta VARCHAR(255),
+        subtipo_secundario VARCHAR(255) 
       );
     `;
             try {
@@ -43,18 +44,19 @@ class ContaRepository {
         });
     }
     rowToConta(row) {
-        return new Contas_1.Conta(row.id_conta, row.nome_conta, row.tipo_conta, row.codigo_conta, row.subtipo_conta || undefined);
+        return new Contas_1.Conta(row.id_conta, row.nome_conta, row.tipo_conta, row.codigo_conta, row.subtipo_conta || undefined, row.subtipo_secundario || undefined);
     }
     create(conta) {
         return __awaiter(this, void 0, void 0, function* () {
             const sql = `
-      INSERT INTO contas (nome_conta, tipo_conta, subtipo_conta, codigo_conta)
-      VALUES (?, ?, ?, ?);
+      INSERT INTO contas (nome_conta, tipo_conta, subtipo_conta, subtipo_secundario, codigo_conta)
+      VALUES (?, ?, ?, ?, ?);
     `;
             const params = [
                 conta.nome_conta,
                 conta.tipo_conta,
                 conta.subtipo_conta || null,
+                conta.subtipo_secundario || null,
                 conta.codigo_conta,
             ];
             const result = yield (0, MySql_1.executarComandoSQL)(sql, params);
@@ -96,13 +98,14 @@ class ContaRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const sql = `
       UPDATE contas
-      SET nome_conta = ?, tipo_conta = ?, subtipo_conta = ?, codigo_conta = ?
+      SET nome_conta = ?, tipo_conta = ?, subtipo_conta = ?, subtipo_secundario = ?, codigo_conta = ?
       WHERE id_conta = ?;
     `;
             const params = [
                 conta.nome_conta,
                 conta.tipo_conta,
                 conta.subtipo_conta || null,
+                conta.subtipo_secundario || null,
                 conta.codigo_conta,
                 conta.id_conta,
             ];

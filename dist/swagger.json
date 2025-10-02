@@ -49,7 +49,7 @@
 				"enum": [
 					"Ativo",
 					"Passivo",
-					"Patrimônio Líquido",
+					"Patrimonio Liquido",
 					"Receita",
 					"Despesa"
 				],
@@ -70,6 +70,9 @@
 					"subtipo_conta": {
 						"type": "string"
 					},
+					"subtipo_secundario": {
+						"type": "string"
+					},
 					"codigo_conta": {
 						"type": "string"
 					}
@@ -83,22 +86,21 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"Partial_Conta_": {
+			"Partial__nome_conta-string--tipo_conta-TipoConta--codigo_conta-string--subtipo_conta_63_-string--subtipo_secundario_63_-string__": {
 				"properties": {
-					"id_conta": {
-						"type": "number",
-						"format": "double"
-					},
 					"nome_conta": {
 						"type": "string"
 					},
 					"tipo_conta": {
 						"$ref": "#/components/schemas/TipoConta"
 					},
+					"codigo_conta": {
+						"type": "string"
+					},
 					"subtipo_conta": {
 						"type": "string"
 					},
-					"codigo_conta": {
+					"subtipo_secundario": {
 						"type": "string"
 					}
 				},
@@ -505,6 +507,9 @@
 						"application/json": {
 							"schema": {
 								"properties": {
+									"subtipo_secundario": {
+										"type": "string"
+									},
 									"subtipo_conta": {
 										"type": "string"
 									},
@@ -682,7 +687,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/Partial_Conta_"
+								"$ref": "#/components/schemas/Partial__nome_conta-string--tipo_conta-TipoConta--codigo_conta-string--subtipo_conta_63_-string--subtipo_secundario_63_-string__"
 							}
 						}
 					}

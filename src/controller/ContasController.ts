@@ -19,6 +19,7 @@ export class ContasController extends Controller {
             tipo_conta: TipoConta;
             codigo_conta: string;
             subtipo_conta?: string;
+            subtipo_secundario?: string; // Novo campo
         },
         @Res() badRequestResponse: TsoaResponse<400, { message: string }>
     ): Promise<Conta | void> {
@@ -28,7 +29,8 @@ export class ContasController extends Controller {
                 dadosConta.nome_conta,
                 dadosConta.tipo_conta,
                 dadosConta.codigo_conta,
-                dadosConta.subtipo_conta
+                dadosConta.subtipo_conta,
+                dadosConta.subtipo_secundario // Passando novo campo
             );
             this.setStatus(201); // Created
             return this.contasService.criarConta(novaConta);
@@ -57,7 +59,13 @@ export class ContasController extends Controller {
     @Put("{id}")
     public async atualizarConta(
         @Path() id: number,
-        @Body() dadosAtualizados: Partial<Conta>,
+        @Body() dadosAtualizados: Partial<{
+            nome_conta: string;
+            tipo_conta: TipoConta;
+            codigo_conta: string;
+            subtipo_conta?: string;
+            subtipo_secundario?: string; // Novo campo no DTO parcial
+        }>,
         @Res() notFoundResponse: TsoaResponse<404, { message: string }>,
         @Res() badRequestResponse: TsoaResponse<400, { message: string }>
     ): Promise<Conta | void> {
