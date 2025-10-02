@@ -376,3 +376,43 @@ a {
 .report-view {
     margin-top: 2rem;
 }
+
+/* =========================================
+   ESTILOS DE VALIDAÇÃO DE FORMULÁRIO
+   ========================================= */
+
+.form-group .validation-message {
+    color: var(--danger-color);
+    font-size: 14px;
+    margin-top: 0.5rem;
+    display: none; /* Oculto por padrão */
+}
+
+.form-group input.is-invalid,
+.form-group select.is-invalid {
+    border-color: var(--danger-color);
+    background-color: #FFF0F0;
+}
+
+.form-group input.is-invalid:focus,
+.form-group select.is-invalid:focus {
+    box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2);
+}
+
+.form-error-summary {
+    background-color: #FFF0F0;
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: none; /* Oculto por padrão */
+}
+
+.form-error-summary h4 {
+    margin-bottom: 0.5rem;
+}
+
+.form-error-summary ul {
+    margin-left: 1.5rem;
+}
