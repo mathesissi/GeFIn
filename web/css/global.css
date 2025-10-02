@@ -1,0 +1,378 @@
+
+/* =========================================
+   DESIGN SYSTEM & GLOBAL STYLES
+   ========================================= */
+
+/* --- Fontes --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* --- Variáveis de Cor (Paleta) --- */
+:root {
+    --primary-color: #1A237E;
+    --primary-color-dark: #121A5A;
+    --secondary-color: #2962FF;
+    --bg-main: #F7F9FC;
+    --bg-element: #FFFFFF;
+    --text-primary: #37474F;
+    --text-secondary: #78909C;
+    --border-color: #E0E0E0;
+    --success-color: #2E7D32;
+    --danger-color: #C62828;
+    --white: #FFFFFF;
+    --shadow-color: rgba(0, 0, 0, 0.05);
+}
+
+/* --- Reset Básico e Padrões --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+    font-weight: 700;
+}
+
+h1 { font-size: 28px; }
+h2 { font-size: 22px; }
+h3 { font-size: 18px; }
+p { font-size: 16px; line-height: 1.5; }
+
+a {
+    text-decoration: none;
+    color: var(--secondary-color);
+}
+
+/* =========================================
+   LAYOUT PRINCIPAL DO DASHBOARD
+   ========================================= */
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 240px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem 0;
+}
+
+.sidebar-header {
+    padding: 0 1.5rem 2rem 1.5rem;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    padding: 1rem 1.5rem;
+    display: block;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--white);
+}
+
+.nav-link.active {
+    background-color: var(--primary-color-dark);
+    color: var(--white);
+    border-left: 3px solid var(--secondary-color);
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background-color: var(--bg-element);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.content-area {
+    padding: 2rem;
+    flex: 1;
+}
+
+/* =========================================
+   COMPONENTES REUTILIZÁVEIS
+   ========================================= */
+
+/* --- Botões --- */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--secondary-color);
+    border: 1px solid var(--secondary-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    opacity: 0.9;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    opacity: 0.6;
+    transition: opacity 0.2s ease;
+}
+.btn-icon:hover {
+    opacity: 1;
+}
+.btn-icon img {
+    width: 20px;
+    height: 20px;
+}
+
+
+/* --- Tabelas --- */
+.table-container {
+    background-color: var(--bg-element);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th, .data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.data-table tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table .action-cell {
+    text-align: right;
+}
+
+/* --- Formulários --- */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Inter', sans-serif;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(41, 98, 255, 0.2);
+}
+
+/* --- Cards --- */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+.card {
+    background-color: var(--bg-element);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+.card-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+.card-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+.card-value.positive { color: var(--success-color); }
+.card-value.negative { color: var(--danger-color); }
+
+
+/* --- Modais --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-content h3 {
+    margin-bottom: 2rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+
+/* =========================================
+   ESTILOS ESPECÍFICOS DA PÁGINA DE LOGIN
+   ========================================= */
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 3rem;
+    background: var(--bg-element);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    text-align: center;
+}
+
+.login-box h1 {
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+}
+
+/* =========================================
+   ESTILOS PÁGINA DE RELATÓRIOS
+   ========================================= */
+
+.report-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.report-card {
+    background-color: var(--bg-element);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.report-card:hover {
+    border-color: var(--secondary-color);
+    transform: translateY(-5px);
+}
+
+.report-card h3 {
+    margin-bottom: 0.5rem;
+}
+
+.report-card p {
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.filter-section {
+    background: var(--bg-element);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-top: 2rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+}
+
+.report-view {
+    margin-top: 2rem;
+}

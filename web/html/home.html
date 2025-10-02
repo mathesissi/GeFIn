@@ -1,106 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeFin - Home</title>
-    <link rel="stylesheet" href="../css/home.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>Dashboard - GeFIn</title>
+    <link rel="stylesheet" href="../css/global.css">
 </head>
-
 <body>
-    <div class="app-container">
+    <div class="app-layout">
         <aside class="sidebar">
-            <div class="logo-area">
-                <span class="logo">GeFin</span>
+            <div class="sidebar-header">
+                <h2>GeFIn</h2>
             </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="home.html" class="nav-item active">Home</a></li>
-                    <li><a href="html/LivroDiario.html" class="nav-item">Livro Diário</a></li>
-                    <li><a href="html/ContasContabeis.html" class="nav-item">Contas Contábeis</a></li>
-                    <li><a href="html/Relatorios.html" class="nav-item">Relatórios</a></li>
-                </ul>
+            <nav class="sidebar-nav">
+                <a href="home.html" class="nav-link active">Dashboard</a>
+                <a href="ContasContabeis.html" class="nav-link">Plano de Contas</a>
+                <a href="LivroDiario.html" class="nav-link">Lançamentos</a>
+                <a href="Relatorios.html" class="nav-link">Relatórios</a>
+                <!-- <a href="#" class="nav-link">Configurações</a> -->
             </nav>
-            <a href="html/login.html" class="logout">Sair</a>
         </aside>
-
-        <main class="content-area">
-            <header class="content-header">
-                <h1 class="page-title">HOME</h1>
-                <div class="user-info">
-                    <span class="user-name">David Jones</span>
-                    <div class="user-avatar"></div>
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Dashboard</h1>
+                <div class="user-profile">
+                    <span>Usuário</span>
                 </div>
             </header>
-
-            <div class="dashboard-area">
-                <div class="cards-container">
-                    <div class="product-card">
-                        <div class="product-icon"></div>
-                        <span class="product-name">Produto X</span>
+            <div class="content-area">
+                <div class="card-grid">
+                    <div class="card">
+                        <h3 class="card-title">Saldo em Caixa</h3>
+                        <p class="card-value">R$ 10.000,00</p>
                     </div>
-                    <div class="product-card">
-                        <div class="product-icon"></div>
-                        <span class="product-name">Produto X</span>
+                    <div class="card">
+                        <h3 class="card-title">Contas a Pagar (Mês)</h3>
+                        <p class="card-value negative">R$ 32.000,00</p>
                     </div>
-                    <div class="product-card">
-                        <div class="product-icon"></div>
-                        <span class="product-name">Produto X</span>
+                    <div class="card">
+                        <h3 class="card-title">Contas a Receber (Mês)</h3>
+                        <p class="card-value positive">R$ 5.000,00</p>
                     </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-legend">
-                        <span class="legend-item sales">Total de vendas</span>
-                        <span class="legend-item targets">Metas</span>
-                    </div>
-                    <div class="bar-chart">
-                        <div class="y-axis-labels">
-                            <span>R$ 10.000,00</span>
-                            <span>R$ 7.500,00</span>
-                            <span>R$ 5.000,00</span>
-                            <span>R$ 2.500,00</span>
-                            <span>R$ 0,00</span>
-                        </div>
-                        <div class="chart-bars">
-                            <div class="bar-group" style="--sales-height: 40%; --target-height: 75%;">
-                                <div class="bar sales"></div>
-                                <div class="bar targets"></div>
-                                <span class="x-label">Carlos</span>
-                            </div>
-                            <div class="bar-group" style="--sales-height: 75%; --target-height: 50%;">
-                                <div class="bar sales"></div>
-                                <div class="bar targets"></div>
-                                <span class="x-label">Sandro</span>
-                            </div>
-                            <div class="bar-group" style="--sales-height: 60%; --target-height: 50%;">
-                                <div class="bar sales"></div>
-                                <div class="bar targets"></div>
-                                <span class="x-label">Nadylla</span>
-                            </div>
-                            <div class="bar-group" style="--sales-height: 85%; --target-height: 95%;">
-                                <div class="bar sales"></div>
-                                <div class="bar targets"></div>
-                                <span class="x-label">Maiara</span>
-                            </div>
-                        </div>
-                        <span class="x-axis-title">Vendedor</span>
+                    <div class="card">
+                        <h3 class="card-title">Resultado (Mês)</h3>
+                        <p class="card-value positive">R$ 1.500,00</p>
                     </div>
                 </div>
+                
+                <div class="card" style="height: 400px;">
+                    <h3 class="card-title">Fluxo de Caixa (placeholder)</h3>
+                    </div>
             </div>
-
-            <button class="fab">
-                <i class="fas fa-plus"></i>
-            </button>
         </main>
     </div>
 </body>
-
 </html>

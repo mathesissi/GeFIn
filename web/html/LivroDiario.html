@@ -1,70 +1,117 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeFin - Livro Diário</title>
-    <link rel="stylesheet" href="../css/livrodiario.css"> 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>Lançamentos - GeFIn</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        /* Estilos específicos para o formulário de lançamento */
+        .lancamento-form {
+            background: var(--bg-element);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            margin-bottom: 2rem;
+        }
+        .partidas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 150px 50px;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+        .partidas-header {
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text-secondary);
+            padding-bottom: 0.5rem;
+        }
+        .partidas-footer {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .partidas-totais {
+            font-weight: 600;
+        }
+    </style>
 </head>
-
 <body>
-    <div class="app-container">
+    <div class="app-layout">
         <aside class="sidebar">
-            <div class="logo-area">
-                <span class="logo">GeFin</span>
+            <div class="sidebar-header">
+                <h2>GeFIn</h2>
             </div>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="../home.html" class="nav-item">Home</a></li>
-                    <li><a href="LivroDiario.html" class="nav-item active">Livro Diário</a></li>
-                    <li><a href="ContasContabeis.html" class="nav-item">Contas Contábeis</a></li>
-                    <li><a href="Relatorios.html" class="nav-item">Relatórios</a></li>
-                </ul>
+            <nav class="sidebar-nav">
+                <a href="home.html" class="nav-link">Dashboard</a>
+                <a href="ContasContabeis.html" class="nav-link">Plano de Contas</a>
+                <a href="LivroDiario.html" class="nav-link active">Lançamentos</a>
+                <a href="Relatorios.html" class="nav-link">Relatórios</a>
+                <!-- <a href="#" class="nav-link">Configurações</a> -->
             </nav>
-            <a href="login.html" class="logout">Sair</a>
         </aside>
-
-        <main class="content-area">
-            <header class="content-header">
-                <h1 class="page-title">LIVRO DIÁRIO</h1>
-                <div class="user-avatar-placeholder"></div>
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Lançamentos</h1>
+                <div class="user-profile">
+                    <span>Usuário</span>
+                </div>
             </header>
+            <div class="content-area">
+                <div class="lancamento-form">
+                    <h3>Novo Lançamento</h3>
+                    <form id="lancamento-form">
+                         <div class="form-group">
+                            <label for="data">Data</label>
+                            <input type="date" id="data" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="descricao">Descrição</label>
+                            <input type="text" id="descricao" placeholder="Ex: Pagamento de fornecedor" required>
+                        </div>
+                        
+                        <div class="partidas-grid partidas-header">
+                            <span>Conta</span>
+                            <span>Tipo</span>
+                            <span>Valor</span>
+                        </div>
+                        
+                        <div id="partidas-container">
+                            </div>
 
-            <form class="journal-entry-form">
-                <div class="form-row row-top">
-                    <div class="form-group date-group">
-                        <label for="data">Data</label>
-                        <input type="text" id="data" class="input-field">
-                    </div>
-                    <div class="form-group description-group">
-                        <label for="descricao">Descrição</label>
-                        <input type="text" id="descricao" class="input-field large-input">
-                    </div>
+                        <button type="button" id="add-partida" class="btn btn-secondary" style="margin-top: 1rem;">Adicionar Partida</button>
+
+                        <div class="partidas-footer">
+                            <div class="partidas-totais">
+                                <p>Débito: <span id="total-debito">R$ 0,00</span></p>
+                                <p>Crédito: <span id="total-credito">R$ 0,00</span></p>
+                                <p>Diferença: <span id="diferenca">R$ 0,00</span></p>
+                            </div>
+                            <button type="submit" id="save-lancamento" class="btn btn-primary" disabled>Salvar Lançamento</button>
+                        </div>
+                    </form>
                 </div>
 
-                <div class="form-row row-bottom">
-                    <div class="form-group">
-                        <label for="debito">Débito</label>
-                        <input type="text" id="debito" class="input-field">
-                    </div>
-                    <div class="form-group">
-                        <label for="credito">Crédito</label>
-                        <input type="text" id="credito" class="input-field">
-                    </div>
-                    <div class="form-group">
-                        <label for="valor">Valor</label>
-                        <input type="text" id="valor" class="input-field">
-                    </div>
+                <div class="table-container">
+                    <h3>Histórico</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lancamentos-historico-tbody"> </tbody>
+                    </table>
                 </div>
-            </form>
-
-            <button class="fab">
-                <i class="fas fa-plus"></i>
-            </button>
+            </div>
         </main>
     </div>
+    <script src="../js/LivroDiario.js"></script>
 </body>
-
 </html>
+
