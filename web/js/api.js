@@ -17,19 +17,43 @@ async function fetchAPI(endpoint, options = {}) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Ocorreu um erro na API');
+            // [1] Tentar obter o tipo de conteúdo da resposta
+            const contentType = response.headers.get("content-type");
+            let errorMessage = 'Ocorreu um erro desconhecido na API.';
+            
+            // [2] Verificar se a resposta é JSON antes de tentar o .json()
+            if (contentType && contentType.includes("application/json")) {
+                try {
+                    const errorData = await response.json();
+                    // Assumimos que o JSON de erro tem um campo 'message'
+                    errorMessage = errorData.message || errorMessage;
+                } catch (e) {
+                    // Ocorreu um erro ao parsear JSON, usar a mensagem padrão
+                    console.warn("Erro ao parsear JSON de erro:", e);
+                }
+            } else {
+                // Se não for JSON (provavelmente HTML), tentamos ler como texto para debug
+                const errorText = await response.text();
+                // Usamos a mensagem padrão ou podemos tentar extrair algo do texto
+                // Mas, crucialmente, NÃO tentamos .json()
+                console.error("Resposta de erro não é JSON (Possível HTML):", errorText);
+            }
+            
+            // Lança a exceção com a mensagem correta (JSON ou padrão)
+            throw new Error(errorMessage);
         }
-        
-        // Retorna um objeto vazio para respostas sem conteúdo (ex: DELETE 204 No Content)
+
         if (response.status === 204) {
             return {};
         }
 
         return response.json();
     } catch (error) {
+        // Agora, este bloco só é executado para a exceção que acabamos de lançar
+        // ou para erros de rede (que não retornam response)
         console.error(`Erro na chamada da API para ${endpoint}:`, error);
-        alert(`Erro: ${error.message}`);
+        // O alert agora mostrará a mensagem que você formatou (JSON ou padrão)
+        alert(`Erro: ${error.message}`); 
         throw error;
     }
 }
@@ -37,6 +61,8 @@ async function fetchAPI(endpoint, options = {}) {
 // --- Funções da API de Contas ---
 
 export const getContas = () => fetchAPI('/contas');
+
+export const getContaById = (id) => fetchAPI(`/contas/${id}`); 
 
 export const createConta = (contaData) => fetchAPI('/contas', {
     method: 'POST',

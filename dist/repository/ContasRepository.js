@@ -75,6 +75,16 @@ class ContaRepository {
             return null;
         });
     }
+    findByCodigoConta(codigoConta) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const sql = "SELECT * FROM contas WHERE codigo_conta = ?;";
+            const result = yield (0, MySql_1.executarComandoSQL)(sql, [codigoConta]);
+            if (result.length > 0) {
+                return this.rowToConta(result[0]);
+            }
+            return null;
+        });
+    }
     findAll() {
         return __awaiter(this, void 0, void 0, function* () {
             const sql = "SELECT * FROM contas ORDER BY codigo_conta;";

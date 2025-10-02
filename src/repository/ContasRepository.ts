@@ -71,6 +71,15 @@ export class ContaRepository {
     return null;
   }
 
+    async findByCodigoConta(codigoConta: string): Promise<Conta | null> {
+    const sql = "SELECT * FROM contas WHERE codigo_conta = ?;";
+    const result = await executarComandoSQL(sql, [codigoConta]);
+    if (result.length > 0) {
+      return this.rowToConta(result[0]);
+    }
+    return null;
+  }
+
   async findAll(): Promise<Conta[]> {
     const sql = "SELECT * FROM contas ORDER BY codigo_conta;";
     const result = await executarComandoSQL(sql, []);
