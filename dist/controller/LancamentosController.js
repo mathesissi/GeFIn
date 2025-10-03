@@ -29,13 +29,14 @@ let LancamentosController = class LancamentosController extends tsoa_1.Controlle
         super();
         this.lancamentosService = new LancamentosService_1.LancamentosService();
     }
-    criarLancamento(dadosLancamento, badRequestResponse) {
+    criarLancamento(dadosTransacao, badRequestResponse) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 this.setStatus(201); // Created
-                return this.lancamentosService.criarLancamento(dadosLancamento);
+                return this.lancamentosService.criarLancamento(dadosTransacao);
             }
             catch (error) {
+                // É importante garantir que a mensagem de erro seja acessível
                 return badRequestResponse(400, { message: error.message });
             }
         });

@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lancamentosTbody = document.getElementById('lancamentos-historico-tbody');
     const errorSummary = document.getElementById('form-error-summary');
     const errorList = document.getElementById('form-error-list');
+    const totalDebitoSpan = document.getElementById('total-debito');
+    const totalCreditoSpan = document.getElementById('total-credito');
+    const diferencaSpan = document.getElementById('diferenca');
+
 
     let contasCache = [];
 
@@ -36,52 +40,88 @@ document.addEventListener('DOMContentLoaded', async () => {
         errorList.appendChild(li);
         errorSummary.style.display = 'block';
     };
-
+    
+    /**
+     * Valida o formulário para lançamentos compostos.
+     * @returns {boolean} Se o formulário é válido.
+     */
     const validateForm = () => {
         clearValidationErrors();
         let isValid = true;
+        
+        const dataInput = document.getElementById('data');
+        const descricaoInput = document.getElementById('descricao');
 
-        if (!document.getElementById('data').value) {
+        if (!dataInput.value) {
             showError('data', 'A data é obrigatória.');
             addSummaryError('O campo "Data" deve ser preenchido.');
             isValid = false;
         }
-        if (!document.getElementById('descricao').value.trim()) {
+        if (!descricaoInput.value.trim()) {
             showError('descricao', 'A descrição é obrigatória.');
             addSummaryError('O campo "Descrição" não pode estar vazio.');
             isValid = false;
         }
 
-        const partidas = partidasContainer.querySelectorAll('.partidas-grid');
+        const partidas = Array.from(partidasContainer.querySelectorAll('.partidas-grid'));
+
         if (partidas.length < 2) {
-            addSummaryError('É necessário ter pelo menos duas partidas (um débito e um crédito).');
+            addSummaryError('É necessário ter pelo menos duas partidas (débito e crédito).');
             isValid = false;
         }
 
-        let totalDebito = 0, totalCredito = 0;
+        let totalDebito = 0;
+        let totalCredito = 0;
+        let temDebito = false;
+        let temCredito = false;
+        
         partidas.forEach((partida, index) => {
             const contaSelect = partida.querySelector('.conta-select');
+            const tipoSelect = partida.querySelector('.tipo-partida');
             const valorInput = partida.querySelector('.valor-partida');
             
+            // Remove classes de erro antigas
+            contaSelect.classList.remove('is-invalid');
+            valorInput.classList.remove('is-invalid');
+
+            let partidaIsValid = true;
+
             if (!contaSelect.value) {
                 contaSelect.classList.add('is-invalid');
                 addSummaryError(`A Partida #${index + 1} precisa ter uma conta selecionada.`);
-                isValid = false;
-            }
-            if (parseFloat(valorInput.value) <= 0 || !valorInput.value) {
-                valorInput.classList.add('is-invalid');
-                addSummaryError(`O valor da Partida #${index + 1} deve ser maior que zero.`);
-                isValid = false;
+                partidaIsValid = false;
             }
             
-            const tipo = partida.querySelector('.tipo-partida').value;
             const valor = parseFloat(valorInput.value) || 0;
-            if (tipo === 'debito') totalDebito += valor;
-            else totalCredito += valor;
+            if (valor <= 0 || !valorInput.value) {
+                valorInput.classList.add('is-invalid');
+                addSummaryError(`O valor da Partida #${index + 1} deve ser um número positivo.`);
+                partidaIsValid = false;
+            }
+
+            if (partidaIsValid) {
+                const tipo = tipoSelect.value;
+                if (tipo === 'debito') {
+                    totalDebito += valor;
+                    temDebito = true;
+                } else if (tipo === 'credito') {
+                    totalCredito += valor;
+                    temCredito = true;
+                }
+            } else {
+                isValid = false;
+            }
         });
 
-        if (totalDebito !== totalCredito || totalDebito === 0) {
+        // Revalida a Regra das Partidas Dobradas
+        // Usa uma pequena tolerância para evitar erros de ponto flutuante
+        if (Math.abs(totalDebito - totalCredito) > 0.005 || totalDebito === 0) {
             addSummaryError('O total de débitos deve ser igual ao total de créditos e maior que zero.');
+            isValid = false;
+        }
+        
+        if (!temDebito || !temCredito) {
+            addSummaryError('A transação deve conter pelo menos um débito e pelo menos um crédito.');
             isValid = false;
         }
 
@@ -94,6 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loadContas = async () => {
         try {
             contasCache = await getContas();
+            // Adiciona as partidas iniciais
             addPartida();
             addPartida();
         } catch (error) {
@@ -117,45 +158,82 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addPartida = () => {
         const newPartida = document.createElement('div');
         newPartida.classList.add('partidas-grid', 'form-group');
-        const contaSelect = createContaSelector();
         
-        newPartida.innerHTML = `
-            <div class="conta-select-wrapper"></div>
-            <select class="tipo-partida"><option value="debito">Débito</option><option value="credito">Crédito</option></select>
-            <input type="number" class="valor-partida" placeholder="0,00" step="0.01">
-            <button type="button" class="btn-icon btn-danger remove-partida" title="Remover Partida"><img src="../media/svg/delete.svg" alt="Remover"></button>
-        `;
-        newPartida.querySelector('.conta-select-wrapper').appendChild(contaSelect);
+        // Crio o wrapper para o select da conta
+        const contaSelectWrapper = document.createElement('div');
+        contaSelectWrapper.className = 'conta-select-wrapper';
+        contaSelectWrapper.appendChild(createContaSelector());
+
+        // Crio o select de tipo
+        const tipoSelect = document.createElement('select');
+        tipoSelect.className = 'tipo-partida';
+        tipoSelect.innerHTML = '<option value="debito">Débito</option><option value="credito">Crédito</option>';
+
+        // Crio o input de valor
+        const valorInput = document.createElement('input');
+        valorInput.type = 'number';
+        valorInput.className = 'valor-partida';
+        valorInput.placeholder = '0,00';
+        valorInput.step = '0.01';
+
+        // Crio o botão de remover
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.className = 'btn-icon btn-danger remove-partida';
+        removeButton.title = 'Remover Partida';
+        removeButton.innerHTML = '<img src="../media/svg/delete.svg" alt="Remover">';
+        
+        // Adiciono os elementos ao container da partida
+        newPartida.appendChild(contaSelectWrapper);
+        newPartida.appendChild(tipoSelect);
+        newPartida.appendChild(valorInput);
+        newPartida.appendChild(removeButton);
+
         partidasContainer.appendChild(newPartida);
+        updateTotals();
     };
 
     const updateTotals = () => {
-        let totalDebito = 0, totalCredito = 0;
+        let totalDebito = 0;
+        let totalCredito = 0;
+
         partidasContainer.querySelectorAll('.partidas-grid').forEach(partida => {
             const tipo = partida.querySelector('.tipo-partida').value;
             const valor = parseFloat(partida.querySelector('.valor-partida').value) || 0;
-            if (tipo === 'debito') totalDebito += valor;
-            else totalCredito += valor;
+            
+            if (tipo === 'debito') {
+                totalDebito += valor;
+            } else if (tipo === 'credito') {
+                totalCredito += valor;
+            }
         });
-        document.getElementById('total-debito').textContent = `R$ ${totalDebito.toFixed(2)}`;
-        document.getElementById('total-credito').textContent = `R$ ${totalCredito.toFixed(2)}`;
-        document.getElementById('diferenca').textContent = `R$ ${(totalDebito - totalCredito).toFixed(2)}`;
+        
+        totalDebitoSpan.textContent = `R$ ${totalDebito.toFixed(2)}`;
+        totalCreditoSpan.textContent = `R$ ${totalCredito.toFixed(2)}`;
+        
+        const diferenca = totalDebito - totalCredito;
+        diferencaSpan.textContent = `R$ ${diferenca.toFixed(2)}`;
+        
+        // Lógica visual para a diferença
+        diferencaSpan.style.color = Math.abs(diferenca) < 0.005 ? 'green' : 'red';
     };
     
-    /** **CORRIGIDO** - Renderiza a tabela de lançamentos. A limpeza da tabela foi movida para cá. */
+    /** Renderiza a tabela de lançamentos. */
     const renderLancamentos = (lancamentos) => {
-        lancamentosTbody.innerHTML = ''; // Limpa a tabela ANTES de adicionar as novas linhas.
+        lancamentosTbody.innerHTML = ''; 
         if (!lancamentos || lancamentos.length === 0) {
             lancamentosTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum lançamento encontrado.</td></tr>';
             return;
         }
         lancamentos.forEach(lanc => {
             const tr = document.createElement('tr');
+            // Nota: O campo no retorno da API é agora 'valor_total'
+            const valorExibido = lanc.valor_total !== undefined ? lanc.valor_total : lanc.valor; 
             tr.innerHTML = `
                 <td>${new Date(lanc.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</td>
                 <td>${lanc.descricao}</td>
-                <td>R$ ${parseFloat(lanc.valor).toFixed(2)}</td>
-            `;
+                <td>R$ ${parseFloat(valorExibido).toFixed(2)}</td>
+            `; 
             lancamentosTbody.appendChild(tr);
         });
     };
@@ -173,54 +251,71 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Event Listeners ---
     addPartidaBtn.addEventListener('click', addPartida);
+    
+    // Delegação de eventos para manipulação e cálculo de totais
     partidasContainer.addEventListener('click', e => {
-        if (e.target.closest('.remove-partida')) { e.target.closest('.partidas-grid').remove(); updateTotals(); }
+        if (e.target.closest('.remove-partida')) { 
+            e.target.closest('.partidas-grid').remove(); 
+            updateTotals(); 
+        }
     });
     partidasContainer.addEventListener('input', updateTotals);
     partidasContainer.addEventListener('change', updateTotals);
 
     lancamentoForm.addEventListener('submit', async (event) => {
         event.preventDefault();
+        
         if (!validateForm()) return;
         
-        const partidas = Array.from(partidasContainer.querySelectorAll('.partidas-grid'));
-        const debitos = partidas.filter(p => p.querySelector('.tipo-partida').value === 'debito');
-        const creditos = partidas.filter(p => p.querySelector('.tipo-partida').value === 'credito');
+        const partidasColetadas = Array.from(partidasContainer.querySelectorAll('.partidas-grid')).map(partida => {
+            return {
+                id_conta: parseInt(partida.querySelector('.conta-select').value),
+                tipo_partida: partida.querySelector('.tipo-partida').value,
+                valor: parseFloat(partida.querySelector('.valor-partida').value)
+            };
+        });
 
-        if (debitos.length !== 1 || creditos.length !== 1) {
-            addSummaryError('Apenas lançamentos com um débito e um crédito são suportados.');
-            errorSummary.style.display = 'block';
-            return;
-        }
-
-        const lancamentoData = {
+        
+        const dadosTransacao = {
             data: document.getElementById('data').value,
             descricao: document.getElementById('descricao').value,
-            valor: parseFloat(debitos[0].querySelector('.valor-partida').value),
-            id_conta_debito: parseInt(debitos[0].querySelector('.conta-select').value),
-            id_conta_credito: parseInt(creditos[0].querySelector('.conta-select').value),
+            partidas: partidasColetadas,
         };
         
         try {
-            const novoLancamento = await createLancamento(lancamentoData); // A API retorna o lançamento criado
+            const novoLancamento = await createLancamento(dadosTransacao); 
+            
             // Limpa e reseta o formulário
             lancamentoForm.reset();
             partidasContainer.innerHTML = '';
             addPartida();
             addPartida();
+            updateTotals(); 
             
-            // **ATUALIZAÇÃO OTIMIZADA:** Adiciona a nova linha sem recarregar tudo
+            // ATUALIZAÇÃO OTIMIZADA: Adiciona a nova linha
             const tr = document.createElement('tr');
+            const valorExibido = novoLancamento.valor_total !== undefined ? novoLancamento.valor_total : novoLancamento.valor;
             tr.innerHTML = `
                 <td>${new Date(novoLancamento.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</td>
                 <td>${novoLancamento.descricao}</td>
-                <td>R$ ${parseFloat(novoLancamento.valor).toFixed(2)}</td>
+                <td>R$ ${parseFloat(valorExibido).toFixed(2)}</td>
             `;
-            lancamentosTbody.prepend(tr); // Adiciona no topo para feedback imediato
+            // Se a tabela estava vazia, remove o item de "nenhum lançamento"
+            if (lancamentosTbody.querySelector('tr > td[colspan="3"]')) {
+                lancamentosTbody.innerHTML = '';
+            }
+            lancamentosTbody.prepend(tr); 
 
             alert('Lançamento salvo com sucesso!');
         } catch(error) {
            console.error("Falha ao criar lançamento:", error);
+           
+           // Tratamento de erro aprimorado
+           if (error.response && error.response.data && error.response.data.message) {
+              addSummaryError(`Erro do Servidor: ${error.response.data.message}`);
+           } else {
+              addSummaryError('Erro desconhecido ao salvar o lançamento. Verifique o console.');
+           }
         }
     });
 

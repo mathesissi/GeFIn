@@ -21,28 +21,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BalancetesController = void 0;
-const BalanceteService_1 = require("../service/BalanceteService");
+exports.BalancoPatrimonialController = void 0;
 const tsoa_1 = require("tsoa");
-let BalancetesController = class BalancetesController extends tsoa_1.Controller {
+const BalancoPatrimonialService_1 = require("../service/BalancoPatrimonialService");
+let BalancoPatrimonialController = class BalancoPatrimonialController extends tsoa_1.Controller {
     constructor() {
         super();
-        this.balanceteService = new BalanceteService_1.BalanceteService();
+        this.balancoService = new BalancoPatrimonialService_1.BalancoPatrimonialService();
     }
-    getBalancetes(mes, ano, serverErrorResponse) {
+    getBalanco(mes, ano, serverErrorResponse) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const balancetes = yield this.balanceteService.getBalancetePorPeriodo(mes, ano);
-                return balancetes;
+                const balanco = yield this.balancoService.gerarBalanco(mes, ano);
+                return balanco;
             }
             catch (error) {
-                console.error('Erro no BalancetesController:', error);
-                return serverErrorResponse(500, { message: `Erro ao obter ou gerar balancetes: ${error.message}` });
+                return serverErrorResponse(500, { message: `Erro ao gerar o Balanço Patrimonial: ${error.message}` });
             }
         });
     }
 };
-exports.BalancetesController = BalancetesController;
+exports.BalancoPatrimonialController = BalancoPatrimonialController;
 __decorate([
     (0, tsoa_1.Get)(),
     __param(0, (0, tsoa_1.Query)()),
@@ -51,9 +50,9 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, Number, Function]),
     __metadata("design:returntype", Promise)
-], BalancetesController.prototype, "getBalancetes", null);
-exports.BalancetesController = BalancetesController = __decorate([
-    (0, tsoa_1.Route)("balancetes"),
+], BalancoPatrimonialController.prototype, "getBalanco", null);
+exports.BalancoPatrimonialController = BalancoPatrimonialController = __decorate([
+    (0, tsoa_1.Route)("balanco-patrimonial"),
     (0, tsoa_1.Tags)("Relatórios"),
     __metadata("design:paramtypes", [])
-], BalancetesController);
+], BalancoPatrimonialController);

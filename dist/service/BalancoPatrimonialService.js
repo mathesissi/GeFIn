@@ -9,73 +9,66 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BalanceteService = void 0;
-const balancete_1 = require("../model/balancete");
-const BalanceteRepository_1 = require("../repository/BalanceteRepository");
-const ContasRepository_1 = require("../repository/ContasRepository");
-const LancamentosRepository_1 = require("../repository/LancamentosRepository");
+exports.BalancoPatrimonialService = void 0;
+const BalanceteService_1 = require("./BalanceteService");
+const ContasService_1 = require("./ContasService");
 const Contas_1 = require("../model/Contas");
-class BalanceteService {
+class BalancoPatrimonialService {
     constructor() {
-        this.balanceteRepo = BalanceteRepository_1.BalanceteRepository.getInstance();
-        this.contaRepo = ContasRepository_1.ContaRepository.getInstance();
-        this.lancamentoRepo = LancamentosRepository_1.LancamentosRepository.getInstance();
+        this.balanceteService = new BalanceteService_1.BalanceteService();
+        this.contasService = new ContasService_1.ContasService();
     }
-    getBalancetePorPeriodo(mes, ano) {
+    gerarBalanco(mes, ano) {
         return __awaiter(this, void 0, void 0, function* () {
-            // 1. Garante que os dados sejam calculados e salvos/atualizados no banco.
-            yield this.gerarOuAtualizarBalancete(mes, ano);
-            // 2. Busca os dados recém-atualizados.
-            const balancetes = yield this.balanceteRepo.findByMesEAno(mes, ano);
-            const contas = yield this.contaRepo.findAll();
-            const contasMap = new Map(contas.map(c => [c.id_conta, c]));
-            // 3. Combina os dados para enviar ao front-end, já com nome e código.
-            return balancetes.map(b => {
-                const conta = contasMap.get(b.id_conta);
-                return Object.assign(Object.assign({}, b), { codigo_conta: (conta === null || conta === void 0 ? void 0 : conta.codigo_conta) || 'N/A', nome_conta: (conta === null || conta === void 0 ? void 0 : conta.nome_conta) || 'Desconhecida' });
-            });
-        });
-    }
-    gerarOuAtualizarBalancete(mes, ano) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const contas = yield this.contaRepo.findAll();
-            for (const conta of contas) {
-                const lancamentos = yield this.lancamentoRepo.findByContaAndPeriodo(conta.id_conta, mes, ano);
-                const saldoAnterior = yield this.getSaldoFinalMesAnterior(conta.id_conta, mes, ano);
-                let saldoFinal = saldoAnterior;
-                const isDevedora = conta.tipo_conta === Contas_1.TipoConta.Ativo || conta.tipo_conta === Contas_1.TipoConta.Despesa;
-                for (const lancamento of lancamentos) {
-                    if (lancamento.id_conta_debito === conta.id_conta) {
-                        saldoFinal += isDevedora ? lancamento.valor : -lancamento.valor;
-                    }
-                    else if (lancamento.id_conta_credito === conta.id_conta) {
-                        saldoFinal += isDevedora ? -lancamento.valor : lancamento.valor;
-                    }
-                }
-                const balanceteExistente = yield this.balanceteRepo.findByMesEAnoAndConta(mes, ano, conta.id_conta);
-                if (balanceteExistente) {
-                    balanceteExistente.saldo_inicial = saldoAnterior;
-                    balanceteExistente.saldo_final = saldoFinal;
-                    yield this.balanceteRepo.update(balanceteExistente);
-                }
-                else {
-                    const novoBalancete = new balancete_1.Balancete(0, mes, ano, conta.id_conta, saldoAnterior, saldoFinal);
-                    yield this.balanceteRepo.create(novoBalancete);
+            // Usa o serviço que já corrigimos para pegar os balancetes atualizados
+            const balancetesComDadosDasContas = yield this.balanceteService.getBalancetePorPeriodo(mes, ano);
+            const balanco = {
+                ativo: { circulante: [], naoCirculante: [], total: 0 },
+                passivo: { circulante: [], naoCirculante: [], total: 0 },
+                patrimonioLiquido: { contas: [], total: 0 },
+                totais: { totalAtivo: 0, totalPassivoPL: 0, diferenca: 0 }
+            };
+            for (const conta of balancetesComDadosDasContas) {
+                const saldoFinal = conta.saldo_final;
+                // Ignora contas com saldo zero para um relatório mais limpo
+                if (Math.abs(saldoFinal) < 0.01)
+                    continue;
+                const item = {
+                    codigo: conta.codigo_conta,
+                    nome: conta.nome_conta,
+                    // Inverte o sinal de passivos e PL para exibição positiva
+                    saldo: conta.tipo_conta === Contas_1.TipoConta.Ativo ? saldoFinal : -saldoFinal
+                };
+                switch (conta.tipo_conta) {
+                    case Contas_1.TipoConta.Ativo:
+                        balanco.ativo.total += item.saldo;
+                        if (conta.subtipo_conta === Contas_1.SubtipoAtivo.Circulante) {
+                            balanco.ativo.circulante.push(item);
+                        }
+                        else {
+                            balanco.ativo.naoCirculante.push(item);
+                        }
+                        break;
+                    case Contas_1.TipoConta.Passivo:
+                        balanco.passivo.total += item.saldo;
+                        if (conta.subtipo_conta === Contas_1.SubtipoPassivo.Circulante) {
+                            balanco.passivo.circulante.push(item);
+                        }
+                        else {
+                            balanco.passivo.naoCirculante.push(item);
+                        }
+                        break;
+                    case Contas_1.TipoConta.PatrimonioLiquido:
+                        balanco.patrimonioLiquido.total += item.saldo;
+                        balanco.patrimonioLiquido.contas.push(item);
+                        break;
                 }
             }
-        });
-    }
-    getSaldoFinalMesAnterior(id_conta, mes, ano) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let mesAnterior = mes - 1;
-            let anoAnterior = ano;
-            if (mesAnterior === 0) {
-                mesAnterior = 12;
-                anoAnterior -= 1;
-            }
-            const balanceteAnterior = yield this.balanceteRepo.findByMesEAnoAndConta(mesAnterior, anoAnterior, id_conta);
-            return balanceteAnterior ? balanceteAnterior.saldo_final : 0;
+            balanco.totais.totalAtivo = balanco.ativo.total;
+            balanco.totais.totalPassivoPL = balanco.passivo.total + balanco.patrimonioLiquido.total;
+            balanco.totais.diferenca = balanco.totais.totalAtivo - balanco.totais.totalPassivoPL;
+            return balanco;
         });
     }
 }
-exports.BalanceteService = BalanceteService;
+exports.BalancoPatrimonialService = BalancoPatrimonialService;

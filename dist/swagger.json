@@ -7,8 +7,38 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"TipoPartida": {
+				"type": "string",
+				"enum": [
+					"debito",
+					"credito"
+				]
+			},
+			"Partida": {
+				"description": "Representa uma linha de débito ou crédito de uma transação contábil.",
+				"properties": {
+					"id_conta": {
+						"type": "number",
+						"format": "double"
+					},
+					"tipo_partida": {
+						"$ref": "#/components/schemas/TipoPartida"
+					},
+					"valor": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id_conta",
+					"tipo_partida",
+					"valor"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"Lancamento": {
-				"description": "Representa uma transação contábil.",
+				"description": "Representa uma transação contábil composta (com múltiplas partidas).",
 				"properties": {
 					"id_lancamento": {
 						"type": "number",
@@ -21,26 +51,47 @@
 					"descricao": {
 						"type": "string"
 					},
-					"valor": {
+					"valor_total": {
 						"type": "number",
 						"format": "double"
 					},
-					"id_conta_debito": {
-						"type": "number",
-						"format": "double"
-					},
-					"id_conta_credito": {
-						"type": "number",
-						"format": "double"
+					"partidas": {
+						"items": {
+							"$ref": "#/components/schemas/Partida"
+						},
+						"type": "array"
 					}
 				},
 				"required": [
 					"id_lancamento",
 					"data",
 					"descricao",
-					"valor",
-					"id_conta_debito",
-					"id_conta_credito"
+					"valor_total",
+					"partidas"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DadosTransacao": {
+				"description": "Interface para a nova estrutura de dados de entrada para a criação de um lançamento (transação composta).",
+				"properties": {
+					"data": {
+						"type": "string"
+					},
+					"descricao": {
+						"type": "string"
+					},
+					"partidas": {
+						"items": {
+							"$ref": "#/components/schemas/Partida"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"data",
+					"descricao",
+					"partidas"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -106,6 +157,132 @@
 				},
 				"type": "object",
 				"description": "Make all properties in T optional"
+			},
+			"BalancoItem": {
+				"properties": {
+					"codigo": {
+						"type": "string"
+					},
+					"nome": {
+						"type": "string"
+					},
+					"saldo": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"codigo",
+					"nome",
+					"saldo"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BalancoPatrimonial": {
+				"properties": {
+					"ativo": {
+						"properties": {
+							"total": {
+								"type": "number",
+								"format": "double"
+							},
+							"naoCirculante": {
+								"items": {
+									"$ref": "#/components/schemas/BalancoItem"
+								},
+								"type": "array"
+							},
+							"circulante": {
+								"items": {
+									"$ref": "#/components/schemas/BalancoItem"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"total",
+							"naoCirculante",
+							"circulante"
+						],
+						"type": "object"
+					},
+					"passivo": {
+						"properties": {
+							"total": {
+								"type": "number",
+								"format": "double"
+							},
+							"naoCirculante": {
+								"items": {
+									"$ref": "#/components/schemas/BalancoItem"
+								},
+								"type": "array"
+							},
+							"circulante": {
+								"items": {
+									"$ref": "#/components/schemas/BalancoItem"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"total",
+							"naoCirculante",
+							"circulante"
+						],
+						"type": "object"
+					},
+					"patrimonioLiquido": {
+						"properties": {
+							"total": {
+								"type": "number",
+								"format": "double"
+							},
+							"contas": {
+								"items": {
+									"$ref": "#/components/schemas/BalancoItem"
+								},
+								"type": "array"
+							}
+						},
+						"required": [
+							"total",
+							"contas"
+						],
+						"type": "object"
+					},
+					"totais": {
+						"properties": {
+							"diferenca": {
+								"type": "number",
+								"format": "double"
+							},
+							"totalPassivoPL": {
+								"type": "number",
+								"format": "double"
+							},
+							"totalAtivo": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"diferenca",
+							"totalPassivoPL",
+							"totalAtivo"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"ativo",
+					"passivo",
+					"patrimonioLiquido",
+					"totais"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -164,34 +341,7 @@
 					"content": {
 						"application/json": {
 							"schema": {
-								"properties": {
-									"id_conta_credito": {
-										"type": "number",
-										"format": "double"
-									},
-									"id_conta_debito": {
-										"type": "number",
-										"format": "double"
-									},
-									"valor": {
-										"type": "number",
-										"format": "double"
-									},
-									"descricao": {
-										"type": "string"
-									},
-									"data": {
-										"type": "string"
-									}
-								},
-								"required": [
-									"id_conta_credito",
-									"id_conta_debito",
-									"valor",
-									"descricao",
-									"data"
-								],
-								"type": "object"
+								"$ref": "#/components/schemas/DadosTransacao"
 							}
 						}
 					}
@@ -351,24 +501,17 @@
 						"application/json": {
 							"schema": {
 								"properties": {
-									"id_conta_credito": {
-										"type": "number",
-										"format": "double"
-									},
-									"id_conta_debito": {
-										"type": "number",
-										"format": "double"
-									},
-									"valor": {
-										"type": "number",
-										"format": "double"
+									"partidas": {
+										"items": {
+											"$ref": "#/components/schemas/Partida"
+										},
+										"type": "array"
 									},
 									"descricao": {
 										"type": "string"
 									},
 									"data": {
-										"type": "string",
-										"format": "date-time"
+										"type": "string"
 									}
 								},
 								"type": "object"
@@ -696,9 +839,9 @@
 				]
 			}
 		},
-		"/balancetes": {
+		"/balanco-patrimonial": {
 			"get": {
-				"operationId": "GetBalancetes",
+				"operationId": "GetBalanco",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -707,8 +850,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"items": {},
-											"type": "array"
+											"$ref": "#/components/schemas/BalancoPatrimonial"
 										},
 										{}
 									]

@@ -16,11 +16,14 @@
             margin-bottom: 2rem;
         }
 
+        /* Estrutura flexível para as partidas (múltiplas linhas) */
         .partidas-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 150px 50px;
+            /* 2.5 coluna para Conta, 1 para Tipo, 1 para Valor, 50px para Botão de Remover */
+            grid-template-columns: 2.5fr 1fr 1fr 50px; 
             gap: 1rem;
-            align-items: flex-end;
+            align-items: center; 
+            margin-top: 0.5rem;
         }
 
         .partidas-header {
@@ -28,6 +31,21 @@
             font-size: 14px;
             color: var(--text-secondary);
             padding-bottom: 0.5rem;
+            /* Garante que o cabeçalho use o mesmo layout de grid */
+            display: grid;
+            grid-template-columns: 2.5fr 1fr 1fr 50px;
+            gap: 1rem;
+        }
+
+        .partidas-header > span:last-child {
+            /* Oculta o cabeçalho da coluna do botão de remover */
+            visibility: hidden;
+        }
+
+        /* Estilo para inputs e selects dentro do grid */
+        .partidas-grid input[type="number"],
+        .partidas-grid select {
+            width: 100%;
         }
 
         .partidas-footer {
@@ -56,8 +74,7 @@
                 <a href="ContasContabeis.html" class="nav-link">Plano de Contas</a>
                 <a href="LivroDiario.html" class="nav-link active">Lançamentos</a>
                 <a href="Relatorios.html" class="nav-link">Relatórios</a>
-                <!-- <a href="#" class="nav-link">Configurações</a> -->
-            </nav>
+                </nav>
         </aside>
         <main class="main-content">
             <header class="main-header">
@@ -68,7 +85,7 @@
             </header>
             <div class="content-area">
                 <div class="lancamento-form">
-                    <h3>Novo Lançamento</h3>
+                    <h3>Novo Lançamento Composto</h3>
 
                     <div class="form-error-summary" id="form-error-summary">
                         <h4>Por favor, corrija os seguintes erros:</h4>
@@ -83,26 +100,27 @@
                         </div>
                         <div class="form-group">
                             <label for="descricao">Descrição</label>
-                            <input type="text" id="descricao" placeholder="Ex: Pagamento de fornecedor">
+                            <input type="text" id="descricao" placeholder="Ex: Pagamento de múltiplos fornecedores">
                             <div class="validation-message" id="descricao-error">A descrição é obrigatória.</div>
                         </div>
 
-                        <div class="partidas-grid partidas-header">
-                            <span>Conta</span>
+                        <div class="partidas-header">
+                            <span>Conta Contábil</span>
                             <span>Tipo</span>
                             <span>Valor</span>
+                            <span></span> 
                         </div>
 
                         <div id="partidas-container">
-                        </div>
+                            </div>
 
                         <button type="button" id="add-partida" class="btn btn-secondary"
                             style="margin-top: 1rem;">Adicionar Partida</button>
 
                         <div class="partidas-footer">
                             <div class="partidas-totais">
-                                <p>Débito: <span id="total-debito">R$ 0,00</span></p>
-                                <p>Crédito: <span id="total-credito">R$ 0,00</span></p>
+                                <p>Débito Total: <span id="total-debito">R$ 0,00</span></p>
+                                <p>Crédito Total: <span id="total-credito">R$ 0,00</span></p>
                                 <p>Diferença: <span id="diferenca">R$ 0,00</span></p>
                             </div>
                             <button type="submit" id="save-lancamento" class="btn btn-primary">Salvar
@@ -112,13 +130,13 @@
                 </div>
 
                 <div class="table-container">
-                    <h3>Histórico</h3>
+                    <h3>Histórico de Transações</h3>
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>Data</th>
                                 <th>Descrição</th>
-                                <th>Valor</th>
+                                <th>Valor Total</th>
                             </tr>
                         </thead>
                         <tbody id="lancamentos-historico-tbody"> </tbody>
