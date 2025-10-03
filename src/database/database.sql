@@ -9,16 +9,19 @@ CREATE TABLE contas (
 );
 
 -- Tabela de balancetes (Atualizada para incluir movimento débito e crédito)
-CREATE TABLE balancetes (
-    id_balancete SERIAL PRIMARY KEY,
-    mes INT NOT NULL CHECK (mes BETWEEN 1 AND 12),
-    ano INT NOT NULL,
-    id_conta INT NOT NULL REFERENCES contas(id_conta),
-    saldo_inicial NUMERIC(12,2) NOT NULL,
-    movimento_debito NUMERIC(12,2) NOT NULL DEFAULT 0,  -- NOVO CAMPO
-    movimento_credito NUMERIC(12,2) NOT NULL DEFAULT 0, -- NOVO CAMPO
-    saldo_final NUMERIC(12,2) NOT NULL,
-    UNIQUE KEY uk_balancete_periodo_conta (mes, ano, id_conta)
+CREATE TABLE IF NOT EXISTS balancetes (
+    id_balancete INT AUTO_INCREMENT PRIMARY KEY,
+    id_conta INT NOT NULL,
+    mes TINYINT NOT NULL, -- 1 a 12
+    ano SMALLINT NOT NULL,
+    saldo_inicial DECIMAL(15,2) DEFAULT 0,
+    movimento_debito DECIMAL(15,2) DEFAULT 0,
+    movimento_credito DECIMAL(15,2) DEFAULT 0,
+    saldo_final DECIMAL(15,2) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_conta FOREIGN KEY (id_conta) REFERENCES contas(id_conta)
+    ADD CONSTRAINT uniq_conta_mes_ano UNIQUE (id_conta, mes, ano);
 );
 
 -- Tabela de Transações (Cabeçalho do lançamento contábil)
@@ -43,3 +46,4 @@ CREATE TABLE partidas_lancamento (
 -- Índices para otimizar consultas
 CREATE INDEX idx_lancamentos_data ON transacoes(data);
 CREATE INDEX idx_lancamentos_conta ON partidas_lancamento(id_conta);
+CREATE INDEX idx_mes_ano ON balancetes(mes, ano);

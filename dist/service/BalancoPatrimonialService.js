@@ -10,64 +10,42 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BalancoPatrimonialService = void 0;
-const BalanceteService_1 = require("./BalanceteService");
 const ContasService_1 = require("./ContasService");
-const Contas_1 = require("../model/Contas");
+const LancamentosService_1 = require("./LancamentosService");
 class BalancoPatrimonialService {
     constructor() {
-        this.balanceteService = new BalanceteService_1.BalanceteService();
         this.contasService = new ContasService_1.ContasService();
+        this.lancamentosService = new LancamentosService_1.LancamentosService();
     }
-    gerarBalanco(mes, ano) {
+    gerarBalancete(mes, ano) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Usa o serviço que já corrigimos para pegar os balancetes atualizados
-            const balancetesComDadosDasContas = yield this.balanceteService.getBalancetePorPeriodo(mes, ano);
-            const balanco = {
-                ativo: { circulante: [], naoCirculante: [], total: 0 },
-                passivo: { circulante: [], naoCirculante: [], total: 0 },
-                patrimonioLiquido: { contas: [], total: 0 },
-                totais: { totalAtivo: 0, totalPassivoPL: 0, diferenca: 0 }
-            };
-            for (const conta of balancetesComDadosDasContas) {
-                const saldoFinal = conta.saldo_final;
-                // Ignora contas com saldo zero para um relatório mais limpo
-                if (Math.abs(saldoFinal) < 0.01)
-                    continue;
-                const item = {
-                    codigo: conta.codigo_conta,
-                    nome: conta.nome_conta,
-                    // Inverte o sinal de passivos e PL para exibição positiva
-                    saldo: conta.tipo_conta === Contas_1.TipoConta.Ativo ? saldoFinal : -saldoFinal
+            const contas = yield this.contasService.listarContas();
+            const lancamentos = yield this.lancamentosService.listarLancamentos();
+            const balancete = contas.map(conta => {
+                const partidasDaConta = lancamentos
+                    .flatMap(l => l.partidas.map(p => (Object.assign(Object.assign({}, p), { data: l.data })))) // adiciona a data do lançamento
+                    .filter(p => p.id_conta === conta.id_conta &&
+                    new Date(p.data).getMonth() + 1 === mes &&
+                    new Date(p.data).getFullYear() === ano);
+                const total_debito = partidasDaConta
+                    .filter(p => p.tipo_partida === 'debito')
+                    .reduce((sum, p) => sum + p.valor, 0);
+                const total_credito = partidasDaConta
+                    .filter(p => p.tipo_partida === 'credito')
+                    .reduce((sum, p) => sum + p.valor, 0);
+                return {
+                    id_conta: conta.id_conta,
+                    nome_conta: conta.nome_conta,
+                    tipo_conta: conta.tipo_conta,
+                    codigo_conta: conta.codigo_conta,
+                    total_debito,
+                    total_credito,
+                    saldo: total_debito - total_credito
                 };
-                switch (conta.tipo_conta) {
-                    case Contas_1.TipoConta.Ativo:
-                        balanco.ativo.total += item.saldo;
-                        if (conta.subtipo_conta === Contas_1.SubtipoAtivo.Circulante) {
-                            balanco.ativo.circulante.push(item);
-                        }
-                        else {
-                            balanco.ativo.naoCirculante.push(item);
-                        }
-                        break;
-                    case Contas_1.TipoConta.Passivo:
-                        balanco.passivo.total += item.saldo;
-                        if (conta.subtipo_conta === Contas_1.SubtipoPassivo.Circulante) {
-                            balanco.passivo.circulante.push(item);
-                        }
-                        else {
-                            balanco.passivo.naoCirculante.push(item);
-                        }
-                        break;
-                    case Contas_1.TipoConta.PatrimonioLiquido:
-                        balanco.patrimonioLiquido.total += item.saldo;
-                        balanco.patrimonioLiquido.contas.push(item);
-                        break;
-                }
-            }
-            balanco.totais.totalAtivo = balanco.ativo.total;
-            balanco.totais.totalPassivoPL = balanco.passivo.total + balanco.patrimonioLiquido.total;
-            balanco.totais.diferenca = balanco.totais.totalAtivo - balanco.totais.totalPassivoPL;
-            return balanco;
+            });
+            const total_debitos = balancete.reduce((sum, c) => sum + c.total_debito, 0);
+            const total_creditos = balancete.reduce((sum, c) => sum + c.total_credito, 0);
+            return { contas: balancete, total_debitos, total_creditos };
         });
     }
 }

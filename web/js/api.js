@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000'; // URL base da sua API back-end
+const API_BASE_URL = window.location.origin; // URL base da sua API back-end
 
 async function fetchAPI(endpoint, options = {}) {
     try {
@@ -42,39 +42,16 @@ async function fetchAPI(endpoint, options = {}) {
 }
 
 // --- Funções da API de Contas ---
-
 export const getContas = () => fetchAPI('/contas');
-
 export const getContaById = (id) => fetchAPI(`/contas/${id}`); 
-
-export const createConta = (contaData) => fetchAPI('/contas', {
-    method: 'POST',
-    body: JSON.stringify(contaData),
-});
-
-export const updateConta = (id, contaData) => fetchAPI(`/contas/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(contaData),
-});
-
-export const deleteConta = (id) => fetchAPI(`/contas/${id}`, {
-    method: 'DELETE',
-});
-
+export const createConta = (contaData) => fetchAPI('/contas', { method: 'POST', body: JSON.stringify(contaData) });
+export const updateConta = (id, contaData) => fetchAPI(`/contas/${id}`, { method: 'PUT', body: JSON.stringify(contaData) });
+export const deleteConta = (id) => fetchAPI(`/contas/${id}`, { method: 'DELETE' });
 
 // --- Funções da API de Lançamentos ---
-
 export const getLancamentos = () => fetchAPI('/lancamentos');
-
-export const createLancamento = (lancamentoData) => fetchAPI('/lancamentos', {
-    method: 'POST',
-    body: JSON.stringify(lancamentoData),
-});
-
+export const createLancamento = (lancamentoData) => fetchAPI('/lancamentos', { method: 'POST', body: JSON.stringify(lancamentoData) });
 
 // --- Funções da API de Relatórios ---
-
-export const getBalancete = (mes, ano) => fetchAPI(`/balancetes?mes=${mes}&ano=${ano}`);
-
-// *** FUNÇÃO QUE ESTAVA EM FALTA, AGORA ADICIONADA CORRETAMENTE ***
+export const getBalancete = (mes, ano) => fetchAPI(`/balancete?mes=${mes}&ano=${ano}`);
 export const getBalancoPatrimonial = (mes, ano) => fetchAPI(`/balanco-patrimonial?mes=${mes}&ano=${ano}`);

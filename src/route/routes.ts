@@ -7,8 +7,6 @@ import {  fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
 import { LancamentosController } from './../controller/LancamentosController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ContasController } from './../controller/ContasController';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { BalancoPatrimonialController } from './../controller/BalancetesController';
 import type { Request as ExRequest, Response as ExResponse, RequestHandler, Router } from 'express';
 
 
@@ -74,27 +72,6 @@ const models: TsoaRoute.Models = {
     "Partial__nome_conta-string--tipo_conta-TipoConta--codigo_conta-string--subtipo_conta_63_-string--subtipo_secundario_63_-string__": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"nome_conta":{"dataType":"string"},"tipo_conta":{"ref":"TipoConta"},"codigo_conta":{"dataType":"string"},"subtipo_conta":{"dataType":"string"},"subtipo_secundario":{"dataType":"string"}},"validators":{}},
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BalancoItem": {
-        "dataType": "refObject",
-        "properties": {
-            "codigo": {"dataType":"string","required":true},
-            "nome": {"dataType":"string","required":true},
-            "saldo": {"dataType":"double","required":true},
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "BalancoPatrimonial": {
-        "dataType": "refObject",
-        "properties": {
-            "ativo": {"dataType":"nestedObjectLiteral","nestedProperties":{"total":{"dataType":"double","required":true},"naoCirculante":{"dataType":"array","array":{"dataType":"refObject","ref":"BalancoItem"},"required":true},"circulante":{"dataType":"array","array":{"dataType":"refObject","ref":"BalancoItem"},"required":true}},"required":true},
-            "passivo": {"dataType":"nestedObjectLiteral","nestedProperties":{"total":{"dataType":"double","required":true},"naoCirculante":{"dataType":"array","array":{"dataType":"refObject","ref":"BalancoItem"},"required":true},"circulante":{"dataType":"array","array":{"dataType":"refObject","ref":"BalancoItem"},"required":true}},"required":true},
-            "patrimonioLiquido": {"dataType":"nestedObjectLiteral","nestedProperties":{"total":{"dataType":"double","required":true},"contas":{"dataType":"array","array":{"dataType":"refObject","ref":"BalancoItem"},"required":true}},"required":true},
-            "totais": {"dataType":"nestedObjectLiteral","nestedProperties":{"diferenca":{"dataType":"double","required":true},"totalPassivoPL":{"dataType":"double","required":true},"totalAtivo":{"dataType":"double","required":true}},"required":true},
-        },
-        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
@@ -413,38 +390,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deletarConta',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        const argsBalancoPatrimonialController_getBalanco: Record<string, TsoaRoute.ParameterSchema> = {
-                mes: {"in":"query","name":"mes","required":true,"dataType":"double"},
-                ano: {"in":"query","name":"ano","required":true,"dataType":"double"},
-                serverErrorResponse: {"in":"res","name":"500","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true}}},
-        };
-        app.get('/balanco-patrimonial',
-            ...(fetchMiddlewares<RequestHandler>(BalancoPatrimonialController)),
-            ...(fetchMiddlewares<RequestHandler>(BalancoPatrimonialController.prototype.getBalanco)),
-
-            async function BalancoPatrimonialController_getBalanco(request: ExRequest, response: ExResponse, next: any) {
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsBalancoPatrimonialController_getBalanco, request, response });
-
-                const controller = new BalancoPatrimonialController();
-
-              await templateService.apiHandler({
-                methodName: 'getBalanco',
                 controller,
                 response,
                 next,

@@ -32,11 +32,11 @@ let BalancoPatrimonialController = class BalancoPatrimonialController extends ts
     getBalanco(mes, ano, serverErrorResponse) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const balanco = yield this.balancoService.gerarBalanco(mes, ano);
-                return balanco;
+                const balancete = yield this.balancoService.gerarBalancete(mes, ano);
+                return balancete;
             }
             catch (error) {
-                return serverErrorResponse(500, { message: `Erro ao gerar o Balanço Patrimonial: ${error.message}` });
+                return serverErrorResponse(500, { message: `Erro ao gerar o Balancete: ${error.message}` });
             }
         });
     }
