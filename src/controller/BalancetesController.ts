@@ -1,27 +1,28 @@
-import { Controller, Get, Query, Route, Tags, TsoaResponse, Res } from 'tsoa';
-import { BalancoPatrimonialService, BalancoPatrimonial } from '../service/BalancoPatrimonialService';
+import { BalanceteService } from '../service/BalanceteService';
+import { Controller, Route, Get, Query, Tags, TsoaResponse, Res } from 'tsoa';
 
-@Route("balanco-patrimonial")
+@Route("balancetes")
 @Tags("Relatórios")
-export class BalancoPatrimonialController extends Controller {
-    private balancoService: BalancoPatrimonialService;
+export class BalancetesController extends Controller {
+    private balanceteService: BalanceteService;
 
     constructor() {
         super();
-        this.balancoService = new BalancoPatrimonialService();
+        this.balanceteService = new BalanceteService();
     }
 
     @Get()
-    public async getBalanco(
+    public async getBalancetes(
         @Query() mes: number,
         @Query() ano: number,
         @Res() serverErrorResponse: TsoaResponse<500, { message: string }>
-    ): Promise<BalancoPatrimonial | void> {
+    ): Promise<any[] | void> {
         try {
-            const balanco = await this.balancoService.gerarBalanco(mes, ano);
-            return balanco;
+            const balancetes = await this.balanceteService.getBalancetePorPeriodo(mes, ano);
+            return balancetes;
         } catch (error: any) {
-            return serverErrorResponse(500, { message: `Erro ao gerar o Balanço Patrimonial: ${error.message}` });
+            console.error('Erro no BalancetesController:', error);
+            return serverErrorResponse(500, { message: `Erro ao obter ou gerar balancetes: ${error.message}` });
         }
     }
 }
