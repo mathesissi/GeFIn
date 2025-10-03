@@ -18,11 +18,6 @@ class ContasService {
         this.contasRepository = ContasRepository_1.ContaRepository.getInstance();
         this.lancamentosRepository = LancamentosRepository_1.LancamentosRepository.getInstance();
     }
-    /**
-     * Cria uma nova conta, com validações de dados antes de persistir.
-     * @param conta Objeto Conta a ser inserido.
-     * @returns A conta criada.
-     */
     criarConta(conta) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!conta.nome_conta || !conta.codigo_conta || !conta.tipo_conta) {
@@ -35,15 +30,9 @@ class ContasService {
             if (contaExistente) {
                 throw new Error(`Já existe uma conta com o código "${conta.codigo_conta}".`);
             }
-            // A validação de subtipo já é realizada no construtor do modelo 'Conta'
             return this.contasRepository.create(conta);
         });
     }
-    /**
-     * Busca uma conta pelo ID.
-     * @param id O ID da conta.
-     * @returns A conta encontrada ou `null` se não existir.
-     */
     buscarContaPorId(id) {
         return __awaiter(this, void 0, void 0, function* () {
             if (typeof id !== 'number' || id <= 0) {
@@ -52,21 +41,11 @@ class ContasService {
             return this.contasRepository.findById(id);
         });
     }
-    /**
-     * Lista todas as contas.
-     * @returns Uma lista de todas as contas.
-     */
     listarContas() {
         return __awaiter(this, void 0, void 0, function* () {
             return this.contasRepository.findAll();
         });
     }
-    /**
-        * Atualiza uma conta com os dados fornecidos.
-        * @param id O ID da conta a ser atualizada.
-        * @param dadosAtualizados Objeto com os dados para atualizar a conta.
-        * @returns A conta atualizada ou `null` se a conta não for encontrada.
-        */
     atualizarConta(id, dadosAtualizados) {
         return __awaiter(this, void 0, void 0, function* () {
             const contaExistente = yield this.contasRepository.findById(id);
@@ -79,35 +58,26 @@ class ContasService {
             if (tipoSemSubtipo && !dadosAtualizados.hasOwnProperty('subtipo_conta')) {
                 contaAtualizada.subtipo_conta = undefined;
             }
-            const contaParaAtualizar = new Contas_1.Conta(contaAtualizada.id_conta, contaAtualizada.nome_conta, contaAtualizada.tipo_conta, contaAtualizada.codigo_conta, contaAtualizada.subtipo_conta);
+            const contaParaAtualizar = new Contas_1.Conta(contaAtualizada.id_conta, contaAtualizada.nome_conta, contaAtualizada.tipo_conta, contaAtualizada.codigo_conta, contaAtualizada.subtipo_conta, contaAtualizada.subtipo_secundario // CORREÇÃO: Adicionado o 6º argumento
+            );
             return this.contasRepository.update(contaParaAtualizar);
         });
     }
-    /**
-         * Deleta uma conta pelo ID, validando se há lançamentos atrelados.
-         * @param id O ID da conta a ser deletada.
-         * @returns `true` se a deleção foi bem-sucedida.
-         * @throws {Error} Se o ID for inválido ou se houver lançamentos atrelados.
-         */
     deletarConta(id) {
         return __awaiter(this, void 0, void 0, function* () {
             if (typeof id !== 'number' || id <= 0) {
                 throw new Error('O ID da conta para deleção é inválido.');
             }
-            // 1. Verificar se há lançamentos atrelados
             const lancamentosAtrelados = yield this.lancamentosRepository.findLinkedLancamentos(id);
             if (lancamentosAtrelados.length > 0) {
-                // [4] Lançar um erro customizado com a lista de lançamentos
                 const lancamentosInfo = lancamentosAtrelados.map(l => ({
                     id: l.id_lancamento,
                     descricao: l.descricao,
                     valor: l.valor
                 }));
-                // Lançamos uma string JSON que o Controller deve capturar
                 const errorMessage = "Não é possível excluir a conta. Lançamentos atrelados encontrados.";
                 throw new Error(errorMessage);
             }
-            // 2. Se não houver lançamentos, procede com a deleção
             return this.contasRepository.delete(id);
         });
     }
