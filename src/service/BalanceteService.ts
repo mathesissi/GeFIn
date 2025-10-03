@@ -1,8 +1,11 @@
+// BalanceteService.ts
+
 import { Balancete } from "../model/balancete";
 import { BalanceteRepository } from "../repository/BalanceteRepository";
 import { ContaRepository } from "../repository/ContasRepository";
 import { LancamentosRepository } from "../repository/LancamentosRepository";
 import { Conta, TipoConta } from "../model/Contas";
+import { Lancamento, Partida, TipoPartida } from "../model/Lancamento"; 
 
 export class BalanceteService {
     private balanceteRepo: BalanceteRepository;
@@ -40,17 +43,39 @@ export class BalanceteService {
         const contas = await this.contaRepo.findAll();
 
         for (const conta of contas) {
-            const lancamentos = await this.lancamentoRepo.findByContaAndPeriodo(conta.id_conta, mes, ano);
+            // Busca as transações (Lancamento) completas do período que a conta participa
+            const lancamentos: Lancamento[] = await this.lancamentoRepo.findByContaAndPeriodo(conta.id_conta, mes, ano);
             const saldoAnterior = await this.getSaldoFinalMesAnterior(conta.id_conta, mes, ano);
 
             let saldoFinal = saldoAnterior;
+            // Define a natureza da conta (Devedora = Saldo aumenta com Débito e diminui com Crédito)
             const isDevedora = conta.tipo_conta === TipoConta.Ativo || conta.tipo_conta === TipoConta.Despesa;
+            
+            let totalDebito = 0;
+            let totalCredito = 0;
 
             for (const lancamento of lancamentos) {
-                if (lancamento.id_conta_debito === conta.id_conta) {
-                    saldoFinal += isDevedora ? lancamento.valor : -lancamento.valor;
-                } else if (lancamento.id_conta_credito === conta.id_conta) {
-                    saldoFinal += isDevedora ? -lancamento.valor : lancamento.valor;
+                // CORREÇÃO: Iterar sobre as partidas do lançamento para encontrar a conta
+                for (const partida of lancamento.partidas) {
+                    if (partida.id_conta === conta.id_conta) {
+                        const valor = partida.valor;
+
+                        // 1. Soma os movimentos para totalização (novo requisito)
+                        if (partida.tipo_partida === 'debito') {
+                            totalDebito += valor;
+                        } else { // 'credito'
+                            totalCredito += valor;
+                        }
+
+                        // 2. Aplica o movimento ao saldo final
+                        if (partida.tipo_partida === 'debito') {
+                            // Débito: Aumenta o saldo em contas devedoras, diminui em credoras
+                            saldoFinal += isDevedora ? valor : -valor;
+                        } else { // 'credito'
+                            // Crédito: Diminui o saldo em contas devedoras, aumenta em credoras
+                            saldoFinal += isDevedora ? -valor : valor;
+                        }
+                    }
                 }
             }
 
@@ -58,10 +83,21 @@ export class BalanceteService {
 
             if (balanceteExistente) {
                 balanceteExistente.saldo_inicial = saldoAnterior;
+                balanceteExistente.movimento_debito = totalDebito; 
+                balanceteExistente.movimento_credito = totalCredito; 
                 balanceteExistente.saldo_final = saldoFinal;
                 await this.balanceteRepo.update(balanceteExistente);
             } else {
-                const novoBalancete = new Balancete(0, mes, ano, conta.id_conta, saldoAnterior, saldoFinal);
+                const novoBalancete = new Balancete(
+                    0, 
+                    mes, 
+                    ano, 
+                    conta.id_conta, 
+                    saldoAnterior, 
+                    saldoFinal,
+                    totalDebito, 
+                    totalCredito 
+                );
                 await this.balanceteRepo.create(novoBalancete);
             }
         }

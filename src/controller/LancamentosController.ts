@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Route, Body, Path, TsoaResponse, Res, Tags } from 'tsoa';
-import { Lancamento } from '../model/Lancamento';
-import { LancamentosService } from '../service/LancamentosService';
+import { Lancamento, Partida } from '../model/Lancamento';
+import { LancamentosService, DadosTransacao } from '../service/LancamentosService';
 
 @Route("lancamentos")
 @Tags("Lançamentos")
@@ -14,19 +14,14 @@ export class LancamentosController extends Controller {
 
   @Post()
   public async criarLancamento(
-    @Body() dadosLancamento: {
-      data: string;
-      descricao: string;
-      valor: number;
-      id_conta_debito: number;
-      id_conta_credito: number;
-    },
+    @Body() dadosTransacao: DadosTransacao, // Nova interface para dados de transação
     @Res() badRequestResponse: TsoaResponse<400, { message: string }>
   ): Promise<Lancamento | void> {
     try {
       this.setStatus(201); // Created
-      return this.lancamentosService.criarLancamento(dadosLancamento);
+      return this.lancamentosService.criarLancamento(dadosTransacao);
     } catch (error: any) {
+      // É importante garantir que a mensagem de erro seja acessível
       return badRequestResponse(400, { message: error.message });
     }
   }
@@ -52,11 +47,9 @@ export class LancamentosController extends Controller {
   public async atualizarLancamento(
     @Path() id: number,
     @Body() dadosAtualizados: {
-      data?: Date;
+      data?: string;
       descricao?: string;
-      valor?: number;
-      id_conta_debito?: number;
-      id_conta_credito?: number;
+      partidas?: Partida[]; // Permite atualizar as partidas
     },
     @Res() notFoundResponse: TsoaResponse<404, { message: string }>,
     @Res() badRequestResponse: TsoaResponse<400, { message: string }>

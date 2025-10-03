@@ -3,7 +3,7 @@
 export enum TipoConta {
   Ativo = 'Ativo',
   Passivo = 'Passivo',
-  PatrimonioLiquido = 'Patrimonio Liquido', // Valor padronizado com espaço
+  PatrimonioLiquido = 'Patrimonio Liquido',
   Receita = 'Receita',
   Despesa = 'Despesa'
 }
@@ -12,25 +12,25 @@ export enum TipoConta {
 //Subtipos principais.
 
 export enum SubtipoAtivo {
-  Circulante = 'Ativo Circulante', // Mantido com espaço
-  NaoCirculante = 'Ativo Nao Circulante' // Valor padronizado com espaço
+  Circulante = 'Ativo Circulante',
+  NaoCirculante = 'Ativo Nao Circulante'
 }
 
 // Novos Subtipos Secundários para "Ativo Não Circulante"
 
 export enum SubtipoSecundarioAtivo {
-  RealizavelLongoPrazo = 'Realizavel a Longo Prazo', // Valor padronizado com espaços
+  RealizavelLongoPrazo = 'Realizavel a Longo Prazo',
   Investimento = 'Investimento',
   Imobilizado = 'Imobilizado',
-  Intangivel = 'Intangivel' // Valor padronizado
+  Intangivel = 'Intangivel'
 }
 
 
 // Subtipos para contas do tipo "Passivo".
 
 export enum SubtipoPassivo {
-  Circulante = 'Passivo Circulante', // Mantido com espaço
-  NaoCirculante = 'Passivo Nao Circulante' // Valor padronizado com espaço
+  Circulante = 'Passivo Circulante',
+  NaoCirculante = 'Passivo Nao Circulante'
 }
 
 
@@ -41,7 +41,7 @@ export class Conta {
   nome_conta: string;
   tipo_conta: TipoConta;
   subtipo_conta?: string;
-  subtipo_secundario?: string; // Novo campo para o segundo nível de subtipo
+  subtipo_secundario?: string;
   codigo_conta: string;
 
 
@@ -51,14 +51,13 @@ export class Conta {
     tipo_conta: TipoConta,
     codigo_conta: string,
     subtipo_conta?: string,
-    subtipo_secundario?: string // Novo parâmetro
+    subtipo_secundario?: string
   ) {
     this.id_conta = id_conta;
     this.nome_conta = nome_conta;
     this.tipo_conta = tipo_conta;
     this.codigo_conta = codigo_conta;
     
-    // Limpa strings vazias, especialmente para campos opcionais vindos do formulário
     const primarySubtype = subtipo_conta?.trim() || undefined; 
     const secondarySubtype = subtipo_secundario?.trim() || undefined;
 
@@ -67,7 +66,6 @@ export class Conta {
     const isSubtypeMandatory = tipo_conta === TipoConta.Ativo || tipo_conta === TipoConta.Passivo;
 
 
-    // 1. Validação do Subtipo Principal
     if (isPatrimonioLiquido || isReceitaDespesa) {
         this.subtipo_conta = undefined;
     } else if (isSubtypeMandatory) {
@@ -85,7 +83,6 @@ export class Conta {
         this.subtipo_conta = undefined;
     }
 
-    // 2. Validação do Subtipo Secundário
     const isAtivoNaoCirculante = tipo_conta === TipoConta.Ativo && primarySubtype === SubtipoAtivo.NaoCirculante;
 
     if (isAtivoNaoCirculante) {
@@ -97,7 +94,6 @@ export class Conta {
         }
         this.subtipo_secundario = secondarySubtype;
     } else {
-        // ESSENCIAL: Garante que o campo é ignorado se não for o caso específico
         this.subtipo_secundario = undefined;
     }
   }

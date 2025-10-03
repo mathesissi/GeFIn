@@ -19,15 +19,39 @@ const ContasController_1 = require("./../controller/ContasController");
 const BalancetesController_1 = require("./../controller/BalancetesController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const models = {
+    "TipoPartida": {
+        "dataType": "refAlias",
+        "type": { "dataType": "union", "subSchemas": [{ "dataType": "enum", "enums": ["debito"] }, { "dataType": "enum", "enums": ["credito"] }], "validators": {} },
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Partida": {
+        "dataType": "refObject",
+        "properties": {
+            "id_conta": { "dataType": "double", "required": true },
+            "tipo_partida": { "ref": "TipoPartida", "required": true },
+            "valor": { "dataType": "double", "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "Lancamento": {
         "dataType": "refObject",
         "properties": {
             "id_lancamento": { "dataType": "double", "required": true },
             "data": { "dataType": "datetime", "required": true },
             "descricao": { "dataType": "string", "required": true },
-            "valor": { "dataType": "double", "required": true },
-            "id_conta_debito": { "dataType": "double", "required": true },
-            "id_conta_credito": { "dataType": "double", "required": true },
+            "valor_total": { "dataType": "double", "required": true },
+            "partidas": { "dataType": "array", "array": { "dataType": "refObject", "ref": "Partida" }, "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "DadosTransacao": {
+        "dataType": "refObject",
+        "properties": {
+            "data": { "dataType": "string", "required": true },
+            "descricao": { "dataType": "string", "required": true },
+            "partidas": { "dataType": "array", "array": { "dataType": "refObject", "ref": "Partida" }, "required": true },
         },
         "additionalProperties": false,
     },
@@ -55,6 +79,27 @@ const models = {
         "type": { "dataType": "nestedObjectLiteral", "nestedProperties": { "nome_conta": { "dataType": "string" }, "tipo_conta": { "ref": "TipoConta" }, "codigo_conta": { "dataType": "string" }, "subtipo_conta": { "dataType": "string" }, "subtipo_secundario": { "dataType": "string" } }, "validators": {} },
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BalancoItem": {
+        "dataType": "refObject",
+        "properties": {
+            "codigo": { "dataType": "string", "required": true },
+            "nome": { "dataType": "string", "required": true },
+            "saldo": { "dataType": "double", "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BalancoPatrimonial": {
+        "dataType": "refObject",
+        "properties": {
+            "ativo": { "dataType": "nestedObjectLiteral", "nestedProperties": { "total": { "dataType": "double", "required": true }, "naoCirculante": { "dataType": "array", "array": { "dataType": "refObject", "ref": "BalancoItem" }, "required": true }, "circulante": { "dataType": "array", "array": { "dataType": "refObject", "ref": "BalancoItem" }, "required": true } }, "required": true },
+            "passivo": { "dataType": "nestedObjectLiteral", "nestedProperties": { "total": { "dataType": "double", "required": true }, "naoCirculante": { "dataType": "array", "array": { "dataType": "refObject", "ref": "BalancoItem" }, "required": true }, "circulante": { "dataType": "array", "array": { "dataType": "refObject", "ref": "BalancoItem" }, "required": true } }, "required": true },
+            "patrimonioLiquido": { "dataType": "nestedObjectLiteral", "nestedProperties": { "total": { "dataType": "double", "required": true }, "contas": { "dataType": "array", "array": { "dataType": "refObject", "ref": "BalancoItem" }, "required": true } }, "required": true },
+            "totais": { "dataType": "nestedObjectLiteral", "nestedProperties": { "diferenca": { "dataType": "double", "required": true }, "totalPassivoPL": { "dataType": "double", "required": true }, "totalAtivo": { "dataType": "double", "required": true } }, "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const templateService = new runtime_1.ExpressTemplateService(models, { "noImplicitAdditionalProperties": "throw-on-extras", "bodyCoercion": true });
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -64,7 +109,7 @@ function RegisterRoutes(app) {
     //      Please look into the "controllerPathGlobs" config option described in the readme: https://github.com/lukeautry/tsoa
     // ###########################################################################################################
     const argsLancamentosController_criarLancamento = {
-        dadosLancamento: { "in": "body", "name": "dadosLancamento", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "id_conta_credito": { "dataType": "double", "required": true }, "id_conta_debito": { "dataType": "double", "required": true }, "valor": { "dataType": "double", "required": true }, "descricao": { "dataType": "string", "required": true }, "data": { "dataType": "string", "required": true } } },
+        dadosTransacao: { "in": "body", "name": "dadosTransacao", "required": true, "ref": "DadosTransacao" },
         badRequestResponse: { "in": "res", "name": "400", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "message": { "dataType": "string", "required": true } } },
     };
     app.post('/lancamentos', ...((0, runtime_1.fetchMiddlewares)(LancamentosController_1.LancamentosController)), ...((0, runtime_1.fetchMiddlewares)(LancamentosController_1.LancamentosController.prototype.criarLancamento)), function LancamentosController_criarLancamento(request, response, next) {
@@ -140,7 +185,7 @@ function RegisterRoutes(app) {
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     const argsLancamentosController_atualizarLancamento = {
         id: { "in": "path", "name": "id", "required": true, "dataType": "double" },
-        dadosAtualizados: { "in": "body", "name": "dadosAtualizados", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "id_conta_credito": { "dataType": "double" }, "id_conta_debito": { "dataType": "double" }, "valor": { "dataType": "double" }, "descricao": { "dataType": "string" }, "data": { "dataType": "datetime" } } },
+        dadosAtualizados: { "in": "body", "name": "dadosAtualizados", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "partidas": { "dataType": "array", "array": { "dataType": "refObject", "ref": "Partida" } }, "descricao": { "dataType": "string" }, "data": { "dataType": "string" } } },
         notFoundResponse: { "in": "res", "name": "404", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "message": { "dataType": "string", "required": true } } },
         badRequestResponse: { "in": "res", "name": "400", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "message": { "dataType": "string", "required": true } } },
     };
@@ -321,20 +366,20 @@ function RegisterRoutes(app) {
         });
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    const argsBalancetesController_getBalancetes = {
+    const argsBalancoPatrimonialController_getBalanco = {
         mes: { "in": "query", "name": "mes", "required": true, "dataType": "double" },
         ano: { "in": "query", "name": "ano", "required": true, "dataType": "double" },
         serverErrorResponse: { "in": "res", "name": "500", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "message": { "dataType": "string", "required": true } } },
     };
-    app.get('/balancetes', ...((0, runtime_1.fetchMiddlewares)(BalancetesController_1.BalancetesController)), ...((0, runtime_1.fetchMiddlewares)(BalancetesController_1.BalancetesController.prototype.getBalancetes)), function BalancetesController_getBalancetes(request, response, next) {
+    app.get('/balanco-patrimonial', ...((0, runtime_1.fetchMiddlewares)(BalancetesController_1.BalancoPatrimonialController)), ...((0, runtime_1.fetchMiddlewares)(BalancetesController_1.BalancoPatrimonialController.prototype.getBalanco)), function BalancoPatrimonialController_getBalanco(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
             let validatedArgs = [];
             try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsBalancetesController_getBalancetes, request, response });
-                const controller = new BalancetesController_1.BalancetesController();
+                validatedArgs = templateService.getValidatedArgs({ args: argsBalancoPatrimonialController_getBalanco, request, response });
+                const controller = new BalancetesController_1.BalancoPatrimonialController();
                 yield templateService.apiHandler({
-                    methodName: 'getBalancetes',
+                    methodName: 'getBalanco',
                     controller,
                     response,
                     next,

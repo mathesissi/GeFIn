@@ -12,35 +12,59 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LancamentosService = void 0;
 const Lancamento_1 = require("../model/Lancamento");
 const LancamentosRepository_1 = require("../repository/LancamentosRepository");
-const ContasRepository_1 = require("../repository/ContasRepository"); // Importado
+const ContasRepository_1 = require("../repository/ContasRepository");
 class LancamentosService {
     constructor() {
         this.lancamentosRepository = LancamentosRepository_1.LancamentosRepository.getInstance();
-        this.contaRepository = ContasRepository_1.ContaRepository.getInstance(); // Instanciado
+        this.contaRepository = ContasRepository_1.ContaRepository.getInstance();
     }
-    criarLancamento(dadosLancamento) {
+    criarLancamento(dadosTransacao) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { data, descricao, valor, id_conta_debito, id_conta_credito } = dadosLancamento;
-            // --- Validações ---
-            if (!data || !descricao || valor === undefined || !id_conta_debito || !id_conta_credito) {
-                throw new Error("Dados incompletos: data, descrição, valor, conta de débito e conta de crédito são obrigatórios.");
+            const { data, descricao, partidas } = dadosTransacao;
+            // --- Validações de Cabeçalho ---
+            if (!data || !descricao || typeof descricao !== 'string' || descricao.trim() === '') {
+                throw new Error("Dados incompletos: data e descrição são obrigatórios.");
             }
-            if (typeof valor !== 'number' || valor <= 0) {
-                throw new Error("O valor do lançamento deve ser um número positivo.");
+            if (!Array.isArray(partidas) || partidas.length < 2) {
+                throw new Error('Uma transação deve ter pelo menos duas partidas (débito e crédito).');
             }
-            if (id_conta_debito === id_conta_credito) {
-                throw new Error("A conta de débito e a conta de crédito não podem ser a mesma.");
+            // --- Validação de Partidas ---
+            let totalDebito = 0;
+            let totalCredito = 0;
+            const contasUsadas = [];
+            for (const partida of partidas) {
+                const { id_conta, tipo_partida, valor } = partida;
+                if (!id_conta || !tipo_partida || typeof valor !== 'number' || valor <= 0) {
+                    throw new Error("Dados de partida inválidos: conta, tipo e valor positivo são obrigatórios para cada partida.");
+                }
+                if (tipo_partida === 'debito') {
+                    totalDebito += valor;
+                }
+                else if (tipo_partida === 'credito') {
+                    totalCredito += valor;
+                }
+                else {
+                    throw new Error(`Tipo de partida inválido: "${tipo_partida}". Deve ser "debito" ou "credito".`);
+                }
+                // Adiciona a conta para checagem de existência, evitando duplicidade
+                if (!contasUsadas.includes(id_conta)) {
+                    contasUsadas.push(id_conta);
+                }
             }
-            // --- NOVA VALIDAÇÃO ---
-            const contaDebitoExiste = yield this.contaRepository.findById(id_conta_debito);
-            if (!contaDebitoExiste) {
-                throw new Error(`A conta de débito com ID "${id_conta_debito}" não existe.`);
+            // Validação do Princípio das Partidas Dobradas: Débitos = Créditos
+            if (Math.abs(totalDebito - totalCredito) > 0.005 || totalDebito === 0) { // Tolerância para ponto flutuante
+                throw new Error(`O total de débitos (R$ ${totalDebito.toFixed(2)}) deve ser igual ao total de créditos (R$ ${totalCredito.toFixed(2)}) e maior que zero. Diferença: R$ ${(totalDebito - totalCredito).toFixed(2)}`);
             }
-            const contaCreditoExiste = yield this.contaRepository.findById(id_conta_credito);
-            if (!contaCreditoExiste) {
-                throw new Error(`A conta de crédito com ID "${id_conta_credito}" não existe.`);
+            // Validação de existência de contas
+            const contasExistentes = yield Promise.all(contasUsadas.map(id => this.contaRepository.findById(id)));
+            const contasInvalidas = contasUsadas.filter((_, index) => !contasExistentes[index]);
+            if (contasInvalidas.length > 0) {
+                throw new Error(`As seguintes contas não existem: ${contasInvalidas.join(', ')}.`);
             }
-            const novoLancamento = new Lancamento_1.Lancamento(0, new Date(data), descricao, valor, id_conta_debito, id_conta_credito);
+            // Cria a instância do modelo de transação
+            const novoLancamento = new Lancamento_1.Lancamento(0, // ID 0 para novo lançamento
+            new Date(data), descricao, totalDebito, // O valor total é a soma dos débitos (ou créditos)
+            partidas);
             return this.lancamentosRepository.Create(novoLancamento);
         });
     }
@@ -78,7 +102,46 @@ class LancamentosService {
             if (!lancamentoExistente) {
                 return null;
             }
-            const lancamentoParaAtualizar = new Lancamento_1.Lancamento(id, dadosAtualizados.data ? new Date(dadosAtualizados.data) : lancamentoExistente.data, dadosAtualizados.descricao || lancamentoExistente.descricao, dadosAtualizados.valor || lancamentoExistente.valor, dadosAtualizados.id_conta_debito || lancamentoExistente.id_conta_debito, dadosAtualizados.id_conta_credito || lancamentoExistente.id_conta_credito);
+            // Mescla dados antigos e novos
+            const dadosMesclados = {
+                data: dadosAtualizados.data || lancamentoExistente.data.toISOString().split('T')[0],
+                descricao: dadosAtualizados.descricao || lancamentoExistente.descricao,
+                partidas: dadosAtualizados.partidas || lancamentoExistente.partidas,
+            };
+            // Executa a validação completa
+            let totalDebito = 0;
+            let totalCredito = 0;
+            const contasUsadas = [];
+            if (!Array.isArray(dadosMesclados.partidas) || dadosMesclados.partidas.length < 2) {
+                throw new Error('Uma transação deve ter pelo menos duas partidas (débito e crédito) na atualização.');
+            }
+            for (const partida of dadosMesclados.partidas) {
+                const { id_conta, tipo_partida, valor } = partida;
+                if (!id_conta || !tipo_partida || typeof valor !== 'number' || valor <= 0) {
+                    throw new Error("Dados de partida inválidos: conta, tipo e valor positivo são obrigatórios para cada partida na atualização.");
+                }
+                if (tipo_partida === 'debito') {
+                    totalDebito += valor;
+                }
+                else if (tipo_partida === 'credito') {
+                    totalCredito += valor;
+                }
+                else {
+                    throw new Error(`Tipo de partida inválido: "${tipo_partida}". Deve ser "debito" ou "credito" na atualização.`);
+                }
+                if (!contasUsadas.includes(id_conta)) {
+                    contasUsadas.push(id_conta);
+                }
+            }
+            if (Math.abs(totalDebito - totalCredito) > 0.005) {
+                throw new Error(`O total de débitos (R$ ${totalDebito.toFixed(2)}) deve ser igual ao total de créditos (R$ ${totalCredito.toFixed(2)}) na atualização.`);
+            }
+            const contasExistentes = yield Promise.all(contasUsadas.map(id_conta => this.contaRepository.findById(id_conta)));
+            const contasInvalidas = contasUsadas.filter((_, index) => !contasExistentes[index]);
+            if (contasInvalidas.length > 0) {
+                throw new Error(`As seguintes contas não existem: ${contasInvalidas.join(', ')}.`);
+            }
+            const lancamentoParaAtualizar = new Lancamento_1.Lancamento(id, new Date(dadosMesclados.data), dadosMesclados.descricao, totalDebito, dadosMesclados.partidas);
             return this.lancamentosRepository.Update(lancamentoParaAtualizar);
         });
     }
