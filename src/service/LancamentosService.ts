@@ -1,21 +1,18 @@
 import { Lancamento } from '../model/Lancamento';
 import { LancamentosRepository } from '../repository/LancamentosRepository';
+import { ContaRepository } from '../repository/ContasRepository'; // Importado
 
 export class LancamentosService {
   private lancamentosRepository: LancamentosRepository;
+  private contaRepository: ContaRepository; // Adicionado
 
   constructor() {
-    // É uma boa prática usar o padrão Singleton para o repositório.
     this.lancamentosRepository = LancamentosRepository.getInstance();
+    this.contaRepository = ContaRepository.getInstance(); // Instanciado
   }
 
-  /**
-   * Cria um novo lançamento após validação dos dados.
-   * @param dadosLancamento Objeto com os dados para criar o lançamento.
-   * @returns O lançamento criado, incluindo o ID do banco de dados.
-   */
   public async criarLancamento(dadosLancamento: {
-    data: string; // Recebido como string do Controller
+    data: string;
     descricao: string;
     valor: number;
     id_conta_debito: number;
@@ -34,19 +31,26 @@ export class LancamentosService {
       throw new Error("A conta de débito e a conta de crédito não podem ser a mesma.");
     }
 
-    // --- Criação do Objeto ---
-    // O ID é 0 porque será gerado pelo banco de dados.
+    // --- NOVA VALIDAÇÃO ---
+    const contaDebitoExiste = await this.contaRepository.findById(id_conta_debito);
+    if (!contaDebitoExiste) {
+      throw new Error(`A conta de débito com ID "${id_conta_debito}" não existe.`);
+    }
+
+    const contaCreditoExiste = await this.contaRepository.findById(id_conta_credito);
+    if (!contaCreditoExiste) {
+      throw new Error(`A conta de crédito com ID "${id_conta_credito}" não existe.`);
+    }
+
     const novoLancamento = new Lancamento(
       0,
-      new Date(data), // Converte a string para um objeto Date
+      new Date(data),
       descricao,
       valor,
       id_conta_debito,
       id_conta_credito
     );
 
-    // Supondo que o método no repositório se chame 'criarLancamento' ou similar.
-    // Ajuste se o nome for diferente (por exemplo, 'Create').
     return this.lancamentosRepository.Create(novoLancamento);
   }
 

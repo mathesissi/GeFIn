@@ -55,19 +55,6 @@ const models = {
         "type": { "dataType": "nestedObjectLiteral", "nestedProperties": { "nome_conta": { "dataType": "string" }, "tipo_conta": { "ref": "TipoConta" }, "codigo_conta": { "dataType": "string" }, "subtipo_conta": { "dataType": "string" }, "subtipo_secundario": { "dataType": "string" } }, "validators": {} },
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "Balancete": {
-        "dataType": "refObject",
-        "properties": {
-            "id_balancete": { "dataType": "double", "required": true },
-            "mes": { "dataType": "double", "required": true },
-            "ano": { "dataType": "double", "required": true },
-            "id_conta": { "dataType": "double", "required": true },
-            "saldo_inicial": { "dataType": "double", "required": true },
-            "saldo_final": { "dataType": "double", "required": true },
-        },
-        "additionalProperties": false,
-    },
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const templateService = new runtime_1.ExpressTemplateService(models, { "noImplicitAdditionalProperties": "throw-on-extras", "bodyCoercion": true });
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -337,7 +324,7 @@ function RegisterRoutes(app) {
     const argsBalancetesController_getBalancetes = {
         mes: { "in": "query", "name": "mes", "required": true, "dataType": "double" },
         ano: { "in": "query", "name": "ano", "required": true, "dataType": "double" },
-        notFoundResponse: { "in": "res", "name": "404", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "message": { "dataType": "string", "required": true } } },
+        serverErrorResponse: { "in": "res", "name": "500", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "message": { "dataType": "string", "required": true } } },
     };
     app.get('/balancetes', ...((0, runtime_1.fetchMiddlewares)(BalancetesController_1.BalancetesController)), ...((0, runtime_1.fetchMiddlewares)(BalancetesController_1.BalancetesController.prototype.getBalancetes)), function BalancetesController_getBalancetes(request, response, next) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -348,32 +335,6 @@ function RegisterRoutes(app) {
                 const controller = new BalancetesController_1.BalancetesController();
                 yield templateService.apiHandler({
                     methodName: 'getBalancetes',
-                    controller,
-                    response,
-                    next,
-                    validatedArgs,
-                    successStatus: undefined,
-                });
-            }
-            catch (err) {
-                return next(err);
-            }
-        });
-    });
-    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    const argsBalancetesController_postGerarBalancetes = {
-        body: { "in": "body", "name": "body", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "ano": { "dataType": "double", "required": true }, "mes": { "dataType": "double", "required": true } } },
-        serverErrorResponse: { "in": "res", "name": "500", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "message": { "dataType": "string", "required": true } } },
-    };
-    app.post('/balancetes/gerar', ...((0, runtime_1.fetchMiddlewares)(BalancetesController_1.BalancetesController)), ...((0, runtime_1.fetchMiddlewares)(BalancetesController_1.BalancetesController.prototype.postGerarBalancetes)), function BalancetesController_postGerarBalancetes(request, response, next) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-            let validatedArgs = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args: argsBalancetesController_postGerarBalancetes, request, response });
-                const controller = new BalancetesController_1.BalancetesController();
-                yield templateService.apiHandler({
-                    methodName: 'postGerarBalancetes',
                     controller,
                     response,
                     next,

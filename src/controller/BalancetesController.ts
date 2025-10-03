@@ -1,41 +1,27 @@
-import { BalanceteService } from '../service/BalanceteService';
-import { Balancete } from '../model/balancete';
-import { Controller, Route, Get, Post, Query, Body, TsoaResponse, Res, Tags } from 'tsoa';
+import { Controller, Get, Query, Route, Tags, TsoaResponse, Res } from 'tsoa';
+import { BalancoPatrimonialService, BalancoPatrimonial } from '../service/BalancoPatrimonialService';
 
-@Route("balancetes")
-@Tags("Balancetes")
-export class BalancetesController extends Controller {
-    private balanceteService: BalanceteService;
+@Route("balanco-patrimonial")
+@Tags("Relatórios")
+export class BalancoPatrimonialController extends Controller {
+    private balancoService: BalancoPatrimonialService;
 
     constructor() {
         super();
-        this.balanceteService = new BalanceteService();
+        this.balancoService = new BalancoPatrimonialService();
     }
 
     @Get()
-    public async getBalancetes(
+    public async getBalanco(
         @Query() mes: number,
         @Query() ano: number,
-        @Res() notFoundResponse: TsoaResponse<404, { message: string }>
-    ): Promise<Balancete[] | void> {
-        const balancetes = await this.balanceteService.getBalancetePorPeriodo(mes, ano);
-        if (!balancetes || balancetes.length === 0) {
-            return notFoundResponse(404, { message: "Balancetes não encontrados para o período especificado." });
-        }
-        return balancetes;
-    }
-
-    @Post("gerar")
-    public async postGerarBalancetes(
-        @Body() body: { mes: number, ano: number },
         @Res() serverErrorResponse: TsoaResponse<500, { message: string }>
-    ): Promise<Balancete[] | void> {
+    ): Promise<BalancoPatrimonial | void> {
         try {
-            const balancetes = await this.balanceteService.gerarBalancete(body.mes, body.ano);
-            this.setStatus(201); // Created
-            return balancetes;
+            const balanco = await this.balancoService.gerarBalanco(mes, ano);
+            return balanco;
         } catch (error: any) {
-            return serverErrorResponse(500, { message: `Erro ao gerar balancetes: ${error.message}` });
+            return serverErrorResponse(500, { message: `Erro ao gerar o Balanço Patrimonial: ${error.message}` });
         }
     }
 }

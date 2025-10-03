@@ -12,16 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LancamentosService = void 0;
 const Lancamento_1 = require("../model/Lancamento");
 const LancamentosRepository_1 = require("../repository/LancamentosRepository");
+const ContasRepository_1 = require("../repository/ContasRepository"); // Importado
 class LancamentosService {
     constructor() {
-        // É uma boa prática usar o padrão Singleton para o repositório.
         this.lancamentosRepository = LancamentosRepository_1.LancamentosRepository.getInstance();
+        this.contaRepository = ContasRepository_1.ContaRepository.getInstance(); // Instanciado
     }
-    /**
-     * Cria um novo lançamento após validação dos dados.
-     * @param dadosLancamento Objeto com os dados para criar o lançamento.
-     * @returns O lançamento criado, incluindo o ID do banco de dados.
-     */
     criarLancamento(dadosLancamento) {
         return __awaiter(this, void 0, void 0, function* () {
             const { data, descricao, valor, id_conta_debito, id_conta_credito } = dadosLancamento;
@@ -35,12 +31,16 @@ class LancamentosService {
             if (id_conta_debito === id_conta_credito) {
                 throw new Error("A conta de débito e a conta de crédito não podem ser a mesma.");
             }
-            // --- Criação do Objeto ---
-            // O ID é 0 porque será gerado pelo banco de dados.
-            const novoLancamento = new Lancamento_1.Lancamento(0, new Date(data), // Converte a string para um objeto Date
-            descricao, valor, id_conta_debito, id_conta_credito);
-            // Supondo que o método no repositório se chame 'criarLancamento' ou similar.
-            // Ajuste se o nome for diferente (por exemplo, 'Create').
+            // --- NOVA VALIDAÇÃO ---
+            const contaDebitoExiste = yield this.contaRepository.findById(id_conta_debito);
+            if (!contaDebitoExiste) {
+                throw new Error(`A conta de débito com ID "${id_conta_debito}" não existe.`);
+            }
+            const contaCreditoExiste = yield this.contaRepository.findById(id_conta_credito);
+            if (!contaCreditoExiste) {
+                throw new Error(`A conta de crédito com ID "${id_conta_credito}" não existe.`);
+            }
+            const novoLancamento = new Lancamento_1.Lancamento(0, new Date(data), descricao, valor, id_conta_debito, id_conta_credito);
             return this.lancamentosRepository.Create(novoLancamento);
         });
     }

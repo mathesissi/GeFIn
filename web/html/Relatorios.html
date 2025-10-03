@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios - GeFIn</title>
     <link rel="stylesheet" href="../css/global.css">
 </head>
+
 <body>
     <div class="app-layout">
         <aside class="sidebar">
@@ -17,7 +19,6 @@
                 <a href="ContasContabeis.html" class="nav-link">Plano de Contas</a>
                 <a href="LivroDiario.html" class="nav-link">Lançamentos</a>
                 <a href="Relatorios.html" class="nav-link active">Relatórios</a>
-                <!-- <a href="#" class="nav-link">Configurações</a> -->
             </nav>
         </aside>
 
@@ -39,11 +40,7 @@
                     </div>
                     <div class="report-card" data-report="balanco">
                         <h3>Balanço Patrimonial</h3>
-                        <p>Visualize a posição patrimonial e financeira da empresa em uma data específica.</p>
-                    </div>
-                    <div class="report-card" data-report="dre">
-                        <h3>Demonstração de Resultados (DRE)</h3>
-                        <p>Acompanhe o confronto entre receitas, custos e despesas para apurar o lucro ou prejuízo.</p>
+                        <p>Visualize a posição patrimonial e financeira da empresa.</p>
                     </div>
                 </div>
 
@@ -55,8 +52,15 @@
                                 <option value="1">Janeiro</option>
                                 <option value="2">Fevereiro</option>
                                 <option value="3">Março</option>
-                                <option value="9" selected>Setembro</option> 
-                                <option value="10">Outubro</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Maio</option>
+                                <option value="6">Junho</option>
+                                <option value="7">Julho</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Setembro</option>
+                                <option value="10" selected>Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
                             </select>
                         </div>
                         <div class="form-group" style="flex: 1;">
@@ -66,11 +70,12 @@
                         <button type="submit" class="btn btn-primary">Gerar Relatório</button>
                     </form>
                 </div>
-                
+
                 <div class="report-view" id="report-view-container" style="display: none;">
-                    <div class="table-container">
-                        <h2 id="report-title" style="margin-bottom: 1.5rem;">Balancete de Verificação - Setembro/2025</h2>
-                        <table class="data-table" id="report-table">
+                    <h2 id="report-title" style="margin-bottom: 1.5rem;"></h2>
+
+                    <div class="table-container" id="balancete-view" style="display: none;">
+                        <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>Código</th>
@@ -79,40 +84,55 @@
                                     <th style="text-align: right;">Saldo Credor</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1.1.1</td>
-                                    <td>Caixa</td>
-                                    <td style="text-align: right;">R$ 10.000,00</td>
-                                    <td style="text-align: right;"></td>
-                                </tr>
-                                <tr>
-                                    <td>1.2.1</td>
-                                    <td>Banco</td>
-                                    <td style="text-align: right;">R$ 64.000,00</td>
-                                    <td style="text-align: right;"></td>
-                                </tr>
-                                <tr>
-                                    <td>3.1.1</td>
-                                    <td>Contas a Pagar</td>
-                                    <td style="text-align: right;"></td>
-                                    <td style="text-align: right;">R$ 32.000,00</td>
-                                </tr>
-                                <tr>
-                                    <td>5.1.1</td>
-                                    <td>Capital Social</td>
-                                    <td style="text-align: right;"></td>
-                                    <td style="text-align: right;">R$ 120.000,00</td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr style="font-weight: bold; background-color: var(--bg-main);">
-                                    <td colspan="2">TOTAIS</td>
-                                    <td style="text-align: right;">R$ 152.000,00</td>
-                                    <td style="text-align: right;">R$ 152.000,00</td>
-                                </tr>
-                            </tfoot>
+                            <tbody id="report-tbody-balancete"></tbody>
+                            <tfoot id="report-tfoot-balancete"></tfoot>
                         </table>
+                    </div>
+
+                    <div id="balanco-view" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">ATIVO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="balanco-ativo-tbody"></tbody>
+                                    <tfoot id="balanco-ativo-tfoot"></tfoot>
+                                </table>
+                            </div>
+
+                            <div>
+                                <div class="table-container" style="margin-bottom: 2rem;">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="2">PASSIVO</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="balanco-passivo-tbody"></tbody>
+                                        <tfoot id="balanco-passivo-tfoot"></tfoot>
+                                    </table>
+                                </div>
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th colspan="2">PATRIMÔNIO LÍQUIDO</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="balanco-pl-tbody"></tbody>
+                                        <tfoot id="balanco-pl-tfoot"></tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-container" style="margin-top: 2rem;">
+                            <table class="data-table">
+                                <tbody id="balanco-totais-tbody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
@@ -121,4 +141,5 @@
     </div>
     <script type="module" src="../js/Relatorios.js"></script>
 </body>
+
 </html>

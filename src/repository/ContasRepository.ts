@@ -54,7 +54,7 @@ export class ContaRepository {
       conta.nome_conta,
       conta.tipo_conta,
       conta.subtipo_conta || null,
-      conta.subtipo_secundario || null, 
+      conta.subtipo_secundario || null,
       conta.codigo_conta,
     ];
     const result = await executarComandoSQL(sql, params);
@@ -74,7 +74,7 @@ export class ContaRepository {
     return null;
   }
 
-    async findByCodigoConta(codigoConta: string): Promise<Conta | null> {
+  async findByCodigoConta(codigoConta: string): Promise<Conta | null> {
     const sql = "SELECT * FROM contas WHERE codigo_conta = ?;";
     const result = await executarComandoSQL(sql, [codigoConta]);
     if (result.length > 0) {
@@ -99,7 +99,7 @@ export class ContaRepository {
       conta.nome_conta,
       conta.tipo_conta,
       conta.subtipo_conta || null,
-      conta.subtipo_secundario || null, 
+      conta.subtipo_secundario || null,
       conta.codigo_conta,
       conta.id_conta,
     ];

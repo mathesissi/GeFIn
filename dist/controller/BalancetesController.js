@@ -29,24 +29,15 @@ let BalancetesController = class BalancetesController extends tsoa_1.Controller 
         super();
         this.balanceteService = new BalanceteService_1.BalanceteService();
     }
-    getBalancetes(mes, ano, notFoundResponse) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const balancetes = yield this.balanceteService.getBalancetePorPeriodo(mes, ano);
-            if (!balancetes || balancetes.length === 0) {
-                return notFoundResponse(404, { message: "Balancetes não encontrados para o período especificado." });
-            }
-            return balancetes;
-        });
-    }
-    postGerarBalancetes(body, serverErrorResponse) {
+    getBalancetes(mes, ano, serverErrorResponse) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const balancetes = yield this.balanceteService.gerarBalancete(body.mes, body.ano);
-                this.setStatus(201); // Created
+                const balancetes = yield this.balanceteService.getBalancetePorPeriodo(mes, ano);
                 return balancetes;
             }
             catch (error) {
-                return serverErrorResponse(500, { message: `Erro ao gerar balancetes: ${error.message}` });
+                console.error('Erro no BalancetesController:', error);
+                return serverErrorResponse(500, { message: `Erro ao obter ou gerar balancetes: ${error.message}` });
             }
         });
     }
@@ -61,16 +52,8 @@ __decorate([
     __metadata("design:paramtypes", [Number, Number, Function]),
     __metadata("design:returntype", Promise)
 ], BalancetesController.prototype, "getBalancetes", null);
-__decorate([
-    (0, tsoa_1.Post)("gerar"),
-    __param(0, (0, tsoa_1.Body)()),
-    __param(1, (0, tsoa_1.Res)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Function]),
-    __metadata("design:returntype", Promise)
-], BalancetesController.prototype, "postGerarBalancetes", null);
 exports.BalancetesController = BalancetesController = __decorate([
     (0, tsoa_1.Route)("balancetes"),
-    (0, tsoa_1.Tags)("Balancetes"),
+    (0, tsoa_1.Tags)("Relatórios"),
     __metadata("design:paramtypes", [])
 ], BalancetesController);

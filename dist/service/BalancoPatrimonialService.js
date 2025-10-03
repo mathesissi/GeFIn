@@ -32,7 +32,7 @@ class BalanceteService {
             // 3. Combina os dados para enviar ao front-end, já com nome e código.
             return balancetes.map(b => {
                 const conta = contasMap.get(b.id_conta);
-                return Object.assign(Object.assign({}, b), { codigo_conta: (conta === null || conta === void 0 ? void 0 : conta.codigo_conta) || 'N/A', nome_conta: (conta === null || conta === void 0 ? void 0 : conta.nome_conta) || 'Desconhecida', tipo_conta: (conta === null || conta === void 0 ? void 0 : conta.tipo_conta) || '' });
+                return Object.assign(Object.assign({}, b), { codigo_conta: (conta === null || conta === void 0 ? void 0 : conta.codigo_conta) || 'N/A', nome_conta: (conta === null || conta === void 0 ? void 0 : conta.nome_conta) || 'Desconhecida' });
             });
         });
     }

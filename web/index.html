@@ -1,36 +1,60 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - GeFIn</title>
-    <link rel="stylesheet" href="./css/global.css">
+    <title>Dashboard - GeFIn</title>
+    <link rel="stylesheet" href="../web/css/global.css">
 </head>
+
 <body>
-    <div class="login-container">
-        <div class="login-box">
-            <h1>GeFIn</h1>
-            <form id="login-form">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" placeholder="seuemail@exemplo.com" required>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>GeFIn</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="home.html" class="nav-link active">Dashboard</a>
+                <a href="/web/html/ContasContabeis.html" class="nav-link">Plano de Contas</a>
+                <a href="/web/html/LivroDiario.html" class="nav-link">Lançamentos</a>
+                <a href="/web/html/Relatorios.html" class="nav-link">Relatórios</a>
+                <!-- <a href="#" class="nav-link">Configurações</a> -->
+            </nav>
+        </aside>
+        <main class="main-content">
+            <header class="main-header">
+                <h1>Dashboard</h1>
+                <div class="user-profile">
+                    <span>Usuário</span>
                 </div>
-                <div class="form-group">
-                    <label for="password">Senha</label>
-                    <input type="password" id="password" placeholder="Sua senha" required>
+            </header>
+            <div class="content-area">
+                <div class="card-grid">
+                    <div class="card">
+                        <h3 class="card-title">Saldo em Caixa</h3>
+                        <p class="card-value">R$ 10.000,00</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Contas a Pagar (Mês)</h3>
+                        <p class="card-value negative">R$ 32.000,00</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Contas a Receber (Mês)</h3>
+                        <p class="card-value positive">R$ 5.000,00</p>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Resultado (Mês)</h3>
+                        <p class="card-value positive">R$ 1.500,00</p>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Entrar</button>
-            </form>
-        </div>
+
+                <div class="card" style="height: 400px;">
+                    <h3 class="card-title">Fluxo de Caixa (placeholder)</h3>
+                </div>
+            </div>
+        </main>
     </div>
-    <script>
-      // Adiciona um listener para o formulário de login
-      document.getElementById('login-form').addEventListener('submit', function(event) {
-        // Previne o envio padrão do formulário
-        event.preventDefault();
-        // Redireciona para a página home.html
-        window.location.href = './html/home.html';
-      });
-    </script>
 </body>
+
 </html>

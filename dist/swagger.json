@@ -106,45 +106,6 @@
 				},
 				"type": "object",
 				"description": "Make all properties in T optional"
-			},
-			"Balancete": {
-				"description": "Representa um balancete com seus saldos de início e fim do período.",
-				"properties": {
-					"id_balancete": {
-						"type": "number",
-						"format": "double"
-					},
-					"mes": {
-						"type": "number",
-						"format": "double"
-					},
-					"ano": {
-						"type": "number",
-						"format": "double"
-					},
-					"id_conta": {
-						"type": "number",
-						"format": "double"
-					},
-					"saldo_inicial": {
-						"type": "number",
-						"format": "double"
-					},
-					"saldo_final": {
-						"type": "number",
-						"format": "double"
-					}
-				},
-				"required": [
-					"id_balancete",
-					"mes",
-					"ano",
-					"id_conta",
-					"saldo_inicial",
-					"saldo_final"
-				],
-				"type": "object",
-				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -746,76 +707,7 @@
 								"schema": {
 									"anyOf": [
 										{
-											"items": {
-												"$ref": "#/components/schemas/Balancete"
-											},
-											"type": "array"
-										},
-										{}
-									]
-								}
-							}
-						}
-					},
-					"404": {
-						"description": "",
-						"content": {
-							"application/json": {
-								"schema": {
-									"properties": {
-										"message": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"message"
-									],
-									"type": "object"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Balancetes"
-				],
-				"security": [],
-				"parameters": [
-					{
-						"in": "query",
-						"name": "mes",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					},
-					{
-						"in": "query",
-						"name": "ano",
-						"required": true,
-						"schema": {
-							"format": "double",
-							"type": "number"
-						}
-					}
-				]
-			}
-		},
-		"/balancetes/gerar": {
-			"post": {
-				"operationId": "PostGerarBalancetes",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"anyOf": [
-										{
-											"items": {
-												"$ref": "#/components/schemas/Balancete"
-											},
+											"items": {},
 											"type": "array"
 										},
 										{}
@@ -844,34 +736,29 @@
 					}
 				},
 				"tags": [
-					"Balancetes"
+					"Relatórios"
 				],
 				"security": [],
-				"parameters": [],
-				"requestBody": {
-					"required": true,
-					"content": {
-						"application/json": {
-							"schema": {
-								"properties": {
-									"ano": {
-										"type": "number",
-										"format": "double"
-									},
-									"mes": {
-										"type": "number",
-										"format": "double"
-									}
-								},
-								"required": [
-									"ano",
-									"mes"
-								],
-								"type": "object"
-							}
+				"parameters": [
+					{
+						"in": "query",
+						"name": "mes",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ano",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
 						}
 					}
-				}
+				]
 			}
 		}
 	},
