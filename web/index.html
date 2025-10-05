@@ -6,6 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - GeFIn</title>
     <link rel="stylesheet" href="../web/css/global.css">
+    <style>
+        /* ===================== */
+        /* ESTILOS ESPECÍFICOS DO DASHBOARD */
+        /* ===================== */
+        .account-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .account-list li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .account-list input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        #mini-relatorio {
+            margin-top: 20px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-element);
+        }
+
+        #gerar-relatorio {
+            margin-top: 1rem;
+        }
+    </style>
 </head>
 
 <body>
@@ -19,42 +53,41 @@
                 <a href="/web/html/ContasContabeis.html" class="nav-link">Plano de Contas</a>
                 <a href="/web/html/LivroDiario.html" class="nav-link">Lançamentos</a>
                 <a href="/web/html/Relatorios.html" class="nav-link">Relatórios</a>
-                <!-- <a href="#" class="nav-link">Configurações</a> -->
             </nav>
         </aside>
+
         <main class="main-content">
             <header class="main-header">
                 <h1>Dashboard</h1>
-                <div class="user-profile">
-                    <span>Usuário</span>
-                </div>
             </header>
             <div class="content-area">
+
                 <div class="card-grid">
                     <div class="card">
                         <h3 class="card-title">Saldo em Caixa</h3>
-                        <p class="card-value">R$ 10.000,00</p>
+                        <ul id="saldo-caixa" class="account-list"></ul>
                     </div>
                     <div class="card">
                         <h3 class="card-title">Contas a Pagar (Mês)</h3>
-                        <p class="card-value negative">R$ 32.000,00</p>
+                        <ul id="contas-pagar" class="account-list"></ul>
                     </div>
                     <div class="card">
                         <h3 class="card-title">Contas a Receber (Mês)</h3>
-                        <p class="card-value positive">R$ 5.000,00</p>
+                        <ul id="contas-receber" class="account-list"></ul>
                     </div>
                     <div class="card">
                         <h3 class="card-title">Resultado (Mês)</h3>
-                        <p class="card-value positive">R$ 1.500,00</p>
+                        <ul id="resultado-mes" class="account-list"></ul>
                     </div>
                 </div>
 
-                <div class="card" style="height: 400px;">
-                    <h3 class="card-title">Fluxo de Caixa (placeholder)</h3>
-                </div>
+                <button id="gerar-relatorio" class="btn btn-primary">Gerar Mini Relatório</button>
+                <div id="mini-relatorio"></div>
             </div>
         </main>
     </div>
+
+    <script src="../web/js/dashboard.js"></script>
 </body>
 
 </html>

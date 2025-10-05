@@ -415,4 +415,20 @@ a {
 
 .form-error-summary ul {
     margin-left: 1.5rem;
+}.account-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.account-list li {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.account-list input[type="checkbox"] {
+    margin-right: 8px;
 }
