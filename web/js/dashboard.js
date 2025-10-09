@@ -1,8 +1,8 @@
 // dashboard.js
-
+const API_BASE_URL = window.location.origin;
 async function carregarBalancete(mes, ano) {
     try {
-       const response = await fetch(`https://laggingly-vitameric-eleanora.ngrok-free.dev/balancete?mes=${mes}&ano=${ano}`);
+       const response = await fetch(`${API_BASE_URL}/balancete?mes=${mes}&ano=${ano}`);
 
         if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
 
