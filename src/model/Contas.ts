@@ -3,7 +3,7 @@
 export enum TipoConta {
   Ativo = 'Ativo',
   Passivo = 'Passivo',
-  PatrimonioLiquido = 'Patrimonio Liquido',
+  PatrimonioLiquido = 'PatrimonioLiquido',
   Receita = 'Receita',
   Despesa = 'Despesa'
 }
@@ -57,8 +57,8 @@ export class Conta {
     this.nome_conta = nome_conta;
     this.tipo_conta = tipo_conta;
     this.codigo_conta = codigo_conta;
-    
-    const primarySubtype = subtipo_conta?.trim() || undefined; 
+
+    const primarySubtype = subtipo_conta?.trim() || undefined;
     const secondarySubtype = subtipo_secundario?.trim() || undefined;
 
     const isPatrimonioLiquido = tipo_conta === TipoConta.PatrimonioLiquido;
@@ -67,34 +67,34 @@ export class Conta {
 
 
     if (isPatrimonioLiquido || isReceitaDespesa) {
-        this.subtipo_conta = undefined;
+      this.subtipo_conta = undefined;
     } else if (isSubtypeMandatory) {
-        if (!primarySubtype) {
-            throw new Error(`Subtipo principal é obrigatório para contas do tipo "${tipo_conta}"`);
-        }
-        
-        if (!this.validarSubtipo(tipo_conta, primarySubtype)) {
-            throw new Error(`Subtipo principal inválido "${primarySubtype}" para o tipo "${tipo_conta}"`);
-        }
-        this.subtipo_conta = primarySubtype;
+      if (!primarySubtype) {
+        throw new Error(`Subtipo principal é obrigatório para contas do tipo "${tipo_conta}"`);
+      }
+
+      if (!this.validarSubtipo(tipo_conta, primarySubtype)) {
+        throw new Error(`Subtipo principal inválido "${primarySubtype}" para o tipo "${tipo_conta}"`);
+      }
+      this.subtipo_conta = primarySubtype;
     } else if (primarySubtype) {
-         throw new Error(`Subtipo principal não é permitido para o tipo "${tipo_conta}"`);
+      throw new Error(`Subtipo principal não é permitido para o tipo "${tipo_conta}"`);
     } else {
-        this.subtipo_conta = undefined;
+      this.subtipo_conta = undefined;
     }
 
     const isAtivoNaoCirculante = tipo_conta === TipoConta.Ativo && primarySubtype === SubtipoAtivo.NaoCirculante;
 
     if (isAtivoNaoCirculante) {
-        if (!secondarySubtype) {
-            throw new Error(`Subtipo secundário é obrigatório para "${SubtipoAtivo.NaoCirculante}"`);
-        }
-        if (!this.validarSubtipoSecundario(secondarySubtype)) {
-            throw new Error(`Subtipo secundário inválido "${secondarySubtype}" para "${SubtipoAtivo.NaoCirculante}"`);
-        }
-        this.subtipo_secundario = secondarySubtype;
+      if (!secondarySubtype) {
+        throw new Error(`Subtipo secundário é obrigatório para "${SubtipoAtivo.NaoCirculante}"`);
+      }
+      if (!this.validarSubtipoSecundario(secondarySubtype)) {
+        throw new Error(`Subtipo secundário inválido "${secondarySubtype}" para "${SubtipoAtivo.NaoCirculante}"`);
+      }
+      this.subtipo_secundario = secondarySubtype;
     } else {
-        this.subtipo_secundario = undefined;
+      this.subtipo_secundario = undefined;
     }
   }
 
@@ -110,7 +110,7 @@ export class Conta {
   }
 
   private validarSubtipoSecundario(subtipoSecundario: string): boolean {
-      return Object.values(SubtipoSecundarioAtivo).includes(subtipoSecundario as SubtipoSecundarioAtivo);
+    return Object.values(SubtipoSecundarioAtivo).includes(subtipoSecundario as SubtipoSecundarioAtivo);
   }
 
 

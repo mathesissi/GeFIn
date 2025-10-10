@@ -177,7 +177,7 @@ function mostrarBalanco(balanco, mes, ano) {
     totalPassivo += saldoFinal;
   });
 
-  (balanco["Patrimonio Liquido"] || []).forEach(conta => {
+  (balanco["PatrimonioLiquido"] || []).forEach(conta => {
     const saldoInicial = Number(conta.saldo_inicial || 0);
     const saldoFinal = Number(conta.saldo_final || 0);
     const tr = document.createElement('tr');

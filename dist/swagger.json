@@ -100,7 +100,7 @@
 				"enum": [
 					"Ativo",
 					"Passivo",
-					"Patrimonio Liquido",
+					"PatrimonioLiquido",
 					"Receita",
 					"Despesa"
 				],

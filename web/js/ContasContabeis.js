@@ -41,14 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
             options: ['Passivo Circulante', 'Passivo Nao Circulante'],
             secondary: {} 
         },
-        'Patrimonio Liquido': { options: [] }, // VALOR PADRONIZADO
+        'PatrimonioLiquido': { options: [] }, // VALOR PADRONIZADO
         Receita: { options: [] },
         Despesa: { options: [] }
     };
     
     // Mapeamento para exibir os nomes bonitos (com acentos) no dropdown e na tabela
     const displayMap = {
-        'Patrimonio Liquido': 'Patrimônio Líquido',
+        'PatrimonioLiquido': 'Patrimônio Líquido',
         'Ativo Nao Circulante': 'Ativo Não Circulante',
         'Passivo Nao Circulante': 'Passivo Não Circulante',
         'Realizavel a Longo Prazo': 'Realizável a Longo Prazo',
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             if (isEditing) {
-                await updateConta(id, formData);
+                await updateConta(parseInt(id, 10), formData);
                 alert('Conta atualizada com sucesso!');
             } else {
                 await createConta(formData);

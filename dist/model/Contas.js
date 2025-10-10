@@ -6,7 +6,7 @@ var TipoConta;
 (function (TipoConta) {
     TipoConta["Ativo"] = "Ativo";
     TipoConta["Passivo"] = "Passivo";
-    TipoConta["PatrimonioLiquido"] = "Patrimonio Liquido";
+    TipoConta["PatrimonioLiquido"] = "PatrimonioLiquido";
     TipoConta["Receita"] = "Receita";
     TipoConta["Despesa"] = "Despesa";
 })(TipoConta || (exports.TipoConta = TipoConta = {}));

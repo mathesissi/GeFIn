@@ -1,6 +1,6 @@
 // src/repository/BalanceteRepository.ts
 import { db } from '../database/database';
-import { Balancete } from '../model/Balancete';
+import { Balancete } from '../model/balancete';
 
 export class BalanceteRepository {
   private static instance: BalanceteRepository;

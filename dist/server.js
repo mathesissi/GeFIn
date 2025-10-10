@@ -105,14 +105,14 @@ app.get('/balanco', (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         // Puxa todas as contas e seus saldos
         const [rows] = yield exports.db.query(`SELECT c.tipo_conta, c.codigo_conta, c.nome_conta,
               b.saldo_inicial, b.saldo_final
-       FROM contas c
+       FROM contas c 
        LEFT JOIN balancetes b ON c.id_conta = b.id_conta AND b.mes = ? AND b.ano = ?
-       ORDER BY FIELD(c.tipo_conta, 'Ativo', 'Passivo', 'Patrimonio Liquido', 'Receita', 'Despesa'), c.codigo_conta`, [mes, ano]);
+       ORDER BY FIELD(c.tipo_conta, 'Ativo', 'Passivo', 'PatrimonioLiquido', 'Receita', 'Despesa'), c.codigo_conta`, [mes, ano]);
         // Agrupa por tipo de conta
         const balanco = {
             Ativo: [],
             Passivo: [],
-            'Patrimonio Liquido': [],
+            'PatrimonioLiquido': [],
             Receita: [],
             Despesa: []
         };

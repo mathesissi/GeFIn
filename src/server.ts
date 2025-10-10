@@ -116,9 +116,9 @@ app.get('/balanco', async (req: Request, res: Response) => {
     const [rows] = await db.query<any[]>(
       `SELECT c.tipo_conta, c.codigo_conta, c.nome_conta,
               b.saldo_inicial, b.saldo_final
-       FROM contas c
+       FROM contas c 
        LEFT JOIN balancetes b ON c.id_conta = b.id_conta AND b.mes = ? AND b.ano = ?
-       ORDER BY FIELD(c.tipo_conta, 'Ativo', 'Passivo', 'Patrimonio Liquido', 'Receita', 'Despesa'), c.codigo_conta`,
+       ORDER BY FIELD(c.tipo_conta, 'Ativo', 'Passivo', 'PatrimonioLiquido', 'Receita', 'Despesa'), c.codigo_conta`,
       [mes, ano]
     );
 
@@ -126,7 +126,7 @@ app.get('/balanco', async (req: Request, res: Response) => {
     const balanco: Record<string, any[]> = {
       Ativo: [],
       Passivo: [],
-      'Patrimonio Liquido': [],
+      'PatrimonioLiquido': [],
       Receita: [],
       Despesa: []
     };
