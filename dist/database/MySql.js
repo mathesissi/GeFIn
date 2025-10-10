@@ -12,6 +12,7 @@ const dbConfig = {
     user: "root",
     password: "",
     database: "gefin",
+    timezone: "+00:00",
 };
 const mysqlConnection = mysql2_1.default.createConnection(dbConfig);
 mysqlConnection.connect((err) => {

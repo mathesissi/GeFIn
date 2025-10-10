@@ -7,6 +7,7 @@ const dbConfig = {
   user: "root",
   password: "",
   database: "gefin",
+  timezone: "+00:00",
 };
 
 const mysqlConnection: Connection = mysql.createConnection(dbConfig);

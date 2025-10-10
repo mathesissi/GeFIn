@@ -12,11 +12,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const totalCreditoSpan = document.getElementById('total-credito');
     const diferencaSpan = document.getElementById('diferenca');
 
-
     let contasCache = [];
 
     // --- Funções de Validação e UI ---
-
     const clearValidationErrors = () => {
         errorSummary.style.display = 'none';
         errorList.innerHTML = '';
@@ -41,10 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         errorSummary.style.display = 'block';
     };
     
-    /**
-     * Valida o formulário para lançamentos compostos.
-     * @returns {boolean} Se o formulário é válido.
-     */
     const validateForm = () => {
         clearValidationErrors();
         let isValid = true;
@@ -80,7 +74,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tipoSelect = partida.querySelector('.tipo-partida');
             const valorInput = partida.querySelector('.valor-partida');
             
-            // Remove classes de erro antigas
             contaSelect.classList.remove('is-invalid');
             valorInput.classList.remove('is-invalid');
 
@@ -113,8 +106,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // Revalida a Regra das Partidas Dobradas
-        // Usa uma pequena tolerância para evitar erros de ponto flutuante
         if (Math.abs(totalDebito - totalCredito) > 0.005 || totalDebito === 0) {
             addSummaryError('O total de débitos deve ser igual ao total de créditos e maior que zero.');
             isValid = false;
@@ -128,13 +119,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         return isValid;
     };
 
-
     // --- Lógica Principal ---
     
     const loadContas = async () => {
         try {
             contasCache = await getContas();
-            // Adiciona as partidas iniciais
             addPartida();
             addPartida();
         } catch (error) {
@@ -159,31 +148,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         const newPartida = document.createElement('div');
         newPartida.classList.add('partidas-grid', 'form-group');
         
-        // Crio o wrapper para o select da conta
         const contaSelectWrapper = document.createElement('div');
         contaSelectWrapper.className = 'conta-select-wrapper';
         contaSelectWrapper.appendChild(createContaSelector());
 
-        // Crio o select de tipo
         const tipoSelect = document.createElement('select');
         tipoSelect.className = 'tipo-partida';
         tipoSelect.innerHTML = '<option value="debito">Débito</option><option value="credito">Crédito</option>';
 
-        // Crio o input de valor
         const valorInput = document.createElement('input');
         valorInput.type = 'number';
         valorInput.className = 'valor-partida';
         valorInput.placeholder = '0,00';
         valorInput.step = '0.01';
 
-        // Crio o botão de remover
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.className = 'btn-icon btn-danger remove-partida';
         removeButton.title = 'Remover Partida';
         removeButton.innerHTML = '<img src="../media/svg/delete.svg" alt="Remover">';
         
-        // Adiciono os elementos ao container da partida
         newPartida.appendChild(contaSelectWrapper);
         newPartida.appendChild(tipoSelect);
         newPartida.appendChild(valorInput);
@@ -208,17 +192,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         
-        totalDebitoSpan.textContent = `R$ ${totalDebito.toFixed(2)}`;
-        totalCreditoSpan.textContent = `R$ ${totalCredito.toFixed(2)}`;
+        totalDebitoSpan.textContent = `R$ ${totalDebito.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        totalCreditoSpan.textContent = `R$ ${totalCredito.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         
         const diferenca = totalDebito - totalCredito;
-        diferencaSpan.textContent = `R$ ${diferenca.toFixed(2)}`;
-        
-        // Lógica visual para a diferença
+        diferencaSpan.textContent = `R$ ${diferenca.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         diferencaSpan.style.color = Math.abs(diferenca) < 0.005 ? 'green' : 'red';
     };
     
-    /** Renderiza a tabela de lançamentos. */
     const renderLancamentos = (lancamentos) => {
         lancamentosTbody.innerHTML = ''; 
         if (!lancamentos || lancamentos.length === 0) {
@@ -227,18 +208,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         lancamentos.forEach(lanc => {
             const tr = document.createElement('tr');
-            // Nota: O campo no retorno da API é agora 'valor_total'
             const valorExibido = lanc.valor_total !== undefined ? lanc.valor_total : lanc.valor; 
             tr.innerHTML = `
                 <td>${new Date(lanc.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</td>
                 <td>${lanc.descricao}</td>
-                <td>R$ ${parseFloat(valorExibido).toFixed(2)}</td>
+                <td>R$ ${parseFloat(valorExibido).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             `; 
             lancamentosTbody.appendChild(tr);
         });
     };
 
-    /** Busca e renderiza os lançamentos. */
     const loadAndRenderLancamentos = async () => {
         try {
             const lancamentos = await getLancamentos();
@@ -252,7 +231,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- Event Listeners ---
     addPartidaBtn.addEventListener('click', addPartida);
     
-    // Delegação de eventos para manipulação e cálculo de totais
     partidasContainer.addEventListener('click', e => {
         if (e.target.closest('.remove-partida')) { 
             e.target.closest('.partidas-grid').remove(); 
@@ -267,15 +245,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (!validateForm()) return;
         
-        const partidasColetadas = Array.from(partidasContainer.querySelectorAll('.partidas-grid')).map(partida => {
-            return {
-                id_conta: parseInt(partida.querySelector('.conta-select').value),
-                tipo_partida: partida.querySelector('.tipo-partida').value,
-                valor: parseFloat(partida.querySelector('.valor-partida').value)
-            };
-        });
+        const partidasColetadas = Array.from(partidasContainer.querySelectorAll('.partidas-grid')).map(partida => ({
+            id_conta: parseInt(partida.querySelector('.conta-select').value),
+            tipo_partida: partida.querySelector('.tipo-partida').value,
+            valor: parseFloat(partida.querySelector('.valor-partida').value)
+        }));
 
-        
         const dadosTransacao = {
             data: document.getElementById('data').value,
             descricao: document.getElementById('descricao').value,
@@ -285,22 +260,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const novoLancamento = await createLancamento(dadosTransacao); 
             
-            // Limpa e reseta o formulário
             lancamentoForm.reset();
             partidasContainer.innerHTML = '';
             addPartida();
             addPartida();
             updateTotals(); 
             
-            // ATUALIZAÇÃO OTIMIZADA: Adiciona a nova linha
             const tr = document.createElement('tr');
             const valorExibido = novoLancamento.valor_total !== undefined ? novoLancamento.valor_total : novoLancamento.valor;
             tr.innerHTML = `
                 <td>${new Date(novoLancamento.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</td>
                 <td>${novoLancamento.descricao}</td>
-                <td>R$ ${parseFloat(valorExibido).toFixed(2)}</td>
+                <td>R$ ${parseFloat(valorExibido).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             `;
-            // Se a tabela estava vazia, remove o item de "nenhum lançamento"
             if (lancamentosTbody.querySelector('tr > td[colspan="3"]')) {
                 lancamentosTbody.innerHTML = '';
             }
@@ -309,8 +281,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Lançamento salvo com sucesso!');
         } catch(error) {
            console.error("Falha ao criar lançamento:", error);
-           
-           // Tratamento de erro aprimorado
            if (error.response && error.response.data && error.response.data.message) {
               addSummaryError(`Erro do Servidor: ${error.response.data.message}`);
            } else {
@@ -319,7 +289,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // --- Carregamento Inicial ---
     await loadContas();
     await loadAndRenderLancamentos();
 });

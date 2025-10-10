@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS balancetes (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_conta FOREIGN KEY (id_conta) REFERENCES contas(id_conta)
-    ADD CONSTRAINT uniq_conta_mes_ano UNIQUE (id_conta, mes, ano);
+    CONSTRAINT uniq_conta_mes_ano UNIQUE (id_conta, mes, ano);
 );
 
 -- Tabela de Transações (Cabeçalho do lançamento contábil)
