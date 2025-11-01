@@ -14,14 +14,14 @@ export class LancamentosController extends Controller {
 
   @Post()
   public async criarLancamento(
-    @Body() dadosTransacao: DadosTransacao, // Nova interface para dados de transação
+    @Body() dadosTransacao: DadosTransacao,
     @Res() badRequestResponse: TsoaResponse<400, { message: string }>
   ): Promise<Lancamento | void> {
     try {
-      this.setStatus(201); // Created
+      this.setStatus(201);
       return this.lancamentosService.criarLancamento(dadosTransacao);
     } catch (error: any) {
-      // É importante garantir que a mensagem de erro seja acessível
+
       return badRequestResponse(400, { message: error.message });
     }
   }
@@ -49,7 +49,7 @@ export class LancamentosController extends Controller {
     @Body() dadosAtualizados: {
       data?: string;
       descricao?: string;
-      partidas?: Partida[]; // Permite atualizar as partidas
+      partidas?: Partida[];
     },
     @Res() notFoundResponse: TsoaResponse<404, { message: string }>,
     @Res() badRequestResponse: TsoaResponse<400, { message: string }>
@@ -74,6 +74,6 @@ export class LancamentosController extends Controller {
     if (!deletado) {
       return notFoundResponse(404, { message: "Lançamento não encontrado." });
     }
-    this.setStatus(204); // No Content
+    this.setStatus(204);
   }
 }

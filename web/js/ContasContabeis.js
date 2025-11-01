@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (conta) {
                 openModal(conta); 
             } else {
-                alert('Erro: Conta não encontrada.');
+                showSystemNotification('Erro: Conta não encontrada.');
             }
         } catch (error) {
             console.error("Falha ao buscar conta para edição.", error);
@@ -276,24 +276,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Adicionando validação front-end básica para o campo Tipo, que é obrigatório
         if (formData.tipo_conta === "") {
-             alert('Erro: O campo Tipo (Conta) é obrigatório.');
+             showSystemNotification('Erro: O campo Tipo (Conta) é obrigatório.');
              return;
         }
         
         try {
             if (isEditing) {
                 await updateConta(parseInt(id, 10), formData);
-                alert('Conta atualizada com sucesso!');
+                showSystemNotification('Conta atualizada com sucesso!');
             } else {
                 await createConta(formData);
-                alert('Conta criada com sucesso!');
+                showSystemNotification('Conta criada com sucesso!');
             }
             
             closeModal();
             loadAndRenderAccounts(); 
         } catch (error) {
             const errorMessage = error.message || "Erro desconhecido ao salvar conta.";
-            alert(`Erro ao salvar conta: ${errorMessage}`);
+            showSystemNotification(`Erro ao salvar conta: ${errorMessage}`);
             console.error(error);
         }
     });
@@ -304,13 +304,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (deleteButton) {
             const id = Number(deleteButton.dataset.id);
-            if (confirm('Tem certeza que deseja excluir esta conta?')) {
+            if (await showSystemConfirm('Tem certeza que deseja excluir esta conta?')) {
                 try {
                     await deleteConta(id);
                     loadAndRenderAccounts();
-                    alert('Conta excluída com sucesso!');
+                    showSystemNotification('Conta excluída com sucesso!');
                 } catch (error) {
-                    alert('Erro ao excluir conta.');
+                    showSystemNotification('Erro ao excluir conta.');
                     console.error("Falha ao excluir conta.", error);
                 }
             }

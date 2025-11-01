@@ -44,7 +44,7 @@ export class ContasService {
             return null;
         }
 
-        
+
         const contaAtualizada = Object.assign({}, contaExistente, dadosAtualizados);
 
 
@@ -55,14 +55,15 @@ export class ContasService {
 
             contaAtualizada.subtipo_conta = undefined;
         }
-        
+
         const contaParaAtualizar = new Conta(
             contaAtualizada.id_conta,
             contaAtualizada.nome_conta,
             contaAtualizada.tipo_conta as TipoConta,
             contaAtualizada.codigo_conta,
+            contaAtualizada.id_empresa,
             contaAtualizada.subtipo_conta,
-            contaAtualizada.subtipo_secundario // CORREÇÃO: Adicionado o 6º argumento
+            contaAtualizada.subtipo_secundario
         );
 
         return this.contasRepository.update(contaParaAtualizar);
@@ -72,7 +73,7 @@ export class ContasService {
         if (typeof id !== 'number' || id <= 0) {
             throw new Error('O ID da conta para deleção é inválido.');
         }
-        
+
         const lancamentosAtrelados = await this.lancamentosRepository.findLinkedLancamentos(id);
 
         if (lancamentosAtrelados.length > 0) {
@@ -81,7 +82,7 @@ export class ContasService {
                 descricao: l.descricao,
                 valor: l.valor
             }));
-            
+
             const errorMessage = "Não é possível excluir a conta. Lançamentos atrelados encontrados.";
 
             throw new Error(errorMessage);

@@ -36,7 +36,7 @@ async function fetchAPI(endpoint, options = {}) {
         return response.json();
     } catch (error) {
         console.error(`Erro na chamada da API para ${endpoint}:`, error);
-        alert(`Erro: ${error.message}`); 
+        showSystemNotification(`Erro: ${error.message}`); 
         throw error;
     }
 }

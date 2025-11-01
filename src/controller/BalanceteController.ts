@@ -1,4 +1,3 @@
-// src/controller/BalanceteController.ts
 import { Request, Response } from 'express';
 import { BalanceteService } from '../service/BalanceteService';
 

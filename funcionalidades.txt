@@ -1,5 +1,3 @@
-link para acesso da equipe: https://prod.liveshare.vsengsaas.visualstudio.com/join?B7D2D7B9D9275C8C845A8B2401A4E2033B18
-
 Cadastrar e Informar > SETUP
 Informar débitos e créditos > Livro Diário
 Balancete e Balanço Patrimonial > Relatórios Automatizados.

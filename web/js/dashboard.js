@@ -34,7 +34,7 @@ async function carregarBalancete(mes, ano) {
 
     } catch (error) {
         console.error('Erro ao carregar balancete:', error);
-        alert('Não foi possível carregar o balancete. Verifique o backend.');
+        showSystemNotification('Não foi possível carregar o balancete. Verifique o backend.');
     }
 }
 

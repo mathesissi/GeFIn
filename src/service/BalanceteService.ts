@@ -1,4 +1,3 @@
-// src/service/BalanceteService.ts
 import { BalanceteRepository } from '../repository/BalanceteRepository';
 
 export class BalanceteService {

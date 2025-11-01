@@ -43,6 +43,7 @@ export class Conta {
   subtipo_conta?: string;
   subtipo_secundario?: string;
   codigo_conta: string;
+  id_empresa: number;
 
 
   constructor(
@@ -50,6 +51,7 @@ export class Conta {
     nome_conta: string,
     tipo_conta: TipoConta,
     codigo_conta: string,
+    id_empresa: number,
     subtipo_conta?: string,
     subtipo_secundario?: string
   ) {
@@ -57,6 +59,7 @@ export class Conta {
     this.nome_conta = nome_conta;
     this.tipo_conta = tipo_conta;
     this.codigo_conta = codigo_conta;
+    this.id_empresa = id_empresa;
 
     const primarySubtype = subtipo_conta?.trim() || undefined;
     const secondarySubtype = subtipo_secundario?.trim() || undefined;
@@ -125,5 +128,6 @@ export class Conta {
       console.log(`Subtipo Secundário: ${this.subtipo_secundario}`);
     }
     console.log(`Código: ${this.codigo_conta}`);
+    console.log(`ID Empresa: ${this.id_empresa}`);
   }
 }

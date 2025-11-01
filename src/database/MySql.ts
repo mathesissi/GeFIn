@@ -1,4 +1,3 @@
-// MySql.ts
 import mysql, { Connection } from "mysql2";
 
 const dbConfig = {

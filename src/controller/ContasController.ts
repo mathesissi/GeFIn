@@ -19,18 +19,18 @@ export class ContasController extends Controller {
             tipo_conta: TipoConta;
             codigo_conta: string;
             subtipo_conta?: string;
-            subtipo_secundario?: string; // Novo campo
+            subtipo_secundario?: string;
         },
         @Res() badRequestResponse: TsoaResponse<400, { message: string }>
     ): Promise<Conta | void> {
         try {
             const novaConta = new Conta(
-                0, // O ID será gerado pelo repositório
+                0,
                 dadosConta.nome_conta,
                 dadosConta.tipo_conta,
-                dadosConta.codigo_conta,
+                dadosConta.id_empresa,
                 dadosConta.subtipo_conta,
-                dadosConta.subtipo_secundario // Passando novo campo
+                dadosConta.subtipo_secundario,
             );
             this.setStatus(201); // Created
             return this.contasService.criarConta(novaConta);
@@ -64,7 +64,7 @@ export class ContasController extends Controller {
             tipo_conta: TipoConta;
             codigo_conta: string;
             subtipo_conta?: string;
-            subtipo_secundario?: string; // Novo campo no DTO parcial
+            subtipo_secundario?: string;
         }>,
         @Res() notFoundResponse: TsoaResponse<404, { message: string }>,
         @Res() badRequestResponse: TsoaResponse<400, { message: string }>
@@ -89,6 +89,6 @@ export class ContasController extends Controller {
         if (!deletado) {
             return notFoundResponse(404, { message: "Conta não encontrada." });
         }
-        this.setStatus(204); // No Content
+        this.setStatus(204);
     }
 }

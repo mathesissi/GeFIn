@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios - GeFIn</title>
     <link rel="stylesheet" href="../css/global.css">
+
+    <link rel="stylesheet" href="toast.css">
+    <script src="toast.js" defer></script>
 </head>
 
 <body>
@@ -89,66 +92,67 @@
                         </table>
                     </div>
 
-<div id="balanco-view" style="display: none;">
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
-        <!-- Ativo -->
-        <div class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th colspan="2">ATIVO</th>
-                    </tr>
-                </thead>
-                <tbody id="balanco-ativo-tbody"></tbody>
-                <tfoot id="balanco-ativo-tfoot"></tfoot>
-            </table>
-        </div>
+                    <div id="balanco-view" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
 
-        <!-- Passivo -->
-        <div class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th colspan="2">PASSIVO</th>
-                    </tr>
-                </thead>
-                <tbody id="balanco-passivo-tbody"></tbody>
-                <tfoot id="balanco-passivo-tfoot"></tfoot>
-            </table>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">ATIVO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="balanco-ativo-tbody"></tbody>
+                                    <tfoot id="balanco-ativo-tfoot"></tfoot>
+                                </table>
+                            </div>
 
-            <!-- Patrimônio Líquido -->
-            <table class="data-table" style="margin-top: 2rem;">
-                <thead>
-                    <tr>
-                        <th colspan="2">PATRIMÔNIO LÍQUIDO</th>
-                    </tr>
-                </thead>
-                <tbody id="balanco-pl-tbody"></tbody>
-                <tfoot id="balanco-pl-tfoot"></tfoot>
-            </table>
-        </div>
-    </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">PASSIVO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="balanco-passivo-tbody"></tbody>
+                                    <tfoot id="balanco-passivo-tfoot"></tfoot>
+                                </table>
 
-    <!-- Receita e Despesa -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
-        <div class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr><th colspan="2">RECEITA</th></tr>
-                </thead>
-                <tbody id="balanco-receita-tbody"></tbody>
-            </table>
-        </div>
-        <div class="table-container">
-            <table class="data-table">
-                <thead>
-                    <tr><th colspan="2">DESPESA</th></tr>
-                </thead>
-                <tbody id="balanco-despesa-tbody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
+                                <table class="data-table" style="margin-top: 2rem;">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">PATRIMÔNIO LÍQUIDO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="balanco-pl-tbody"></tbody>
+                                    <tfoot id="balanco-pl-tfoot"></tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">RECEITA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="balanco-receita-tbody"></tbody>
+                                </table>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">DESPESA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="balanco-despesa-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>

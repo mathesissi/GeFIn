@@ -24,6 +24,9 @@ export class ContaRepository {
         codigo_conta VARCHAR(255) NOT NULL UNIQUE,
         subtipo_conta VARCHAR(255),
         subtipo_secundario VARCHAR(255) 
+        id_empresa INT NOT NULL,
+        FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa),
+        UNIQUE KEY unique_conta_empresa (codigo_conta, id_empresa)
       );
     `;
     try {

@@ -1,4 +1,3 @@
-// model/Balancete.ts
 export class Balancete {
     id_balancete?: number;
     id_conta: number;
@@ -8,6 +7,7 @@ export class Balancete {
     movimento_debito: number;
     movimento_credito: number;
     saldo_final: number;
+    id_empresa: number;
 
     constructor(
         id_conta: number,
@@ -17,6 +17,7 @@ export class Balancete {
         movimento_debito = 0,
         movimento_credito = 0,
         saldo_final = 0,
+        id_empresa: number,
         id_balancete?: number
     ) {
         this.id_conta = id_conta;
@@ -27,5 +28,6 @@ export class Balancete {
         this.movimento_credito = movimento_credito;
         this.saldo_final = saldo_final;
         if (id_balancete) this.id_balancete = id_balancete;
+        this.id_empresa = id_empresa;
     }
 }

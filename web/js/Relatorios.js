@@ -92,7 +92,7 @@ filterForm.addEventListener('submit', async (event) => {
     }
 
   } catch (error) {
-    alert(`Erro ao gerar relatório: ${error.message}`);
+    showSystemNotification(`Erro ao gerar relatório: ${error.message}`);
     console.error(error);
   }
 });

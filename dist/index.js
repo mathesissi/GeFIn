@@ -3,18 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express")); // Ajuste aqui para importar tipos
+const express_1 = __importDefault(require("express")); 
 const routes_1 = require("./route/routes");
 const swagger_ui_express_1 = __importDefault(require("swagger-ui-express"));
 const Swagger_1 = require("./config/Swagger");
 const cors_1 = __importDefault(require("cors"));
-const tsoa_1 = require("tsoa"); // Importar o erro de validação do TSOA
+const tsoa_1 = require("tsoa");
 const app = (0, express_1.default)();
 const port = 3000;
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)());
-// Rota para a documentação do Swagger
+
 app.use('/docs', swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(Swagger_1.swaggerSpec));
 (0, routes_1.RegisterRoutes)(app);
 // ----------------------------------------------------------------------

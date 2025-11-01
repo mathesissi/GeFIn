@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             lancamentosTbody.prepend(tr); 
 
-            alert('Lançamento salvo com sucesso!');
+            showSystemNotification('Lançamento salvo com sucesso!');
         } catch(error) {
            console.error("Falha ao criar lançamento:", error);
            if (error.response && error.response.data && error.response.data.message) {
