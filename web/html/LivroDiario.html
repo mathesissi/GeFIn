@@ -78,6 +78,7 @@
                 <h1>Lançamentos</h1>
                 <div class="user-profile"><span>Usuário</span></div>
             </header>
+
             <div class="content-area">
                 <div class="lancamento-form">
                     <h3>Novo Lançamento Composto</h3>
@@ -85,53 +86,49 @@
                         <h4>Por favor, corrija os seguintes erros:</h4>
                         <ul id="form-error-list"></ul>
                     </div>
+
                     <form id="lancamento-form">
                         <div class="form-group">
                             <label for="data">Data</label>
                             <input type="date" id="data">
                             <div class="validation-message" id="data-error">A data é obrigatória.</div>
                         </div>
+
                         <div class="form-group">
                             <label for="descricao">Descrição</label>
                             <input type="text" id="descricao" placeholder="Ex: Pagamento de múltiplos fornecedores">
                             <div class="validation-message" id="descricao-error">A descrição é obrigatória.</div>
                         </div>
+
                         <div class="partidas-header">
                             <span>Conta Contábil</span>
                             <span>Tipo</span>
                             <span>Valor</span>
                             <span></span>
                         </div>
+
                         <div id="partidas-container"></div>
-                        <button type="button" id="add-partida" class="btn btn-secondary"
-                            style="margin-top: 1rem;">Adicionar Partida</button>
+
+                        <button type="button" id="add-partida" class="btn btn-secondary" style="margin-top: 1rem;">
+                            Adicionar Partida
+                        </button>
+
                         <div class="partidas-footer">
                             <div class="partidas-totais">
                                 <p>Débito Total: <span id="total-debito">R$ 0,00</span></p>
                                 <p>Crédito Total: <span id="total-credito">R$ 0,00</span></p>
                                 <p>Diferença: <span id="diferenca">R$ 0,00</span></p>
                             </div>
-                            <button type="submit" id="save-lancamento" class="btn btn-primary">Salvar
-                                Lançamento</button>
+                            <button type="submit" id="save-lancamento" class="btn btn-primary">
+                                Salvar Lançamento
+                            </button>
                         </div>
                     </form>
-                </div>
-                <div class="table-container">
-                    <h3>Histórico de Transações</h3>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Descrição</th>
-                                <th>Valor Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lancamentos-historico-tbody"></tbody>
-                    </table>
                 </div>
             </div>
         </main>
     </div>
+
     <script type="module" src="../js/LivroDiario.js"></script>
 </body>
 

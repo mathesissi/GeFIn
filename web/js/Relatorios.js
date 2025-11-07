@@ -18,43 +18,40 @@ const balancoAtivoTfoot = document.getElementById('balanco-ativo-tfoot');
 const balancoPassivoTfoot = document.getElementById('balanco-passivo-tfoot');
 const balancoPlTfoot = document.getElementById('balanco-pl-tfoot');
 
-// Criar tbody para Receita e Despesa
-let balancoReceitaTbody = document.getElementById('balanco-receita-tbody');
-let balancoDespesaTbody = document.getElementById('balanco-despesa-tbody');
-
-// Se não existirem no HTML, criamos dinamicamente
-if (!balancoReceitaTbody) {
-  const receitaTable = document.createElement('table');
-  receitaTable.className = 'data-table';
-  receitaTable.innerHTML = `
-    <thead><tr><th colspan="2">RECEITA</th></tr></thead>
-    <tbody id="balanco-receita-tbody"></tbody>
-  `;
-  balancoView.appendChild(receitaTable);
-  balancoReceitaTbody = document.getElementById('balanco-receita-tbody');
-}
-
-if (!balancoDespesaTbody) {
-  const despesaTable = document.createElement('table');
-  despesaTable.className = 'data-table';
-  despesaTable.innerHTML = `
-    <thead><tr><th colspan="2">DESPESA</th></tr></thead>
-    <tbody id="balanco-despesa-tbody"></tbody>
-  `;
-  balancoView.appendChild(despesaTable);
-  balancoDespesaTbody = document.getElementById('balanco-despesa-tbody');
-}
+// Novo container para o Livro Diário
+let livroDiarioView = document.createElement('div');
+livroDiarioView.id = 'livrodiario-view';
+livroDiarioView.style.display = 'none';
+livroDiarioView.innerHTML = `
+  <div class="table-container">
+      <table class="data-table">
+          <thead>
+              <tr>
+                  <th>Data</th>
+                  <th>Descrição</th>
+                  <th>Conta Débito</th>
+                  <th>Conta Crédito</th>
+                  <th style="text-align:right;">Valor</th>
+              </tr>
+          </thead>
+          <tbody id="livrodiario-tbody"></tbody>
+      </table>
+  </div>
+`;
+reportViewContainer.appendChild(livroDiarioView);
 
 let selectedReport = null;
 
+// =====================
 // Seleção do relatório
+// =====================
 reportCards.forEach(card => {
   card.addEventListener('click', () => {
     selectedReport = card.dataset.report;
     reportCards.forEach(c => c.classList.remove('active'));
     card.classList.add('active');
 
-    if (selectedReport === 'balancete' || selectedReport === 'balanco') {
+    if (['balancete', 'balanco', 'livrodiario'].includes(selectedReport)) {
       filterContainer.style.display = 'block';
       reportViewContainer.style.display = 'none';
     } else {
@@ -64,7 +61,9 @@ reportCards.forEach(card => {
   });
 });
 
+// =====================
 // Submissão do filtro
+// =====================
 const filterForm = document.getElementById('report-filter-form');
 filterForm.addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -86,9 +85,14 @@ filterForm.addEventListener('submit', async (event) => {
       const response = await fetch(`${baseUrl}/balanco?mes=${mes}&ano=${ano}`);
       if (!response.ok) throw new Error(`Erro ${response.status}`);
       const data = await response.json();
-
-      // Passa o objeto "balanco" para a função
       mostrarBalanco(data.balanco || {}, mes, ano);
+    }
+
+    if (selectedReport === 'livrodiario') {
+      const response = await fetch(`${baseUrl}/livrodiario?mes=${mes}&ano=${ano}`);
+      if (!response.ok) throw new Error(`Erro ${response.status}`);
+      const data = await response.json();
+      mostrarLivroDiario(data, mes, ano);
     }
 
   } catch (error) {
@@ -98,138 +102,32 @@ filterForm.addEventListener('submit', async (event) => {
 });
 
 // =====================
-// Função para preencher o Balancete
+// Função para mostrar o Livro Diário
 // =====================
-function mostrarBalancete(balancete, mes, ano) {
-  reportTitle.textContent = `Balancete de Verificação - ${mes}/${ano}`;
-  reportViewContainer.style.display = 'block';
-  balanceteView.style.display = 'block';
-  balancoView.style.display = 'none';
-
-  reportTbody.innerHTML = '';
-  reportTfoot.innerHTML = '';
-
-  balancete.contas.forEach(conta => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${conta.codigo_conta}</td>
-      <td>${conta.nome_conta}</td>
-      <td style="text-align: right;">${Number(conta.total_debito || 0).toFixed(2)}</td>
-      <td style="text-align: right;">${Number(conta.total_credito || 0).toFixed(2)}</td>
-    `;
-    reportTbody.appendChild(tr);
-  });
-
-  const trFoot = document.createElement('tr');
-  trFoot.innerHTML = `
-    <td colspan="2" style="text-align: right; font-weight: bold;">Totais:</td>
-    <td style="text-align: right; font-weight: bold;">${balancete.total_debitos.toFixed(2)}</td>
-    <td style="text-align: right; font-weight: bold;">${balancete.total_creditos.toFixed(2)}</td>
-  `;
-  reportTfoot.appendChild(trFoot);
-}
-
-// =====================
-// Função para preencher o Balanço Patrimonial
-// =====================
-function mostrarBalanco(balanco, mes, ano) {
-  reportTitle.textContent = `Balanço Patrimonial - ${mes}/${ano}`;
+function mostrarLivroDiario(livro, mes, ano) {
+  reportTitle.textContent = `Livro Diário - ${mes}/${ano}`;
   reportViewContainer.style.display = 'block';
   balanceteView.style.display = 'none';
-  balancoView.style.display = 'block';
+  balancoView.style.display = 'none';
+  livroDiarioView.style.display = 'block';
 
-  // Limpa os TBody
-  balancoAtivoTbody.innerHTML = '';
-  balancoPassivoTbody.innerHTML = '';
-  balancoPlTbody.innerHTML = '';
-  balancoReceitaTbody.innerHTML = '';
-  balancoDespesaTbody.innerHTML = '';
+  const tbody = document.getElementById('livrodiario-tbody');
+  tbody.innerHTML = '';
 
-  // Totais
-  let totalAtivo = 0;
-  let totalPassivo = 0;
-  let totalPL = 0;
-  let totalReceita = 0;
-  let totalDespesa = 0;
+  if (!livro || livro.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Nenhum lançamento encontrado.</td></tr>`;
+    return;
+  }
 
-  // Itera sobre cada tipo de conta
-  (balanco.Ativo || []).forEach(conta => {
-    const saldoInicial = Number(conta.saldo_inicial || 0);
-    const saldoFinal = Number(conta.saldo_final || 0);
+  livro.forEach(lancamento => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${conta.nome_conta}</td>
-      <td style="text-align: right;">Saldo Inicial: ${saldoInicial.toFixed(2)} | Saldo Final: ${saldoFinal.toFixed(2)}</td>
+      <td>${lancamento.data}</td>
+      <td>${lancamento.descricao}</td>
+      <td>${lancamento.conta_debito}</td>
+      <td>${lancamento.conta_credito}</td>
+      <td style="text-align:right;">${Number(lancamento.valor || 0).toFixed(2)}</td>
     `;
-    balancoAtivoTbody.appendChild(tr);
-    totalAtivo += saldoFinal;
+    tbody.appendChild(tr);
   });
-
-  (balanco.Passivo || []).forEach(conta => {
-    const saldoInicial = Number(conta.saldo_inicial || 0);
-    const saldoFinal = Number(conta.saldo_final || 0);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${conta.nome_conta}</td>
-      <td style="text-align: right;">Saldo Inicial: ${saldoInicial.toFixed(2)} | Saldo Final: ${saldoFinal.toFixed(2)}</td>
-    `;
-    balancoPassivoTbody.appendChild(tr);
-    totalPassivo += saldoFinal;
-  });
-
-  (balanco["PatrimonioLiquido"] || []).forEach(conta => {
-    const saldoInicial = Number(conta.saldo_inicial || 0);
-    const saldoFinal = Number(conta.saldo_final || 0);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${conta.nome_conta}</td>
-      <td style="text-align: right;">Saldo Inicial: ${saldoInicial.toFixed(2)} | Saldo Final: ${saldoFinal.toFixed(2)}</td>
-    `;
-    balancoPlTbody.appendChild(tr);
-    totalPL += saldoFinal;
-  });
-
-  (balanco.Receita || []).forEach(conta => {
-    const saldoFinal = Number(conta.saldo_final || 0);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${conta.nome_conta}</td><td style="text-align:right;">${saldoFinal.toFixed(2)}</td>`;
-    balancoReceitaTbody.appendChild(tr);
-    totalReceita += saldoFinal;
-  });
-
-  (balanco.Despesa || []).forEach(conta => {
-    const saldoFinal = Number(conta.saldo_final || 0);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${conta.nome_conta}</td><td style="text-align:right;">${saldoFinal.toFixed(2)}</td>`;
-    balancoDespesaTbody.appendChild(tr);
-    totalDespesa += saldoFinal;
-  });
-
-  // Totais nos rodapés
-  balancoAtivoTfoot.innerHTML = `<tr><td style="font-weight:bold;">Total Ativo:</td><td style="text-align:right; font-weight:bold;">${totalAtivo.toFixed(2)}</td></tr>`;
-  balancoPassivoTfoot.innerHTML = `<tr><td style="font-weight:bold;">Total Passivo:</td><td style="text-align:right; font-weight:bold;">${totalPassivo.toFixed(2)}</td></tr>`;
-  balancoPlTfoot.innerHTML = `<tr><td style="font-weight:bold;">Total Patrimônio Líquido:</td><td style="text-align:right; font-weight:bold;">${totalPL.toFixed(2)}</td></tr>`;
-
-  // Total Passivo + PL
-  const trTotalPassivoPL = document.createElement('tr');
-  trTotalPassivoPL.innerHTML = `<td style="font-weight:bold;">Total Passivo + PL:</td>
-                                 <td style="text-align:right; font-weight:bold;">${(totalPassivo + totalPL).toFixed(2)}</td>`;
-  balancoPlTbody.appendChild(trTotalPassivoPL);
-
-  // Totais de Receita e Despesa
-  const trTotalReceita = document.createElement('tr');
-  trTotalReceita.innerHTML = `<td style="font-weight:bold;">Total Receita:</td>
-                              <td style="text-align:right; font-weight:bold;">${totalReceita.toFixed(2)}</td>`;
-  balancoReceitaTbody.appendChild(trTotalReceita);
-
-  const trTotalDespesa = document.createElement('tr');
-  trTotalDespesa.innerHTML = `<td style="font-weight:bold;">Total Despesa:</td>
-                              <td style="text-align:right; font-weight:bold;">${totalDespesa.toFixed(2)}</td>`;
-  balancoDespesaTbody.appendChild(trTotalDespesa);
-
-  // Resultado do período (Receita - Despesa)
-  const trResultado = document.createElement('tr');
-  trResultado.innerHTML = `<td style="font-weight:bold;">Resultado do Período:</td>
-                           <td style="text-align:right; font-weight:bold;">${(totalReceita - totalDespesa).toFixed(2)}</td>`;
-  balancoReceitaTbody.appendChild(trResultado);
 }

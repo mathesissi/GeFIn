@@ -1,4 +1,3 @@
-// server.ts
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -31,9 +30,7 @@ export const db = mysql.createPool({
 // ================= ROTAS DA API =================
 RegisterRoutes(app);
 
-// ================= ROTAS ADICIONAIS =================
-
-// Balancete
+// ================= BALANCETE =================
 app.get('/balancete', async (req: Request, res: Response) => {
   try {
     const mes = parseInt(req.query.mes as string);
@@ -55,7 +52,7 @@ app.get('/balancete', async (req: Request, res: Response) => {
       [mes, ano]
     );
 
-    const contas = [];
+    const contas: any[] = [];
     for (const r of rows) {
       const contaId = r.id_conta;
 
@@ -102,8 +99,7 @@ app.get('/balancete', async (req: Request, res: Response) => {
   }
 });
 
-// Balanço Patrimonial
-// Balanço Patrimonial detalhado por conta
+// ================= BALANÇO PATRIMONIAL =================
 app.get('/balanco', async (req: Request, res: Response) => {
   try {
     const mes = parseInt(req.query.mes as string);
@@ -112,7 +108,6 @@ app.get('/balanco', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Mês ou ano inválido' });
     }
 
-    // Puxa todas as contas e seus saldos
     const [rows] = await db.query<any[]>(
       `SELECT c.tipo_conta, c.codigo_conta, c.nome_conta,
               b.saldo_inicial, b.saldo_final
@@ -122,13 +117,12 @@ app.get('/balanco', async (req: Request, res: Response) => {
       [mes, ano]
     );
 
-    // Agrupa por tipo de conta
     const balanco: Record<string, any[]> = {
       Ativo: [],
       Passivo: [],
-      'PatrimonioLiquido': [],
+      PatrimonioLiquido: [],
       Receita: [],
-      Despesa: []
+      Despesa: [],
     };
 
     rows.forEach(r => {
@@ -137,7 +131,7 @@ app.get('/balanco', async (req: Request, res: Response) => {
         codigo_conta: r.codigo_conta,
         nome_conta: r.nome_conta,
         saldo_inicial: r.saldo_inicial || 0,
-        saldo_final: r.saldo_final || 0
+        saldo_final: r.saldo_final || 0,
       });
     });
 
@@ -148,6 +142,55 @@ app.get('/balanco', async (req: Request, res: Response) => {
   }
 });
 
+// ================= NOVA ROTA: LIVRO DIÁRIO =================
+app.get('/livrodiario', async (req: Request, res: Response) => {
+  try {
+    const mes = parseInt(req.query.mes as string);
+    const ano = parseInt(req.query.ano as string);
+
+    if (isNaN(mes) || isNaN(ano)) {
+      return res.status(400).json({ message: 'Mês ou ano inválido' });
+    }
+
+    const [rows] = await db.query<any[]>(
+      `
+      SELECT 
+        t.id_transacao,
+        DATE_FORMAT(t.data, '%Y-%m-%d') AS data,
+        t.descricao,
+        pd.valor AS valor_debito,
+        pc.valor AS valor_credito,
+        c_debito.nome_conta AS conta_debito,
+        c_credito.nome_conta AS conta_credito
+      FROM transacoes t
+      JOIN partidas_lancamento pd ON t.id_transacao = pd.id_transacao AND pd.tipo_partida = 'debito'
+      JOIN partidas_lancamento pc ON t.id_transacao = pc.id_transacao AND pc.tipo_partida = 'credito'
+      JOIN contas c_debito ON pd.id_conta = c_debito.id_conta
+      JOIN contas c_credito ON pc.id_conta = c_credito.id_conta
+      WHERE MONTH(t.data) = ? AND YEAR(t.data) = ?
+      ORDER BY t.data ASC, t.id_transacao ASC
+      `,
+      [mes, ano]
+    );
+
+    if (!rows.length) {
+      return res.json([]);
+    }
+
+    const lancamentos = rows.map(r => ({
+      data: r.data,
+      descricao: r.descricao,
+      conta_debito: r.conta_debito,
+      conta_credito: r.conta_credito,
+      valor: parseFloat(r.valor_debito || r.valor_credito || 0),
+    }));
+
+    return res.json(lancamentos);
+  } catch (error) {
+    console.error('Erro ao gerar Livro Diário:', error);
+    return res.status(500).json({ message: 'Erro ao gerar Livro Diário' });
+  }
+});
 
 // ================= ERRO 404 =================
 app.use((req, res) => {
