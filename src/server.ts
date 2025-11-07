@@ -7,16 +7,12 @@ import 'reflect-metadata';
 
 const app = express();
 
-// ================= MIDDLEWARES =================
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ================= ROTAS DE ARQUIVOS ESTÁTICOS =================
-// Serve toda a pasta src/web
 app.use('/web', express.static(path.join(__dirname, '../web')));
 
-// ================= CONEXÃO COM BANCO =================
 export const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
@@ -27,7 +23,6 @@ export const db = mysql.createPool({
   queueLimit: 0,
 });
 
-// ================= ROTAS DA API =================
 RegisterRoutes(app);
 
 // ================= BALANCETE =================
@@ -75,7 +70,6 @@ app.get('/balancete', async (req: Request, res: Response) => {
         saldo_final: saldoFinal,
       });
 
-      // Inserir ou atualizar balancete
       await db.query(
         `INSERT INTO balancetes (id_conta, mes, ano, saldo_inicial, movimento_debito, movimento_credito, saldo_final)
          VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -99,7 +93,7 @@ app.get('/balancete', async (req: Request, res: Response) => {
   }
 });
 
-// ================= BALANÇO PATRIMONIAL =================
+// ================= BALANÇO =================
 app.get('/balanco', async (req: Request, res: Response) => {
   try {
     const mes = parseInt(req.query.mes as string);
@@ -142,7 +136,7 @@ app.get('/balanco', async (req: Request, res: Response) => {
   }
 });
 
-// ================= NOVA ROTA: LIVRO DIÁRIO =================
+// ================= LIVRO DIÁRIO =================
 app.get('/livrodiario', async (req: Request, res: Response) => {
   try {
     const mes = parseInt(req.query.mes as string);
@@ -153,42 +147,54 @@ app.get('/livrodiario', async (req: Request, res: Response) => {
     }
 
     const [rows] = await db.query<any[]>(
-      `
-      SELECT 
+      `SELECT 
         t.id_transacao,
         DATE_FORMAT(t.data, '%Y-%m-%d') AS data,
         t.descricao,
-        pd.valor AS valor_debito,
-        pc.valor AS valor_credito,
-        c_debito.nome_conta AS conta_debito,
-        c_credito.nome_conta AS conta_credito
-      FROM transacoes t
-      JOIN partidas_lancamento pd ON t.id_transacao = pd.id_transacao AND pd.tipo_partida = 'debito'
-      JOIN partidas_lancamento pc ON t.id_transacao = pc.id_transacao AND pc.tipo_partida = 'credito'
-      JOIN contas c_debito ON pd.id_conta = c_debito.id_conta
-      JOIN contas c_credito ON pc.id_conta = c_credito.id_conta
-      WHERE MONTH(t.data) = ? AND YEAR(t.data) = ?
-      ORDER BY t.data ASC, t.id_transacao ASC
-      `,
+        SUM(p.valor) AS valor_total
+       FROM transacoes t
+       JOIN partidas_lancamento p ON t.id_transacao = p.id_transacao
+       WHERE MONTH(t.data) = ? AND YEAR(t.data) = ?
+       GROUP BY t.id_transacao
+       ORDER BY t.data ASC, t.id_transacao ASC`,
       [mes, ano]
     );
 
-    if (!rows.length) {
-      return res.json([]);
-    }
-
-    const lancamentos = rows.map(r => ({
-      data: r.data,
-      descricao: r.descricao,
-      conta_debito: r.conta_debito,
-      conta_credito: r.conta_credito,
-      valor: parseFloat(r.valor_debito || r.valor_credito || 0),
-    }));
-
-    return res.json(lancamentos);
+    return res.json(rows);
   } catch (error) {
     console.error('Erro ao gerar Livro Diário:', error);
     return res.status(500).json({ message: 'Erro ao gerar Livro Diário' });
+  }
+});
+
+// ================= LIVRO DIÁRIO - DETALHES =================
+app.get('/livrodiario/:id/detalhes', async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
+
+    const [rows] = await db.query<any[]>(
+      `SELECT 
+          p.id_partida,
+          c.nome_conta AS conta,
+          p.tipo_partida,
+          c.tipo_conta,
+          c.subtipo_conta,
+          c.subtipo_secundario,
+          p.valor
+       FROM partidas_lancamento p
+       JOIN contas c ON p.id_conta = c.id_conta
+       WHERE p.id_transacao = ?
+       ORDER BY p.tipo_partida DESC, c.nome_conta ASC`,
+      [id]
+    );
+
+    return res.json(rows);
+  } catch (error) {
+    console.error('Erro ao obter detalhes do lançamento:', error);
+    return res.status(500).json({ message: 'Erro ao buscar detalhes do lançamento' });
   }
 });
 
@@ -197,7 +203,6 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Rota não encontrada' });
 });
 
-// ================= INICIAR SERVIDOR =================
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

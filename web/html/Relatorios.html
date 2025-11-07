@@ -35,6 +35,7 @@
             <div class="content-area">
                 <h2>Selecione o Relatório</h2>
 
+                <!-- Seleção de relatórios -->
                 <div class="report-selection">
                     <div class="report-card" data-report="balancete">
                         <h3>Balancete de Verificação</h3>
@@ -46,40 +47,61 @@
                         <p>Visualize a posição patrimonial e financeira da empresa.</p>
                     </div>
 
-                    <!-- Novo botão Livro Diário -->
                     <div class="report-card" data-report="livrodiario">
                         <h3>Livro Diário</h3>
                         <p>Visualize os lançamentos contábeis detalhados por mês e ano.</p>
                     </div>
                 </div>
 
-                <div id="filter-container" style="display: none;">
-                    <form class="filter-section" id="report-filter-form">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="mes">Mês</label>
-                            <select id="mes">
-                                <option value="1">Janeiro</option>
-                                <option value="2">Fevereiro</option>
-                                <option value="3">Março</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Maio</option>
-                                <option value="6">Junho</option>
-                                <option value="7">Julho</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Setembro</option>
-                                <option value="10" selected>Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
+                <!-- Filtro -->
+                <div id="filter-container" style="display: none; width: 100%;">
+                    <form class="filter-section" id="report-filter-form"
+                        style="
+                            display: flex;
+                            gap: 1rem;
+                            align-items: center;
+                            width: 100%;
+                            flex-wrap: wrap;
+                            background: var(--bg-element);
+                            padding: 1rem 1.5rem;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 12px var(--shadow-color);
+                            margin-top: 1.5rem;
+                        ">
+
+                        <div style="display: flex; flex: 1; gap: 1rem; align-items: center;">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="mes">Mês</label>
+                                <select id="mes" style="width: 100%; height: 42px;">
+                                    <option value="1">Janeiro</option>
+                                    <option value="2">Fevereiro</option>
+                                    <option value="3">Março</option>
+                                    <option value="4">Abril</option>
+                                    <option value="5">Maio</option>
+                                    <option value="6">Junho</option>
+                                    <option value="7">Julho</option>
+                                    <option value="8">Agosto</option>
+                                    <option value="9">Setembro</option>
+                                    <option value="10" selected>Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="flex: 1;">
+                                <label for="ano">Ano</label>
+                                <input type="number" id="ano" value="2025" style="width: 100%; height: 42px;">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" 
+                                    style="height: 42px; white-space: nowrap;">
+                                Gerar Relatório
+                            </button>
                         </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="ano">Ano</label>
-                            <input type="number" id="ano" value="2025">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Gerar Relatório</button>
                     </form>
                 </div>
 
+                <!-- Área de exibição dos relatórios -->
                 <div class="report-view" id="report-view-container" style="display: none;">
                     <h2 id="report-title" style="margin-bottom: 1.5rem;"></h2>
 
@@ -102,7 +124,6 @@
                     <!-- Balanço Patrimonial -->
                     <div id="balanco-view" style="display: none;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
-
                             <div class="table-container">
                                 <table class="data-table">
                                     <thead>
@@ -139,6 +160,7 @@
                                     <tbody id="balanco-receita-tbody"></tbody>
                                 </table>
                             </div>
+
                             <div class="table-container">
                                 <table class="data-table">
                                     <thead><tr><th colspan="2">DESPESA</th></tr></thead>
@@ -147,10 +169,28 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Livro Diário -->
+                    <div id="livrodiario-view" class="table-container" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th>Conta Débito</th>
+                                    <th>Conta Crédito</th>
+                                    <th style="text-align: right;">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="livrodiario-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
+
     <script type="module" src="../js/Relatorios.js"></script>
 </body>
+
 </html>
