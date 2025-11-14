@@ -4,6 +4,7 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/Swagger';
 import cors from 'cors';
 import { ValidateError } from 'tsoa';
+import { DREController } from "./controller/DREController";
 
 const app = express();
 const port = 3000;
@@ -45,3 +46,5 @@ app.listen(port, () => {
     console.log(`Servidor rodando em http://localhost:${port}`);
     console.log(`Swagger docs disponíveis em http://localhost:${port}/docs`);
 });
+
+app.use("/dre", DREController);
