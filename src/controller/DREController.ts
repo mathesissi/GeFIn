@@ -1,18 +1,14 @@
-import express, { Request, Response } from "express";
-export const DREController = express.Router();
-
+import express from "express";
 import { DREService } from "../service/DREService";
 
-DREController.get("/:ano/:mes?", async (req: Request, res: Response) => {
-    try {
-        const ano = Number(req.params.ano);
-        const mes = req.params.mes ? Number(req.params.mes) : null;
+export const DREController = express.Router();
 
-        const dre = await DREService.gerarDRE(ano, mes);
-
-        res.json(dre);
-
-    } catch (error: any) {
-        res.status(500).json({ erro: error.message });
-    }
+DREController.get("/:ano", async (req, res) => {
+  try {
+    const ano = Number(req.params.ano);
+    const dre = await DREService.gerarDRE(ano);
+    res.json(dre);
+  } catch (err: any) {
+    res.status(500).json({ erro: err.message });
+  }
 });

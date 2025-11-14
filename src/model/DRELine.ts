@@ -1,22 +1,22 @@
 export class DRELine {
     codigo: string | null;
     descricao: string;
-    valor: number;
-    grupo: string | null;
-
-    constructor(
-        codigo: string | null = null,
-        descricao: string,
-        valor: number = 0,
-        grupo: string | null = null
-    ) {
-        this.codigo = codigo;
-        this.descricao = descricao;
-        this.valor = valor;
-        this.grupo = grupo;
+    valor: number | null;
+    tipo: "conta" | "subtotal" | "calculo";
+    children: DRELine[];
+  
+    constructor(params: {
+      codigo?: string | null;
+      descricao: string;
+      valor?: number | null;
+      tipo: "conta" | "subtotal" | "calculo";
+      children?: DRELine[];
+    }) {
+      this.codigo = params.codigo ?? null;
+      this.descricao = params.descricao;
+      this.valor = params.valor ?? null;
+      this.tipo = params.tipo;
+      this.children = params.children ?? [];
     }
-
-    exibirLinha(): string {
-        return `${this.codigo ? this.codigo + " - " : ""}${this.descricao}: R$ ${this.valor.toFixed(2)}`;
-    }
-}
+  }
+  
