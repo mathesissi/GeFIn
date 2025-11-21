@@ -182,7 +182,7 @@ cnpjInput.addEventListener("input", e => {
 // ===============================
 // SUBMIT (ENVIO AO BACKEND) - LÓGICA FINAL
 // ===============================
-const SIGNUP_API_ENDPOINT = 'http://localhost:3000/usuarios/signup';
+const SIGNUP_API_ENDPOINT = `${window.location.origin}/usuarios/signup`;
 
 form.addEventListener("submit", async (e) => {
     e.preventDefault();

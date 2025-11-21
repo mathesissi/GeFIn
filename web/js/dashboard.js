@@ -1,7 +1,7 @@
 // dashboard.js
 
 // 1. CORREÇÃO: Apontar para a porta do Backend (3000)
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Gerenciar Usuário (LocalStorage)

@@ -7,7 +7,7 @@ const submitButton = document.querySelector('.btn-primary');
 const messageArea = document.getElementById('login-message-area');
 
 // 1. CORREÇÃO: Apontar explicitamente para a porta 3000 (Backend)
-const LOGIN_API_ENDPOINT = 'http://localhost:3000/usuarios/login';
+const LOGIN_API_ENDPOINT = `${window.location.origin}/usuarios/login`;
 
 // Função auxiliar para exibir mensagens
 function showMessage(message, isError = true) {

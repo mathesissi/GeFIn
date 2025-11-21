@@ -432,3 +432,83 @@ a {
 .account-list input[type="checkbox"] {
     margin-right: 8px;
 }
+
+/* css/global.css */
+
+/* ... (Mantenha os estilos existentes) ... */
+
+/* RELATÓRIOS - CARDS DE SELEÇÃO */
+.active-card {
+    border: 2px solid var(--primary-color);
+    background-color: #e8eaf6;
+}
+
+/* LIVRO RAZÃO */
+.account-ledger-block {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-color);
+}
+
+.ledger-header h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+
+.ledger-initial-balance, .ledger-final-balance {
+    background-color: #f9f9f9;
+}
+
+/* INDICADORES */
+.indicadores-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.indicator-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    border-top: 5px solid #ccc;
+    transition: transform 0.2s;
+}
+
+.indicator-card:hover {
+    transform: translateY(-5px);
+}
+
+.indicator-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 10px 0;
+}
+
+.indicator-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Bordas Coloridas para Indicadores */
+.border-success { border-top-color: var(--success-color); }
+.border-warning { border-top-color: #ff9800; }
+.border-info { border-top-color: #00bcd4; }
+.border-primary { border-top-color: var(--primary-color); }
+
+/* UTILITÁRIOS DE TABELA */
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.text-danger { color: var(--danger-color); }
+.text-primary { color: var(--secondary-color); }
+.text-muted { color: #999; }
+.font-weight-bold { font-weight: 700; }
+.text-uppercase { text-transform: uppercase; }

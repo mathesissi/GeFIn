@@ -202,7 +202,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         totalCreditoSpan.textContent = `R$ ${totalCredito.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
         
         const diferenca = totalDebito - totalCredito;
-        diferencaSpan.textContent = `R$ ${diferenca.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        
+        // ALTERAÇÃO AQUI: Adicionado Math.abs() para remover o sinal negativo visualmente
+        diferencaSpan.textContent = `R$ ${Math.abs(diferenca).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        
+        // A cor continua vermelha se houver diferença (positiva ou negativa) e verde se zerar
         diferencaSpan.style.color = Math.abs(diferenca) < 0.005 ? 'green' : 'red';
     };
     

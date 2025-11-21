@@ -78,7 +78,7 @@ const data = {
         };
         
         try {
-            const response = await fetch('http://localhost:3000/empresas', { 
+            const response = await fetch(`${window.location.origin}/empresas`, { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
