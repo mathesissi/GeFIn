@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - GeFIn</title>
+    <link rel="stylesheet" href="../css/global.css">
+    <style>
+        /* ===================== */
+        /* ESTILOS DO PERFIL     */
+        /* ===================== */
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+            /* Empurra para a direita */
+        }
+
+        .user-profile {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .user-profile:hover {
+            background-color: #f0f0f0;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            padding: 5px 15px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-logout:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* Estilos do Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .close-btn {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: black;
+        }
+
+        .profile-info p {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .profile-info strong {
+            color: #333;
+            display: inline-block;
+            width: 100px;
+        }
+
+        /* ===================== */
+        /* DASHBOARD (Existente) */
+        /* ===================== */
+        .account-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .account-list li {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .account-list input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        #mini-relatorio {
+            margin-top: 20px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-element);
+        }
+
+        #gerar-relatorio {
+            margin-top: 1rem;
+        }
+    </style>
+
+    <link rel="stylesheet" href="/web/css/toast.css">
+    <script src="/web/js/toast.js" defer></script>
+</head>
+
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>GeFIn</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="Home.html" class="nav-link active">Dashboard</a>
+                <a href="ContasContabeis.html" class="nav-link">Plano de Contas</a>
+                <a href="LivroDiario.html" class="nav-link">Lançamentos</a>
+                <a href="Relatorios.html" class="nav-link">Relatórios</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h1>Dashboard</h1>
+
+                <div class="user-actions">
+                    <div class="user-profile" id="btn-open-profile" title="Ver Perfil">
+                        <span id="header-username">Carregando...</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <button class="btn-logout" id="btn-logout">Sair</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+
+                <div class="card-grid">
+                    <div class="card">
+                        <h3 class="card-title">Saldo em Caixa</h3>
+                        <ul id="saldo-caixa" class="account-list"></ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Contas a Pagar (Mês)</h3>
+                        <ul id="contas-pagar" class="account-list"></ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Contas a Receber (Mês)</h3>
+                        <ul id="contas-receber" class="account-list"></ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="card-title">Resultado (Mês)</h3>
+                        <ul id="resultado-mes" class="account-list"></ul>
+                    </div>
+                </div>
+
+                <button id="gerar-relatorio" class="btn btn-primary">Gerar Mini Relatório</button>
+                <div id="mini-relatorio"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Perfil do Usuário</h2>
+                <span class="close-btn" id="close-profile-btn">&times;</span>
+            </div>
+            <div class="modal-body profile-info">
+                <p><strong>Nome:</strong> <span id="profile-nome">-</span></p>
+                <p><strong>Email:</strong> <span id="profile-email">-</span></p>
+                <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+                <p><strong>Empresa:</strong> <span id="profile-empresa">-</span></p>
+                <p><strong>CNPJ:</strong> <span id="profile-cnpj">-</span></p>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" class="btn btn-secondary" id="btn-close-modal-action"
+                    style="padding: 8px 16px; border: 1px solid #ccc; background: #fff; border-radius: 4px; cursor: pointer;">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/dashboard.js"></script>
+</body>
+
+</html>

@@ -32,13 +32,14 @@ var SubtipoPassivo;
 })(SubtipoPassivo || (exports.SubtipoPassivo = SubtipoPassivo = {}));
 //Representa uma conta contábil com seus atributos e lógica de validação.
 class Conta {
-    constructor(id_conta, nome_conta, tipo_conta, codigo_conta, subtipo_conta, subtipo_secundario) {
+    constructor(id_conta, nome_conta, tipo_conta, codigo_conta, id_empresa, subtipo_conta, subtipo_secundario) {
         this.id_conta = id_conta;
         this.nome_conta = nome_conta;
         this.tipo_conta = tipo_conta;
         this.codigo_conta = codigo_conta;
-        const primarySubtype = (subtipo_conta === null || subtipo_conta === void 0 ? void 0 : subtipo_conta.trim()) || undefined;
-        const secondarySubtype = (subtipo_secundario === null || subtipo_secundario === void 0 ? void 0 : subtipo_secundario.trim()) || undefined;
+        this.id_empresa = id_empresa;
+        const primarySubtype = subtipo_conta?.trim() || undefined;
+        const secondarySubtype = subtipo_secundario?.trim() || undefined;
         const isPatrimonioLiquido = tipo_conta === TipoConta.PatrimonioLiquido;
         const isReceitaDespesa = tipo_conta === TipoConta.Receita || tipo_conta === TipoConta.Despesa;
         const isSubtypeMandatory = tipo_conta === TipoConta.Ativo || tipo_conta === TipoConta.Passivo;
@@ -98,6 +99,7 @@ class Conta {
             console.log(`Subtipo Secundário: ${this.subtipo_secundario}`);
         }
         console.log(`Código: ${this.codigo_conta}`);
+        console.log(`ID Empresa: ${this.id_empresa}`);
     }
 }
 exports.Conta = Conta;

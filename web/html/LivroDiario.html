@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lançamentos - GeFIn</title>
     <link rel="stylesheet" href="../css/global.css">
+
+    <link rel="stylesheet" href="/web/css/toast.css">
+    <script src="/web/js/toast.js" defer></script>
+
     <style>
         .lancamento-form {
             background: var(--bg-element);
@@ -33,6 +37,7 @@
             gap: 1rem;
         }
 
+        /* Botão de remover invisível no header para manter alinhamento */
         .partidas-header>span:last-child {
             visibility: hidden;
         }
@@ -40,6 +45,13 @@
         .partidas-grid input[type="number"],
         .partidas-grid select {
             width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .is-invalid {
+            border-color: red !important;
         }
 
         .partidas-footer {
@@ -53,11 +65,26 @@
 
         .partidas-totais {
             font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-error-summary {
+            display: none;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .validation-message {
+            display: none;
+            color: red;
+            font-size: 0.85em;
+            margin-top: 4px;
         }
     </style>
-
-    <link rel="stylesheet" href="toast.css">
-    <script src="toast.js" defer></script>
 </head>
 
 <body>
@@ -67,7 +94,7 @@
                 <h2>GeFIn</h2>
             </div>
             <nav class="sidebar-nav">
-                <a href="/web/index.html" class="nav-link">Dashboard</a>
+                <a href="Home.html" class="nav-link">Dashboard</a>
                 <a href="ContasContabeis.html" class="nav-link">Plano de Contas</a>
                 <a href="LivroDiario.html" class="nav-link active">Lançamentos</a>
                 <a href="Relatorios.html" class="nav-link">Relatórios</a>
@@ -81,10 +108,12 @@
             <div class="content-area">
                 <div class="lancamento-form">
                     <h3>Novo Lançamento Composto</h3>
+
                     <div class="form-error-summary" id="form-error-summary">
                         <h4>Por favor, corrija os seguintes erros:</h4>
                         <ul id="form-error-list"></ul>
                     </div>
+
                     <form id="lancamento-form">
                         <div class="form-group">
                             <label for="data">Data</label>
@@ -96,15 +125,20 @@
                             <input type="text" id="descricao" placeholder="Ex: Pagamento de múltiplos fornecedores">
                             <div class="validation-message" id="descricao-error">A descrição é obrigatória.</div>
                         </div>
+
                         <div class="partidas-header">
                             <span>Conta Contábil</span>
                             <span>Tipo</span>
                             <span>Valor</span>
-                            <span></span>
+                            <span>Remover</span>
                         </div>
-                        <div id="partidas-container"></div>
+
+                        <div id="partidas-container">
+                        </div>
+
                         <button type="button" id="add-partida" class="btn btn-secondary"
                             style="margin-top: 1rem;">Adicionar Partida</button>
+
                         <div class="partidas-footer">
                             <div class="partidas-totais">
                                 <p>Débito Total: <span id="total-debito">R$ 0,00</span></p>
@@ -115,19 +149,6 @@
                                 Lançamento</button>
                         </div>
                     </form>
-                </div>
-                <div class="table-container">
-                    <h3>Histórico de Transações</h3>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Data</th>
-                                <th>Descrição</th>
-                                <th>Valor Total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lancamentos-historico-tbody"></tbody>
-                    </table>
                 </div>
             </div>
         </main>

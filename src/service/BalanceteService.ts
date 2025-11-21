@@ -3,8 +3,8 @@ import { BalanceteRepository } from '../repository/BalanceteRepository';
 export class BalanceteService {
   private repository = BalanceteRepository.getInstance();
 
-  public async getBalancete(mes: number, ano: number) {
-    const contas = await this.repository.findByMesEAno(mes, ano);
+  public async getBalancete(mes: number, ano: number, idEmpresa: number) {
+    const contas = await this.repository.findByMesEAno(mes, ano, idEmpresa);
 
     const total_debitos = contas.reduce((acc, c) => acc + Number(c.movimento_debito), 0);
     const total_creditos = contas.reduce((acc, c) => acc + Number(c.movimento_credito), 0);

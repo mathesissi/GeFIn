@@ -1,17 +1,24 @@
 export type TipoPartida = 'debito' | 'credito';
 
+/**
+ * Representa uma linha de débito ou crédito de uma transação contábil.
+ */
 export interface Partida {
   id_conta: number;
   tipo_partida: TipoPartida;
   valor: number;
 }
 
+/**
+ * Representa uma transação contábil composta (com múltiplas partidas).
+ */
 export class Lancamento {
   id_lancamento: number;
   data: Date;
   descricao: string;
   valor_total: number;
   partidas: Partida[];
+  id_empresa: number;
 
   /**
    * Cria uma nova instância de Lancamento (agora Transação Composta).
@@ -26,7 +33,8 @@ export class Lancamento {
     data: Date,
     descricao: string,
     valor_total: number,
-    partidas: Partida[]
+    partidas: Partida[],
+    id_empresa: number
   ) {
     if (!(data instanceof Date) || isNaN(data.getTime())) {
       throw new Error('A data fornecida é inválida.');
@@ -46,6 +54,7 @@ export class Lancamento {
     this.descricao = descricao;
     this.valor_total = valor_total;
     this.partidas = partidas;
+    this.id_empresa = id_empresa;
   }
 
   /**
@@ -58,7 +67,6 @@ export class Lancamento {
       `Descrição: ${this.descricao}\n` +
       `Valor Total: R$ ${this.valor_total.toFixed(2)}\n` +
       `Detalhes das Partidas:\n`;
-
     this.partidas.forEach(p => {
       output += `  - Conta ${p.id_conta} (${p.tipo_partida.toUpperCase()}): R$ ${p.valor.toFixed(2)}\n`;
     });

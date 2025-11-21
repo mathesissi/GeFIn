@@ -1,34 +1,119 @@
-import mysql, { Connection } from "mysql2";
+// src/database/MySql.ts
 
-const dbConfig = {
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "",
-  database: "gefin",
-  timezone: "+00:00",
-};
+import mysql, { Pool, RowDataPacket } from "mysql2/promise";
 
-const mysqlConnection: Connection = mysql.createConnection(dbConfig);
-
-mysqlConnection.connect((err) => {
-  if (err) {
-    console.error("Erro ao conectar ao banco de dados:", err);
-    throw err;
-  }
-  console.log("Conexão bem-sucedida com o banco de dados MySQL");
+// 1. Configuração e Criação do Pool de Conexões
+export const db: Pool = mysql.createPool({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'gefin',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  timezone: "+00:00", // Manter consistência de timezone
 });
 
-export function executarComandoSQL(query: string, valores: any[]): Promise<any> {
-  return new Promise<any>((resolve, reject) => {
-    mysqlConnection.query(query, valores, (err, resultado: any) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      resolve(resultado);
-    });
-  });
+console.log("Pool de Conexões MySQL configurado.");
+
+/**
+ * Executa um comando SQL (SELECT, INSERT, UPDATE, DELETE, CREATE).
+ * @param query Comando SQL a ser executado.
+ * @param valores Array de valores para substituição (prevenção de SQL Injection).
+ * @returns O resultado da query.
+ */
+export async function executarComandoSQL(query: string, valores: any[] = []): Promise<any> {
+  try {
+    const [resultado] = await db.execute(query, valores);
+    return resultado;
+  } catch (error) {
+    console.error("Erro ao executar comando SQL:", query, error);
+    throw error;
+  }
 }
 
 
+export async function inicializarBancoDeDados() {
+  console.log('\n[DB] Iniciando verificação e criação de tabelas (Multi-Tenant)...');
+
+  await executarComandoSQL(`
+        CREATE TABLE IF NOT EXISTS empresas (
+            id_empresa INT AUTO_INCREMENT PRIMARY KEY,
+            razao_social VARCHAR(150) NOT NULL,
+            cnpj VARCHAR(14) UNIQUE NOT NULL
+        );
+    `);
+
+  await executarComandoSQL(`
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(100) NOT NULL,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            senha VARCHAR(255),
+            id_empresa INT NOT NULL,
+            FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+        );
+    `);
+
+  await executarComandoSQL(`
+      CREATE TABLE IF NOT EXISTS contas (
+        id_conta INT AUTO_INCREMENT PRIMARY KEY,
+        nome_conta VARCHAR(255) NOT NULL,
+        tipo_conta ENUM('Ativo', 'Passivo', 'PatrimonioLiquido', 'Receita', 'Despesa') NOT NULL,
+        codigo_conta VARCHAR(255) NOT NULL,
+        subtipo_conta VARCHAR(255),
+        subtipo_secundario VARCHAR(255),
+        id_empresa INT NOT NULL,
+        FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa),
+        UNIQUE KEY unique_conta_empresa (codigo_conta, id_empresa)
+      );
+    `);
+
+  await executarComandoSQL(`
+      CREATE TABLE IF NOT EXISTS transacoes (
+        id_transacao INT AUTO_INCREMENT PRIMARY KEY,
+        data DATE NOT NULL,
+        descricao VARCHAR(255) NOT NULL,
+        valor_total DECIMAL(12, 2) NOT NULL,
+        id_balancete INT,
+        id_empresa INT NOT NULL,
+        FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+      );
+    `);
+
+  await executarComandoSQL(`
+      CREATE TABLE IF NOT EXISTS partidas_lancamento (
+        id_partida INT AUTO_INCREMENT PRIMARY KEY,
+        id_transacao INT NOT NULL,
+        id_conta INT NOT NULL,
+        tipo_partida VARCHAR(7) NOT NULL CHECK (tipo_partida IN ('debito', 'credito')),
+        valor DECIMAL(12, 2) NOT NULL,
+        id_empresa INT NOT NULL,
+        FOREIGN KEY (id_transacao) REFERENCES transacoes(id_transacao) ON DELETE CASCADE,
+        FOREIGN KEY (id_conta) REFERENCES contas(id_conta),
+        FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+      );
+    `);
+
+  await executarComandoSQL(`
+        CREATE TABLE IF NOT EXISTS balancetes (
+        id_balancete INT AUTO_INCREMENT PRIMARY KEY,
+        id_conta INT NOT NULL,
+        id_empresa INT NOT NULL,
+        mes TINYINT NOT NULL, 
+        ano SMALLINT NOT NULL,
+        saldo_inicial DECIMAL(15,2) DEFAULT 0,
+        movimento_debito DECIMAL(15,2) DEFAULT 0,
+        movimento_credito DECIMAL(15,2) DEFAULT 0,
+        saldo_final DECIMAL(15,2) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        CONSTRAINT fk_balancete_conta FOREIGN KEY (id_conta) REFERENCES contas(id_conta),
+        CONSTRAINT fk_balancete_empresa FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa),
+        CONSTRAINT uq_balancetes_conta_mes_ano UNIQUE (id_conta, id_empresa, mes, ano)
+        );
+    `);
+
+
+  console.log('[DB] Inicialização do banco de dados concluída.');
+}

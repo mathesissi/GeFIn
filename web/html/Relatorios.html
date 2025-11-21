@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatórios - GeFIn</title>
+
     <link rel="stylesheet" href="../css/global.css">
 
-    <link rel="stylesheet" href="toast.css">
-    <script src="toast.js" defer></script>
+    <link rel="stylesheet" href="/web/css/toast.css">
+    <script src="/web/js/toast.js" defer></script>
 </head>
 
 <body>
@@ -18,7 +19,7 @@
                 <h2>GeFIn</h2>
             </div>
             <nav class="sidebar-nav">
-                <a href="/web/index.html" class="nav-link">Dashboard</a>
+                <a href="Home.html" class="nav-link">Dashboard</a>
                 <a href="ContasContabeis.html" class="nav-link">Plano de Contas</a>
                 <a href="LivroDiario.html" class="nav-link">Lançamentos</a>
                 <a href="Relatorios.html" class="nav-link active">Relatórios</a>
@@ -41,36 +42,65 @@
                         <h3>Balancete de Verificação</h3>
                         <p>Analise os saldos devedores e credores de todas as contas em um período.</p>
                     </div>
+
                     <div class="report-card" data-report="balanco">
                         <h3>Balanço Patrimonial</h3>
                         <p>Visualize a posição patrimonial e financeira da empresa.</p>
                     </div>
+
+                    <div class="report-card" data-report="livrodiario">
+                        <h3>Livro Diário</h3>
+                        <p>Visualize o histórico completo de lançamentos e seus detalhes.</p>
+                    </div>
+
+                    <div class="report-card" data-report="dre">
+                        <h3>DRE</h3>
+                        <p>Demonstração do Resultado do Exercício (Regime de Competência).</p>
+                    </div>
                 </div>
 
-                <div id="filter-container" style="display: none;">
-                    <form class="filter-section" id="report-filter-form">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="mes">Mês</label>
-                            <select id="mes">
-                                <option value="1">Janeiro</option>
-                                <option value="2">Fevereiro</option>
-                                <option value="3">Março</option>
-                                <option value="4">Abril</option>
-                                <option value="5">Maio</option>
-                                <option value="6">Junho</option>
-                                <option value="7">Julho</option>
-                                <option value="8">Agosto</option>
-                                <option value="9">Setembro</option>
-                                <option value="10" selected>Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
+                <div id="filter-container" style="display: none; width: 100%;">
+                    <form class="filter-section" id="report-filter-form" style="
+                            display: flex;
+                            gap: 1rem;
+                            align-items: center;
+                            width: 100%;
+                            flex-wrap: wrap;
+                            background: var(--bg-element);
+                            padding: 1rem 1.5rem;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 12px var(--shadow-color);
+                            margin-top: 1.5rem;
+                        ">
+
+                        <div style="display: flex; flex: 1; gap: 1rem; align-items: center;">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="mes">Mês</label>
+                                <select id="mes" style="width: 100%; height: 42px;">
+                                    <option value="1">Janeiro</option>
+                                    <option value="2">Fevereiro</option>
+                                    <option value="3">Março</option>
+                                    <option value="4">Abril</option>
+                                    <option value="5">Maio</option>
+                                    <option value="6">Junho</option>
+                                    <option value="7">Julho</option>
+                                    <option value="8">Agosto</option>
+                                    <option value="9">Setembro</option>
+                                    <option value="10" selected>Outubro</option>
+                                    <option value="11">Novembro</option>
+                                    <option value="12">Dezembro</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="flex: 1;">
+                                <label for="ano">Ano</label>
+                                <input type="number" id="ano" value="2025" style="width: 100%; height: 42px;">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" style="height: 42px; white-space: nowrap;">
+                                Gerar Relatório
+                            </button>
                         </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label for="ano">Ano</label>
-                            <input type="number" id="ano" value="2025">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Gerar Relatório</button>
                     </form>
                 </div>
 
@@ -141,6 +171,7 @@
                                     <tbody id="balanco-receita-tbody"></tbody>
                                 </table>
                             </div>
+
                             <div class="table-container">
                                 <table class="data-table">
                                     <thead>
@@ -153,11 +184,38 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <div id="livrodiario-view" class="table-container" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">Data</th>
+                                    <th style="width: 40%;">Descrição</th>
+                                    <th colspan="2"></th>
+                                    <th style="text-align: right; width: 15%;">Valor Total</th>
+                                    <th style="width: 50px; text-align: center;">Det.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="livrodiario-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-container" id="dre-view" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th style="text-align: right; width: 150px;">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-tbody-dre"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
+
     <script type="module" src="../js/Relatorios.js"></script>
 </body>
 

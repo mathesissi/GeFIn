@@ -7,6 +7,58 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"Usuario": {
+				"properties": {
+					"id_usuario": {
+						"type": "number",
+						"format": "double"
+					},
+					"nome": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"senha": {
+						"type": "string"
+					},
+					"id_empresa": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id_usuario",
+					"nome",
+					"email",
+					"id_empresa"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Partial_Usuario_": {
+				"properties": {
+					"id_usuario": {
+						"type": "number",
+						"format": "double"
+					},
+					"nome": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string"
+					},
+					"senha": {
+						"type": "string"
+					},
+					"id_empresa": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"type": "object",
+				"description": "Make all properties in T optional"
+			},
 			"TipoPartida": {
 				"type": "string",
 				"enum": [
@@ -60,6 +112,10 @@
 							"$ref": "#/components/schemas/Partida"
 						},
 						"type": "array"
+					},
+					"id_empresa": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -67,7 +123,8 @@
 					"data",
 					"descricao",
 					"valor_total",
-					"partidas"
+					"partidas",
+					"id_empresa"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -92,6 +149,93 @@
 					"data",
 					"descricao",
 					"partidas"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Empresa": {
+				"properties": {
+					"id_empresa": {
+						"type": "number",
+						"format": "double"
+					},
+					"razao_social": {
+						"type": "string"
+					},
+					"cnpj": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id_empresa",
+					"razao_social",
+					"cnpj"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DRELine": {
+				"properties": {
+					"codigo": {
+						"type": "string",
+						"nullable": true
+					},
+					"descricao": {
+						"type": "string"
+					},
+					"valor": {
+						"type": "number",
+						"format": "double"
+					},
+					"tipo": {
+						"type": "string",
+						"enum": [
+							"conta",
+							"subtotal",
+							"calculo",
+							"titulo"
+						]
+					},
+					"children": {
+						"items": {
+							"$ref": "#/components/schemas/DRELine"
+						},
+						"type": "array"
+					},
+					"nivel": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"codigo",
+					"descricao",
+					"valor",
+					"tipo",
+					"children",
+					"nivel"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"DRE": {
+				"properties": {
+					"mes": {
+						"type": "number",
+						"format": "double"
+					},
+					"ano": {
+						"type": "number",
+						"format": "double"
+					},
+					"root": {
+						"$ref": "#/components/schemas/DRELine"
+					}
+				},
+				"required": [
+					"mes",
+					"ano",
+					"root"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -126,13 +270,18 @@
 					},
 					"codigo_conta": {
 						"type": "string"
+					},
+					"id_empresa": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
 					"id_conta",
 					"nome_conta",
 					"tipo_conta",
-					"codigo_conta"
+					"codigo_conta",
+					"id_empresa"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -157,6 +306,39 @@
 				},
 				"type": "object",
 				"description": "Make all properties in T optional"
+			},
+			"BalanceteReport": {
+				"properties": {
+					"mes": {
+						"type": "number",
+						"format": "double"
+					},
+					"ano": {
+						"type": "number",
+						"format": "double"
+					},
+					"contas": {
+						"items": {},
+						"type": "array"
+					},
+					"total_debitos": {
+						"type": "number",
+						"format": "double"
+					},
+					"total_creditos": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"mes",
+					"ano",
+					"contas",
+					"total_debitos",
+					"total_creditos"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -167,6 +349,361 @@
 		"description": "Documentação da API usando Swagger"
 	},
 	"paths": {
+		"/usuarios/signup": {
+			"post": {
+				"operationId": "CriarUsuario",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Usuario"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Usuários"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"id_empresa": {
+										"type": "number",
+										"format": "double"
+									},
+									"senha": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"nome": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"id_empresa",
+									"senha",
+									"email",
+									"nome"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/usuarios/login": {
+			"post": {
+				"operationId": "SignInWithPassword",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"properties": {
+												"user": {},
+												"token": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"user",
+												"token"
+											],
+											"type": "object"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Usuários"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"senha": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"senha",
+									"email"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/usuarios": {
+			"get": {
+				"operationId": "ListarUsuarios",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Usuario"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Usuários"
+				],
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/usuarios/{id}": {
+			"get": {
+				"operationId": "BuscarUsuarioPorId",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Usuario"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Usuários"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "AtualizarDadosUsuario",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Usuario"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Usuários"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Partial_Usuario_"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeletarUsuario",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Usuários"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
 		"/lancamentos": {
 			"post": {
 				"operationId": "CriarLancamento",
@@ -208,7 +745,11 @@
 				"tags": [
 					"Lançamentos"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [],
 				"requestBody": {
 					"required": true,
@@ -241,7 +782,11 @@
 				"tags": [
 					"Lançamentos"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": []
 			}
 		},
@@ -286,7 +831,11 @@
 				"tags": [
 					"Lançamentos"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -357,7 +906,11 @@
 				"tags": [
 					"Lançamentos"
 				],
-				"security": [],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
 				"parameters": [
 					{
 						"in": "path",
@@ -422,11 +975,263 @@
 				"tags": [
 					"Lançamentos"
 				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/empresas": {
+			"post": {
+				"operationId": "CriarEmpresa",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Empresa"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Cria uma nova empresa no sistema.\r\nEsta rota é geralmente restrita a administradores ou ao fluxo de cadastro inicial (Sign-up).",
+				"tags": [
+					"Empresas"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"cnpj": {
+										"type": "string"
+									},
+									"razao_social": {
+										"type": "string"
+									}
+								},
+								"required": [
+									"cnpj",
+									"razao_social"
+								],
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/empresas/{id}": {
+			"get": {
+				"operationId": "BuscarEmpresaPorId",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Empresa"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Busca uma empresa pelo ID.",
+				"tags": [
+					"Empresas"
+				],
 				"security": [],
 				"parameters": [
 					{
 						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/empresas/cnpj/{cnpj}": {
+			"get": {
+				"operationId": "BuscarEmpresaPorCnpj",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/Empresa"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Busca uma empresa pelo CNPJ.",
+				"tags": [
+					"Empresas"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "cnpj",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/dre": {
+			"get": {
+				"operationId": "GetDRE",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/DRE"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"description": "Gera a Demonstração do Resultado do Exercício (DRE) para um período específico.",
+				"tags": [
+					"Relatórios"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "mes",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ano",
 						"required": true,
 						"schema": {
 							"format": "double",
@@ -474,6 +1279,7 @@
 						}
 					}
 				},
+				"description": "Criar Conta",
 				"tags": [
 					"Contas"
 				],
@@ -494,6 +1300,10 @@
 									"codigo_conta": {
 										"type": "string"
 									},
+									"id_empresa": {
+										"type": "number",
+										"format": "double"
+									},
 									"tipo_conta": {
 										"$ref": "#/components/schemas/TipoConta"
 									},
@@ -503,6 +1313,7 @@
 								},
 								"required": [
 									"codigo_conta",
+									"id_empresa",
 									"tipo_conta",
 									"nome_conta"
 								],
@@ -511,7 +1322,9 @@
 						}
 					}
 				}
-			},
+			}
+		},
+		"/contas/{id_empresa}": {
 			"get": {
 				"operationId": "ListarContas",
 				"responses": {
@@ -529,14 +1342,25 @@
 						}
 					}
 				},
+				"description": "Listar contas por empresa",
 				"tags": [
 					"Contas"
 				],
 				"security": [],
-				"parameters": []
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id_empresa",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
 			}
 		},
-		"/contas/{id}": {
+		"/contas/{id_empresa}/{id}": {
 			"get": {
 				"operationId": "BuscarContaPorId",
 				"responses": {
@@ -574,11 +1398,21 @@
 						}
 					}
 				},
+				"description": "Buscar conta por id",
 				"tags": [
 					"Contas"
 				],
 				"security": [],
 				"parameters": [
+					{
+						"in": "path",
+						"name": "id_empresa",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
 					{
 						"in": "path",
 						"name": "id",
@@ -645,11 +1479,21 @@
 						}
 					}
 				},
+				"description": "Atualizar conta",
 				"tags": [
 					"Contas"
 				],
 				"security": [],
 				"parameters": [
+					{
+						"in": "path",
+						"name": "id_empresa",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
 					{
 						"in": "path",
 						"name": "id",
@@ -696,6 +1540,7 @@
 						}
 					}
 				},
+				"description": "Deletar conta",
 				"tags": [
 					"Contas"
 				],
@@ -703,7 +1548,87 @@
 				"parameters": [
 					{
 						"in": "path",
+						"name": "id_empresa",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/balancete": {
+			"get": {
+				"operationId": "GetBalancete",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/BalanceteReport"
+										},
+										{}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Erro Interno do Servidor"
+					}
+				},
+				"tags": [
+					"Balancete"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "mes",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ano",
 						"required": true,
 						"schema": {
 							"format": "double",

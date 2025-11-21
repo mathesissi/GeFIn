@@ -4,7 +4,6 @@ import { executarComandoSQL } from "../database/MySql";
 export class EmpresaRepository {
     private static instance: EmpresaRepository;
     private constructor() {
-        this.createTable();
     }
 
     public static getInstance(): EmpresaRepository {
@@ -12,21 +11,6 @@ export class EmpresaRepository {
             EmpresaRepository.instance = new EmpresaRepository();
         }
         return EmpresaRepository.instance;
-    }
-    private async createTable(): Promise<void> {
-        const sql = `
-      CREATE TABLE IF NOT EXISTS empresas (
-            id_empresa INT AUTO_INCREMENT PRIMARY KEY,
-            razao_social VARCHAR(150) NOT NULL,
-            cnpj VARCHAR(14) UNIQUE NOT NULL
-        );
-    `;
-        try {
-            await executarComandoSQL(sql, []);
-            console.log('Tabela "empresas" criada ou já existente.');
-        } catch (error) {
-            console.error('Erro ao criar tabela "empresas":', error);
-        }
     }
 
     private rowToEmpresa(row: any): Empresa {
@@ -63,7 +47,7 @@ export class EmpresaRepository {
     }
 
     async findAll(): Promise<Empresa[]> {
-        const sql = "SELECT * FROM contas ORDER BY razao_social;";
+        const sql = "SELECT * FROM empresas ORDER BY razao_social;";
         const result = await executarComandoSQL(sql, []);
         return result.map((row: any) => this.rowToEmpresa(row));
     }

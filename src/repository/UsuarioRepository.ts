@@ -3,8 +3,9 @@ import { executarComandoSQL } from "../database/MySql";
 
 export class UsuarioRepository {
     private static instance: UsuarioRepository;
+
     private constructor() {
-        this.createTable();
+
     }
 
     public static getInstance(): UsuarioRepository {
@@ -13,25 +14,7 @@ export class UsuarioRepository {
         }
         return UsuarioRepository.instance;
     }
-    private async createTable(): Promise<void> {
-        const sql = `
-      CREATE TABLE IF NOT EXISTS usuarios (
-            id_usuario INT AUTO_INCREMENT PRIMARY KEY,
-            nome VARCHAR(100) NOT NULL,
-            email VARCHAR(100) UNIQUE NOT NULL,
-            senha VARCHAR(255),
-            google_id VARCHAR(255) UNIQUE,
-            id_empresa INT NOT NULL,
-            FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
-        );
-    `;
-        try {
-            await executarComandoSQL(sql, []);
-            console.log('Tabela "usuarios" criada ou já existente.');
-        } catch (error) {
-            console.error('Erro ao criar tabela "usuarios":', error);
-        }
-    }
+
 
     private rowToUsuario(row: any): Usuario {
         return new Usuario(
@@ -39,67 +22,67 @@ export class UsuarioRepository {
             row.nome,
             row.email,
             row.id_empresa,
-            row.senha || undefined,
-            row.google_id || undefined
+            row.senha // A senha (hash) é retornada aqui para uso no login
         );
     }
 
     async create(usuario: Usuario): Promise<Usuario> {
-        const sql = `INSERT INTO usuarios (nome, email, senha, google_id, id_empresa) VALUES (?, ?, ?, ?, ?);`;
-        const params = [usuario.nome, usuario.email, usuario.senha, usuario.google_id, usuario.id_empresa];
+        const sql = `INSERT INTO usuarios (nome, email, senha, id_empresa) VALUES (?, ?, ?, ?);`;
+        // Garantimos que a senha seja null se não for fornecida (embora o signup force a senha)
+        const params = [
+            usuario.nome,
+            usuario.email,
+            usuario.senha || null,
+            usuario.id_empresa
+        ];
         const result = await executarComandoSQL(sql, params);
         const newId = result.insertId;
 
-        const created = await this.findById(newId);
+        const created = await this.findById(newId, usuario.id_empresa);
         if (!created) throw new Error("Erro ao criar usuário");
         return created;
     }
 
-    async findById(id: number): Promise<Usuario | null> {
-        const sql = "SELECT * FROM usuarios WHERE id_usuario = ?;";
-        const result = await executarComandoSQL(sql, [id]);
+    async findById(id: number, id_empresa: number): Promise<Usuario | null> {
+        const sql = "SELECT * FROM usuarios WHERE id_usuario = ? AND id_empresa = ?;";
+        const result = await executarComandoSQL(sql, [id, id_empresa]);
         return result.length > 0 ? this.rowToUsuario(result[0]) : null;
     }
 
     async findByEmail(email: string): Promise<Usuario | null> {
+        // Busca sem filtro de id_empresa, pois o e-mail deve ser único globalmente
         const sql = "SELECT * FROM usuarios WHERE email = ?;";
         const result = await executarComandoSQL(sql, [email]);
         return result.length > 0 ? this.rowToUsuario(result[0]) : null;
     }
 
-    async findByGoogleId(googleId: string): Promise<Usuario | null> {
-        const sql = "SELECT * FROM usuarios WHERE google_id = ?;";
-        const result = await executarComandoSQL(sql, [googleId]);
-        return result.length > 0 ? this.rowToUsuario(result[0]) : null;
-    }
-    async findAll(): Promise<Usuario[]> {
-        const sql = "SELECT * FROM usuarios ORDER BY nome;";
-        const result = await executarComandoSQL(sql, []);
+
+    async findAll(id_empresa: number): Promise<Usuario[]> {
+        const sql = "SELECT * FROM usuarios WHERE id_empresa = ? ORDER BY nome;";
+        const result = await executarComandoSQL(sql, [id_empresa]);
         return result.map((row: any) => this.rowToUsuario(row));
     }
 
     async update(usuario: Usuario): Promise<Usuario | null> {
+        // CORREÇÃO: Alinha o SQL com os parâmetros do modelo (removendo google_id)
         const sql = `
-      UPDATE usuarios
-      SET nome = ?, email = ?, senha = ?, google_id = ?, id_empresa = ?
-      WHERE id_usuario = ?;
-    `;
+            UPDATE usuarios
+            SET nome = ?, email = ?, senha = ?
+            WHERE id_usuario = ? AND id_empresa = ?;
+        `;
         const params = [
             usuario.nome,
             usuario.email,
-            usuario.senha || null,
-            usuario.google_id || null,
-            usuario.id_empresa,
-            usuario.id_usuario,
+            usuario.senha || null, // Garante que é null se não houver senha
+            usuario.id_usuario, // WHERE 1
+            usuario.id_empresa, // WHERE 2 (Segurança)
         ];
         await executarComandoSQL(sql, params);
-        return this.findById(usuario.id_usuario);
+        return this.findById(usuario.id_usuario, usuario.id_empresa);
     }
-
-    async delete(id: number): Promise<boolean> {
-        const sql = "DELETE FROM usuarios WHERE id_usuario = ?";
-        const result = await executarComandoSQL(sql, [id]);
+    async delete(id: number, id_empresa: number): Promise<boolean> {
+        const sql = "DELETE FROM usuarios WHERE id_usuario = ? AND id_empresa = ?";
+        const result = await executarComandoSQL(sql, [id, id_empresa]);
         return result.affectedRows > 0;
     }
-
 }

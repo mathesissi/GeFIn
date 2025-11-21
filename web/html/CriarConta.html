@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Criar Conta - Seu Sistema Financeiro</title>
+    <style>
+        /* reset simples */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f6f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 480px;
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h2 {
+            color: #222;
+            margin-bottom: 18px;
+            font-size: 1.6rem;
+            text-align: center;
+        }
+
+        .field {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            color: #444;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.18s, box-shadow 0.18s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.07);
+        }
+
+        .field .help {
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .invalid {
+            border-color: #e55353 !important;
+            box-shadow: none !important;
+        }
+
+        .valid {
+            border-color: #2e9b5f !important;
+        }
+
+        .msg {
+            margin-top: 6px;
+            font-size: 0.88rem;
+        }
+
+        .msg.error {
+            color: #d23b3b;
+        }
+
+        .msg.success {
+            color: #1e7e34;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: #28a745;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 10px;
+            transition: opacity .15s ease, transform .05s;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .row .col {
+            flex: 1;
+        }
+
+        .small {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 8px;
+        }
+    </style>
+    <link rel="stylesheet" href="/web/css/toast.css">
+    <script src="/web/js/toast.js" defer></script>
+</head>
+
+<body>
+    <main class="card" role="main">
+        <h2>Criar Conta</h2>
+
+        <form id="signupForm" novalidate>
+            <div class="field">
+                <label for="nome">Nome</label>
+                <input id="nome" name="nome" type="text" placeholder="Seu nome completo" required />
+                <div id="nomeMsg" class="msg" aria-live="polite"></div>
+            </div>
+
+            <div class="field">
+                <label for="email">E-mail</label>
+                <input id="email" name="email" type="email" placeholder="seu.email@empresa.com" required />
+                <div id="emailMsg" class="msg" aria-live="polite"></div>
+            </div>
+
+            <div class="row">
+                <div class="col field">
+                    <label for="senha">Senha</label>
+                    <input id="senha" name="senha" type="password" placeholder="Mínimo 6 caracteres" required />
+                    <div id="senhaMsg" class="msg" aria-live="polite"></div>
+                </div>
+
+                <div class="col field">
+                    <label for="confirmSenha">Confirmar senha</label>
+                    <input id="confirmSenha" name="confirmSenha" type="password" placeholder="Repita a senha"
+                        required />
+                    <div id="confirmMsg" class="msg" aria-live="polite"></div>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="cnpj">CNPJ</label>
+                <input id="cnpj" name="cnpj" type="text" placeholder="00.000.000/0000-00" maxlength="18" required />
+                <div id="cnpjMsg" class="msg" aria-live="polite"></div>
+                <div class="small">O CNPJ será usado para criar a sua empresa no sistema.</div>
+            </div>
+
+            <button id="btnSubmit" type="submit" disabled>Criar Conta</button>
+        </form>
+    </main>
+    <script>
+        document.addEventListener('keydown', function (event) {
+            const isCtrlOrCmd = event.ctrlKey || event.metaKey; // Ctrl ou Cmd
+            const isShift = event.shiftKey;
+            const isE = event.key === 'e' || event.key === 'E';
+
+            if (isCtrlOrCmd && isShift && isE) {
+                event.preventDefault();
+
+                console.log("Atalho detectado: Redirecionando para Cadastro de Empresa...");
+
+                window.location.href = 'EmpresaCadastri.html';
+            }
+        });
+    </script>
+    <script type="module" src="../js/CriarConta.js"></script>
+
+</body>
+
+</html>

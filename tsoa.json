@@ -1,5 +1,5 @@
 {
-  "entryFile": "src/index.ts",
+  "entryFile": "src/server.ts",
   "noImplicitAdditionalProperties": "throw-on-extras",
   "controllerPathGlobs": [
     "src/controller/**/*Controller.ts"
@@ -22,6 +22,7 @@
     }
   },
   "routes": {
-    "routesDir": "src/route"
+    "routesDir": "src/route",
+    "authenticationModule": "./src/authentication.ts"
   }
 }

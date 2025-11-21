@@ -1,0 +1,36 @@
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Descrição</th>
+            <th class="text-end">Valor</th>
+        </tr>
+    </thead>
+
+    <tbody id="tbodyDRE"></tbody>
+</table>
+
+<script>
+    async function carregarDRE() {
+        const ano = new Date().getFullYear();
+        const res = await fetch(`/dre/${ano}`);
+        const dre = await res.json();
+
+        let html = "";
+
+        dre.linhas.forEach(l => {
+            const bold = l.tipo !== "conta" ? "fw-bold" : "";
+            const value = l.valor !== null ? l.valor.toLocaleString('pt-BR', { style: "currency", currency: "BRL" }) : "-";
+
+            html += `
+          <tr>
+              <td class="${bold}">${l.descricao}</td>
+              <td class="${bold} text-end">${value}</td>
+          </tr>
+      `;
+        });
+
+        document.getElementById("tbodyDRE").innerHTML = html;
+    }
+
+    carregarDRE();
+</script>

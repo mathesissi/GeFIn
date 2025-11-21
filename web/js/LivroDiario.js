@@ -1,11 +1,15 @@
-import { getContas, createLancamento, getLancamentos } from './api.js';
+import { getContas, createLancamento } from './api.js'; 
+// Removido getLancamentos da importação pois não é mais usado aqui
 
 document.addEventListener('DOMContentLoaded', async () => {
     // --- Referências aos Elementos ---
     const lancamentoForm = document.getElementById('lancamento-form');
     const addPartidaBtn = document.getElementById('add-partida');
     const partidasContainer = document.getElementById('partidas-container');
-    const lancamentosTbody = document.getElementById('lancamentos-historico-tbody');
+    
+    // REMOVIDO: referência à tabela que não existe mais
+    // const lancamentosTbody = document.getElementById('lancamentos-historico-tbody');
+    
     const errorSummary = document.getElementById('form-error-summary');
     const errorList = document.getElementById('form-error-list');
     const totalDebitoSpan = document.getElementById('total-debito');
@@ -15,9 +19,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let contasCache = [];
 
     // --- Funções de Validação e UI ---
+
     const clearValidationErrors = () => {
-        errorSummary.style.display = 'none';
-        errorList.innerHTML = '';
+        if(errorSummary) errorSummary.style.display = 'none';
+        if(errorList) errorList.innerHTML = '';
         document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
         document.querySelectorAll('.validation-message').forEach(el => el.style.display = 'none');
     };
@@ -48,12 +53,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!dataInput.value) {
             showError('data', 'A data é obrigatória.');
-            addSummaryError('O campo "Data" deve ser preenchido.');
             isValid = false;
         }
         if (!descricaoInput.value.trim()) {
             showError('descricao', 'A descrição é obrigatória.');
-            addSummaryError('O campo "Descrição" não pode estar vazio.');
             isValid = false;
         }
 
@@ -81,14 +84,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (!contaSelect.value) {
                 contaSelect.classList.add('is-invalid');
-                addSummaryError(`A Partida #${index + 1} precisa ter uma conta selecionada.`);
                 partidaIsValid = false;
             }
             
             const valor = parseFloat(valorInput.value) || 0;
             if (valor <= 0 || !valorInput.value) {
                 valorInput.classList.add('is-invalid');
-                addSummaryError(`O valor da Partida #${index + 1} deve ser um número positivo.`);
                 partidaIsValid = false;
             }
 
@@ -102,12 +103,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     temCredito = true;
                 }
             } else {
-                isValid = false;
+                isValid = false; 
             }
         });
 
         if (Math.abs(totalDebito - totalCredito) > 0.005 || totalDebito === 0) {
-            addSummaryError('O total de débitos deve ser igual ao total de créditos e maior que zero.');
+            addSummaryError(`O total de débitos (R$ ${totalDebito.toFixed(2)}) deve ser igual ao total de créditos (R$ ${totalCredito.toFixed(2)}).`);
             isValid = false;
         }
         
@@ -123,11 +124,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const loadContas = async () => {
         try {
-            contasCache = await getContas();
-            addPartida();
-            addPartida();
+            const response = await getContas();
+            contasCache = Array.isArray(response) ? response : [];
+            
+            if (partidasContainer.innerHTML === '') {
+                addPartida();
+                addPartida();
+            }
         } catch (error) {
-            console.error('Falha ao carregar contas para o formulário.');
+            console.error('Falha ao carregar contas:', error);
         }
     };
 
@@ -161,12 +166,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         valorInput.className = 'valor-partida';
         valorInput.placeholder = '0,00';
         valorInput.step = '0.01';
+        valorInput.min = '0.01';
 
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.className = 'btn-icon btn-danger remove-partida';
         removeButton.title = 'Remover Partida';
-        removeButton.innerHTML = '<img src="../media/svg/delete.svg" alt="Remover">';
+        removeButton.innerHTML = '<img src="../media/svg/delete.svg" alt="X" style="width:16px;">';
         
         newPartida.appendChild(contaSelectWrapper);
         newPartida.appendChild(tipoSelect);
@@ -192,51 +198,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         
-        totalDebitoSpan.textContent = `R$ ${totalDebito.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        totalCreditoSpan.textContent = `R$ ${totalCredito.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        totalDebitoSpan.textContent = `R$ ${totalDebito.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+        totalCreditoSpan.textContent = `R$ ${totalCredito.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
         
         const diferenca = totalDebito - totalCredito;
-        diferencaSpan.textContent = `R$ ${diferenca.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        diferencaSpan.textContent = `R$ ${diferenca.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
         diferencaSpan.style.color = Math.abs(diferenca) < 0.005 ? 'green' : 'red';
     };
     
-    const renderLancamentos = (lancamentos) => {
-        lancamentosTbody.innerHTML = ''; 
-        if (!lancamentos || lancamentos.length === 0) {
-            lancamentosTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum lançamento encontrado.</td></tr>';
-            return;
-        }
-        lancamentos.forEach(lanc => {
-            const tr = document.createElement('tr');
-            const valorExibido = lanc.valor_total !== undefined ? lanc.valor_total : lanc.valor; 
-            tr.innerHTML = `
-                <td>${new Date(lanc.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</td>
-                <td>${lanc.descricao}</td>
-                <td>R$ ${parseFloat(valorExibido).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-            `; 
-            lancamentosTbody.appendChild(tr);
-        });
-    };
-
-    const loadAndRenderLancamentos = async () => {
-        try {
-            const lancamentos = await getLancamentos();
-            renderLancamentos(lancamentos);
-        } catch (error) {
-            console.error('Falha ao carregar lançamentos.');
-            lancamentosTbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color: red;">Erro ao carregar histórico.</td></tr>';
-        }
-    };
+    // --- Funções de renderização REMOVIDAS ---
+    // renderLancamentos() -> Removido
+    // loadAndRenderLancamentos() -> Removido
 
     // --- Event Listeners ---
     addPartidaBtn.addEventListener('click', addPartida);
     
     partidasContainer.addEventListener('click', e => {
         if (e.target.closest('.remove-partida')) { 
-            e.target.closest('.partidas-grid').remove(); 
-            updateTotals(); 
+            if (partidasContainer.querySelectorAll('.partidas-grid').length > 2) {
+                e.target.closest('.partidas-grid').remove(); 
+                updateTotals(); 
+            } else {
+                alert("Um lançamento deve ter no mínimo duas partidas.");
+            }
         }
     });
+
     partidasContainer.addEventListener('input', updateTotals);
     partidasContainer.addEventListener('change', updateTotals);
 
@@ -258,37 +245,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
         
         try {
-            const novoLancamento = await createLancamento(dadosTransacao); 
+            await createLancamento(dadosTransacao); 
             
+            if (typeof showSystemNotification === 'function') {
+                showSystemNotification('Lançamento salvo com sucesso!', 'success');
+            } else {
+                alert('Lançamento salvo!');
+            }
+
+            // Reset do form
             lancamentoForm.reset();
             partidasContainer.innerHTML = '';
             addPartida();
             addPartida();
             updateTotals(); 
             
-            const tr = document.createElement('tr');
-            const valorExibido = novoLancamento.valor_total !== undefined ? novoLancamento.valor_total : novoLancamento.valor;
-            tr.innerHTML = `
-                <td>${new Date(novoLancamento.data).toLocaleDateString('pt-BR', {timeZone: 'UTC'})}</td>
-                <td>${novoLancamento.descricao}</td>
-                <td>R$ ${parseFloat(valorExibido).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-            `;
-            if (lancamentosTbody.querySelector('tr > td[colspan="3"]')) {
-                lancamentosTbody.innerHTML = '';
-            }
-            lancamentosTbody.prepend(tr); 
+            // REMOVIDO: Chamada para recarregar tabela
 
-            showSystemNotification('Lançamento salvo com sucesso!');
         } catch(error) {
            console.error("Falha ao criar lançamento:", error);
-           if (error.response && error.response.data && error.response.data.message) {
-              addSummaryError(`Erro do Servidor: ${error.response.data.message}`);
-           } else {
-              addSummaryError('Erro desconhecido ao salvar o lançamento. Verifique o console.');
-           }
+           addSummaryError(`Erro ao salvar: ${error.message}`);
         }
     });
 
+    // Inicialização: Apenas carrega as contas
     await loadContas();
-    await loadAndRenderLancamentos();
 });

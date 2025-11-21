@@ -17,121 +17,58 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const modalTitle = document.getElementById('modal-title');
     
-    const idInput = document.createElement('input');
-    idInput.type = 'hidden';
-    idInput.id = 'id_conta';
-    accountForm.appendChild(idInput);
+    // Garante que o campo oculto ID exista
+    let idInput = document.getElementById('id_conta');
+    if (!idInput) {
+        idInput = document.createElement('input');
+        idInput.type = 'hidden';
+        idInput.id = 'id_conta';
+        accountForm.appendChild(idInput);
+    }
 
-    // Estrutura atualizada para suportar hierarquia de subtipos com valores padronizados (sem acentos, com espaços canónicos)
+    // Mapeamento de Subtipos e Exibição
     const subtiposMap = {
         Ativo: {
-            // Subtipos Principais
             options: ['Ativo Circulante', 'Ativo Nao Circulante'], 
-            // Subtipos Secundários aninhados sob 'Ativo Nao Circulante'
             secondary: {
-                'Ativo Nao Circulante': [
-                    'Realizavel a Longo Prazo', 
-                    'Investimento',
-                    'Imobilizado',
-                    'Intangivel'
-                ]
+                'Ativo Nao Circulante': ['Realizavel a Longo Prazo', 'Investimento', 'Imobilizado', 'Intangivel']
             }
         },
         Passivo: {
             options: ['Passivo Circulante', 'Passivo Nao Circulante'],
             secondary: {} 
         },
-        'PatrimonioLiquido': { options: [] }, // VALOR PADRONIZADO
+        'PatrimonioLiquido': { options: [] },
         Receita: { options: [] },
         Despesa: { options: [] }
     };
     
-    // Mapeamento para exibir os nomes bonitos (com acentos) no dropdown e na tabela
     const displayMap = {
         'PatrimonioLiquido': 'Patrimônio Líquido',
         'Ativo Nao Circulante': 'Ativo Não Circulante',
         'Passivo Nao Circulante': 'Passivo Não Circulante',
         'Realizavel a Longo Prazo': 'Realizável a Longo Prazo',
-        'Intangivel': 'Intangível',
-        // Valores que são iguais ao display para facilitar a função
-        'Ativo': 'Ativo',
-        'Passivo': 'Passivo',
-        'Receita': 'Receita',
-        'Despesa': 'Despesa',
-        'Ativo Circulante': 'Ativo Circulante',
-        'Passivo Circulante': 'Passivo Circulante',
-        'Investimento': 'Investimento',
-        'Imobilizado': 'Imobilizado'
+        'Intangivel': 'Intangível'
     };
 
     const getDisplayText = (value) => displayMap[value] || value;
 
+    // --- Funções Auxiliares ---
 
-    const openModal = (conta = null) => {
-        accountForm.reset();
-        subtipoGroup.style.display = 'none';
-        subtipoSecundarioGroup.style.display = 'none'; // Esconder o novo campo
-        idInput.value = '';
+    const populateSelectAndSet = (selectElement, options, selectedValue) => {
+        selectElement.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.value = "";
+        defaultOption.textContent = options.length > 0 ? "Selecione..." : "N/A";
+        selectElement.appendChild(defaultOption);
 
-        // Helper para preencher e selecionar um valor de um campo Select
-        const populateSelectAndSet = (selectElement, options, selectedValue) => {
-            selectElement.innerHTML = '';
-            const defaultOption = document.createElement('option');
-            defaultOption.value = "";
-            defaultOption.textContent = options.length > 0 ? "Selecione..." : "N/A";
-            selectElement.appendChild(defaultOption);
-
-            options.forEach(optionText => {
-                const option = document.createElement('option');
-                option.value = optionText;
-                option.textContent = getDisplayText(optionText); // Usando displayMap para o texto
-                selectElement.appendChild(option);
-            });
-            if (selectedValue) {
-                selectElement.value = selectedValue;
-            }
-        };
-
-        if (conta) {
-            modalTitle.textContent = 'Editar Conta';
-            idInput.value = conta.id_conta;
-            document.getElementById('codigo').value = conta.codigo_conta;
-            document.getElementById('nome').value = conta.nome_conta;
-            tipoSelect.value = conta.tipo_conta;
-            
-            const currentSubtipos = subtiposMap[conta.tipo_conta];
-
-            if (currentSubtipos && currentSubtipos.options.length > 0) {
-                // 1. Popular e selecionar o Subtipo Principal
-                populateSelectAndSet(subtipoSelect, currentSubtipos.options, conta.subtipo_conta);
-                subtipoGroup.style.display = 'block';
-
-                if (currentSubtipos.secondary && currentSubtipos.secondary[conta.subtipo_conta]) {
-                    const secondaryOptions = currentSubtipos.secondary[conta.subtipo_conta];
-                    // 2. Popular e selecionar o Subtipo Secundário
-                    populateSelectAndSet(subtipoSecundarioSelect, secondaryOptions, conta.subtipo_secundario);
-                    subtipoSecundarioGroup.style.display = 'block';
-                }
-            }
-        } else {
-            modalTitle.textContent = 'Adicionar Nova Conta';
-        }
-        
-        // Em modo de adição, sempre chamamos para popular o primeiro dropdown
-        if (!conta) {
-             updateSubtipoOptions();
-        }
-        
-        modal.style.display = 'flex';
-    };
-    
-    const closeModal = () => {
-        modal.style.display = 'none';
-        accountForm.reset();
-        subtipoGroup.style.display = 'none';
-        subtipoSecundarioGroup.style.display = 'none';
-        idInput.value = '';
-        modalTitle.textContent = 'Adicionar Nova Conta';
+        options.forEach(optionText => {
+            const option = document.createElement('option');
+            option.value = optionText;
+            option.textContent = getDisplayText(optionText);
+            selectElement.appendChild(option);
+        });
+        if (selectedValue) selectElement.value = selectedValue;
     };
 
     const updateSubtipoOptions = () => {
@@ -151,14 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
             currentSubtipos.options.forEach(subtipo => {
                 const option = document.createElement('option');
                 option.value = subtipo;
-                option.textContent = getDisplayText(subtipo); // Usando displayMap
+                option.textContent = getDisplayText(subtipo);
                 subtipoSelect.appendChild(option);
             });
             subtipoGroup.style.display = 'block';
         } else {
             subtipoGroup.style.display = 'none';
         }
-        // Quando o tipo muda, o subtipo secundário deve ser atualizado ou escondido
         updateSubtipoSecundarioOptions();
     };
     
@@ -172,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (secondaryMap && secondaryMap[selectedSubtipo] && secondaryMap[selectedSubtipo].length > 0) {
             const secondaryOptions = secondaryMap[selectedSubtipo];
-
             const defaultOption = document.createElement('option');
             defaultOption.value = "";
             defaultOption.textContent = "Selecione um subtipo secundário";
@@ -181,34 +116,74 @@ document.addEventListener('DOMContentLoaded', () => {
             secondaryOptions.forEach(subtipo => {
                 const option = document.createElement('option');
                 option.value = subtipo;
-                option.textContent = getDisplayText(subtipo); // Usando displayMap
+                option.textContent = getDisplayText(subtipo);
                 subtipoSecundarioSelect.appendChild(option); 
             });
             subtipoSecundarioGroup.style.display = 'block';
         }
     };
 
+    // --- Gestão do Modal ---
+
+    const openModal = (conta = null) => {
+        accountForm.reset();
+        subtipoGroup.style.display = 'none';
+        subtipoSecundarioGroup.style.display = 'none';
+        idInput.value = '';
+
+        if (conta) {
+            modalTitle.textContent = 'Editar Conta';
+            idInput.value = conta.id_conta;
+            document.getElementById('codigo').value = conta.codigo_conta;
+            document.getElementById('nome').value = conta.nome_conta;
+            tipoSelect.value = conta.tipo_conta;
+            
+            // Popula os selects cascata
+            const currentSubtipos = subtiposMap[conta.tipo_conta];
+            if (currentSubtipos && currentSubtipos.options.length > 0) {
+                populateSelectAndSet(subtipoSelect, currentSubtipos.options, conta.subtipo_conta);
+                subtipoGroup.style.display = 'block';
+
+                if (currentSubtipos.secondary && currentSubtipos.secondary[conta.subtipo_conta]) {
+                    populateSelectAndSet(subtipoSecundarioSelect, currentSubtipos.secondary[conta.subtipo_conta], conta.subtipo_secundario);
+                    subtipoSecundarioGroup.style.display = 'block';
+                }
+            }
+        } else {
+            modalTitle.textContent = 'Adicionar Nova Conta';
+            updateSubtipoOptions(); // Reseta os selects para o estado inicial
+        }
+        modal.style.display = 'flex';
+    };
+    
+    const closeModal = () => {
+        modal.style.display = 'none';
+    };
+
+    // --- Renderização da Tabela ---
+
     const renderTable = (contas) => {
         accountsTbody.innerHTML = ''; 
+        if(!contas || contas.length === 0) {
+             accountsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center">Nenhuma conta cadastrada.</td></tr>';
+             return;
+        }
+
         contas.forEach(conta => {
             const tr = document.createElement('tr');
-            // Usando getDisplayText para exibir o nome bonito na tabela
-            const tipoValue = conta.tipo_conta;
-            const subtipoValue = conta.subtipo_conta;
-            const subtipoSecundarioValue = conta.subtipo_secundario;
-
-            const tipoDisplay = getDisplayText(tipoValue) || tipoValue;
-            const subtipoDisplay = getDisplayText(subtipoValue) || subtipoValue || '-';
-            const subtipoSecundarioDisplay = getDisplayText(subtipoSecundarioValue) || subtipoSecundarioValue || '-';
-            
             tr.innerHTML = `
                 <td>${conta.codigo_conta}</td>
                 <td>${conta.nome_conta}</td>
-                <td>${tipoDisplay}</td> 
-                <td>${subtipoDisplay}</td>
-                <td>${subtipoSecundarioDisplay}</td> <td class="action-cell">
-                    <button class="btn-icon btn-edit" data-id="${conta.id_conta}" title="Editar"><img src="../media/svg/edit.svg" alt="Editar"></button>
-                    <button class="btn-icon btn-delete" data-id="${conta.id_conta}" title="Excluir"><img src="../media/svg/delete.svg" alt="Excluir"></button>
+                <td>${getDisplayText(conta.tipo_conta)}</td> 
+                <td>${getDisplayText(conta.subtipo_conta) || '-'}</td>
+                <td>${getDisplayText(conta.subtipo_secundario) || '-'}</td> 
+                <td class="action-cell">
+                    <button class="btn-icon btn-edit" data-id="${conta.id_conta}" title="Editar">
+                        <img src="../media/svg/edit.svg" alt="Editar" style="width:16px;height:16px;">
+                    </button>
+                    <button class="btn-icon btn-delete" data-id="${conta.id_conta}" title="Excluir">
+                        <img src="../media/svg/delete.svg" alt="Excluir" style="width:16px;height:16px;">
+                    </button>
                 </td>
             `;
             accountsTbody.appendChild(tr);
@@ -217,110 +192,91 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadAndRenderAccounts = async () => {
         try {
-            const contas = await getContas();
-            renderTable(contas);
+            // Chama API que já injeta o token e ID da empresa
+            const contas = await getContas(); 
+            renderTable(contas || []);
         } catch (error) {
-            console.error("Falha ao carregar contas.");
+            console.error("Falha ao carregar contas:", error);
         }
     };
-
-    const handleEditClick = async (id) => {
-        try {
-            const conta = await getContaById(id);
-            if (conta) {
-                openModal(conta); 
-            } else {
-                showSystemNotification('Erro: Conta não encontrada.');
-            }
-        } catch (error) {
-            console.error("Falha ao buscar conta para edição.", error);
-        }
-    };
-    
 
     // --- Event Listeners ---
+
     addBtn.addEventListener('click', () => openModal(null)); 
     cancelBtn.addEventListener('click', closeModal);
+    
+    // Listeners para Selects em Cascata
     tipoSelect.addEventListener('change', updateSubtipoOptions);
-    // Novo listener para atualizar o subtipo secundário quando o principal muda
     subtipoSelect.addEventListener('change', updateSubtipoSecundarioOptions); 
 
     window.addEventListener('click', (event) => {
         if (event.target === modal) closeModal();
     });
 
+    // SUBMIT DO FORMULÁRIO
     accountForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         
         const id = idInput.value; 
         const isEditing = !!id; 
 
-        // Capturando valor do Subtipo Secundário
-        const isSubtipoPrincipalVisible = subtipoGroup.style.display === 'block';
-        const isSecondaryVisible = subtipoSecundarioGroup.style.display === 'block';
-
-        // Lógica para enviar undefined se o campo estiver invisível ou vazio (a validação de obrigatoriedade é no backend)
-        const getFieldValue = (element, isVisible) => {
-            // Trim() para remover espaços acidentais antes de verificar se é uma string vazia
-            const value = element.value ? element.value.trim() : undefined;
-            return isVisible && value !== "" ? value : undefined;
-        };
+        // Função auxiliar para pegar valor ou undefined (importante para o backend não receber string vazia)
+        const getVal = (el) => el && el.offsetParent !== null && el.value ? el.value : undefined;
         
         const formData = {
             codigo_conta: document.getElementById('codigo').value,
             nome_conta: document.getElementById('nome').value,
             tipo_conta: tipoSelect.value, 
-            subtipo_conta: getFieldValue(subtipoSelect, isSubtipoPrincipalVisible),
-            subtipo_secundario: getFieldValue(subtipoSecundarioSelect, isSecondaryVisible),
+            subtipo_conta: getVal(subtipoSelect),
+            subtipo_secundario: getVal(subtipoSecundarioSelect),
         };
 
-        // Adicionando validação front-end básica para o campo Tipo, que é obrigatório
-        if (formData.tipo_conta === "") {
-             showSystemNotification('Erro: O campo Tipo (Conta) é obrigatório.');
-             return;
-        }
-        
         try {
             if (isEditing) {
-                await updateConta(parseInt(id, 10), formData);
-                showSystemNotification('Conta atualizada com sucesso!');
+                await updateConta(id, formData);
+                if(typeof showSystemNotification === 'function') showSystemNotification('Conta atualizada!');
             } else {
                 await createConta(formData);
-                showSystemNotification('Conta criada com sucesso!');
+                if(typeof showSystemNotification === 'function') showSystemNotification('Conta criada!');
             }
-            
             closeModal();
             loadAndRenderAccounts(); 
         } catch (error) {
-            const errorMessage = error.message || "Erro desconhecido ao salvar conta.";
-            showSystemNotification(`Erro ao salvar conta: ${errorMessage}`);
+            // Erros já são logados pelo api.js, mas podemos forçar um alerta aqui se necessário
             console.error(error);
         }
     });
 
+    // AÇÕES DA TABELA (Delegated Events)
     accountsTbody.addEventListener('click', async (event) => {
+        // Garante que pegamos o botão mesmo clicando no ícone SVG
         const deleteButton = event.target.closest('.btn-delete');
         const editButton = event.target.closest('.btn-edit');
         
         if (deleteButton) {
-            const id = Number(deleteButton.dataset.id);
-            if (await showSystemConfirm('Tem certeza que deseja excluir esta conta?')) {
+            const id = deleteButton.dataset.id;
+            if (confirm('Tem certeza que deseja excluir esta conta?')) {
                 try {
                     await deleteConta(id);
                     loadAndRenderAccounts();
-                    showSystemNotification('Conta excluída com sucesso!');
-                } catch (error) {
-                    showSystemNotification('Erro ao excluir conta.');
-                    console.error("Falha ao excluir conta.", error);
+                    if(typeof showSystemNotification === 'function') showSystemNotification('Conta excluída!');
+                } catch (e) {
+                    // Erro tratado no api.js
                 }
             }
         }
         
         if (editButton) {
-            const id = Number(editButton.dataset.id);
-            await handleEditClick(id);
+            const id = editButton.dataset.id;
+            try {
+                const conta = await getContaById(id);
+                if(conta) openModal(conta);
+            } catch (e) {
+                console.error(e);
+            }
         }
     });
 
+    // Inicialização
     loadAndRenderAccounts();
 });

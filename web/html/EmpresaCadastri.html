@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeFin - Cadastro de Empresa</title>
+    <style>
+        /* RESET BÁSICO */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* LAYOUT GERAL */
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #ffffff;
+        }
+
+        /* PAINEL ESQUERDO (BRANDING) - Mantendo o estilo GeFin */
+        .left-panel {
+            flex: 1.5;
+            background-color: #2b457e;
+            color: white;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            min-width: 300px;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: linear-gradient(135deg, #2b457e 40%, #4a6fae 100%);
+            z-index: 1;
+        }
+
+        .left-panel>* {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .tagline {
+            font-size: 2em;
+            font-weight: 300;
+            line-height: 1.4;
+            margin-top: 100px;
+        }
+
+        .graphic-placeholder {
+            height: 300px;
+            width: 100%;
+            background-color: transparent;
+        }
+
+        /* PAINEL DIREITO (FORMULÁRIO) */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+            background-color: #f4f6f9;
+        }
+
+        .signup-box {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .signup-box h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: #333;
+            text-align: center;
+        }
+
+        .signup-box p {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #777;
+            font-size: 0.9em;
+        }
+
+        /* GRUPO DE INPUTS */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            border-bottom: 1px solid #ccc;
+            font-size: 1em;
+        }
+
+        .input-group input:focus {
+            border-bottom-color: #007bff;
+            outline: none;
+        }
+
+        .icon-text {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .icon-text i {
+            color: #007bff;
+        }
+
+        /* BOTÕES */
+        .btn-signup {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 15px;
+        }
+
+        .btn-signup:hover {
+            background-color: #0056b3;
+        }
+
+        /* RESPONSIVIDADE */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                order: 2;
+                min-height: 150px;
+                padding: 30px;
+                flex: none;
+            }
+
+            .right-panel {
+                order: 1;
+                min-height: auto;
+            }
+
+            .tagline {
+                margin-top: 10px;
+                font-size: 1.5em;
+            }
+
+            .graphic-placeholder {
+                display: none;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="/web/css/toast.css">
+    <script src="/web/js/toast.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div class="right-panel">
+        <div class="signup-box">
+
+            <h3>Dados da sua Empresa</h3>
+            <p>Por favor, preencha os dados de sua Pessoa Jurídica (PJ).</p>
+
+            <div id="message" style="margin-bottom: 15px; font-size: 0.9em; color: red;"></div>
+
+            <form id="empresaForm">
+                <div class="input-group">
+                    <div class="icon-text">
+                        <i class="fas fa-building"></i>
+                        <span>Razão Social ou Nome Fantasia</span>
+                    </div>
+                    <input type="text" id="razao_social" name="razao_social" placeholder="Ex: GSA Serviços LTDA"
+                        required>
+                </div>
+
+                <div class="input-group">
+                    <div class="icon-text">
+                        <i class="fas fa-id-card"></i>
+                        <span>CNPJ</span>
+                    </div>
+                    <input type="text" id="cnpj" name="cnpj" placeholder="00.000.000/0000-00" maxlength="18" required>
+                </div>
+
+
+                <button type="submit" class="btn-signup">
+                    Finalizar
+                </button>
+            </form>
+
+        </div>
+    </div>
+    <script type="module" src="../js/Empresa.js"></script>
+    <script>
+        document.addEventListener('keydown', function (event) {
+            const isCtrlOrCmd = event.ctrlKey || event.metaKey; // Ctrl ou Cmd
+            const isShift = event.shiftKey;
+            const isE = event.key === 'e' || event.key === 'E';
+
+            if (isCtrlOrCmd && isShift && isE) {
+                event.preventDefault();
+
+                console.log("Atalho detectado: Redirecionando para Cadastro de Empresa...");
+
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('keydown', function (event) {
+            const isCtrlOrCmd = event.ctrlKey || event.metaKey; // Ctrl ou Cmd
+            const isShift = event.shiftKey;
+            const isE = event.key === 'l' || event.key === 'L';
+
+            if (isCtrlOrCmd && isShift && isE) {
+                event.preventDefault();
+
+                console.log("Atalho detectado: Redirecionando para Cadastro de Empresa...");
+
+                window.location.href = '../index.html';
+            }
+        });
+    </script>
+</body </html>

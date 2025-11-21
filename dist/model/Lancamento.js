@@ -1,5 +1,4 @@
 "use strict";
-// Lancamento.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Lancamento = void 0;
 /**
@@ -14,7 +13,7 @@ class Lancamento {
      * @param valor_total O valor total da transação (soma dos débitos/créditos).
      * @param partidas A lista de partidas (débitos e créditos).
      */
-    constructor(id_lancamento, data, descricao, valor_total, partidas) {
+    constructor(id_lancamento, data, descricao, valor_total, partidas, id_empresa) {
         if (!(data instanceof Date) || isNaN(data.getTime())) {
             throw new Error('A data fornecida é inválida.');
         }
@@ -32,6 +31,7 @@ class Lancamento {
         this.descricao = descricao;
         this.valor_total = valor_total;
         this.partidas = partidas;
+        this.id_empresa = id_empresa;
     }
     /**
      * Retorna uma representação formatada do lançamento em uma string.

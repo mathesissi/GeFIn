@@ -20,7 +20,7 @@ export class LancamentosService {
     this.contaRepository = ContaRepository.getInstance();
   }
 
-  public async criarLancamento(dadosTransacao: DadosTransacao): Promise<Lancamento> {
+  public async criarLancamento(dadosTransacao: DadosTransacao, id_empresa: number): Promise<Lancamento> {
     const { data, descricao, partidas } = dadosTransacao;
 
     // --- Validações de Cabeçalho ---
@@ -63,7 +63,7 @@ export class LancamentosService {
     }
 
     // Validação de existência de contas
-    const contasExistentes = await Promise.all(contasUsadas.map(id => this.contaRepository.findById(id)));
+    const contasExistentes = await Promise.all(contasUsadas.map(id => this.contaRepository.findById(id, id_empresa)));
     const contasInvalidas = contasUsadas.filter((_, index) => !contasExistentes[index]);
 
     if (contasInvalidas.length > 0) {
@@ -76,7 +76,8 @@ export class LancamentosService {
       new Date(data),
       descricao,
       totalDebito, // O valor total é a soma dos débitos (ou créditos)
-      partidas
+      partidas,
+      id_empresa
     );
 
     return this.lancamentosRepository.Create(novoLancamento);
@@ -87,19 +88,19 @@ export class LancamentosService {
    * @param id O ID do lançamento a ser buscado.
    * @returns O lançamento encontrado ou `null` se não existir.
    */
-  public async buscarLancamentoPorId(id: number): Promise<Lancamento | null> {
+  public async buscarLancamentoPorId(id: number, id_empresa: number): Promise<Lancamento | null> {
     if (typeof id !== 'number' || id <= 0) {
       throw new Error('O ID do lançamento deve ser um número inteiro positivo.');
     }
-    return this.lancamentosRepository.Select(id);
+    return this.lancamentosRepository.Select(id, id_empresa);
   }
 
   /**
    * Lista todos os lançamentos.
    * @returns Uma lista de todos os lançamentos.
    */
-  public async listarLancamentos(): Promise<Lancamento[]> {
-    return this.lancamentosRepository.findAll();
+  public async listarLancamentos(id_empresa: number): Promise<Lancamento[]> {
+    return this.lancamentosRepository.findAll(id_empresa);
   }
 
   /**
@@ -108,12 +109,12 @@ export class LancamentosService {
    * @param dadosAtualizados Os dados a serem atualizados no lançamento.
    * @returns O lançamento atualizado ou `null` se não for encontrado.
    */
-  public async atualizarLancamento(id: number, dadosAtualizados: {
+  public async atualizarLancamento(id: number, id_empresa: number, dadosAtualizados: {
     data?: string;
     descricao?: string;
     partidas?: Partida[];
   }): Promise<Lancamento | null> {
-    const lancamentoExistente = await this.lancamentosRepository.Select(id);
+    const lancamentoExistente = await this.lancamentosRepository.Select(id, id_empresa);
 
     if (!lancamentoExistente) {
       return null;
@@ -159,7 +160,7 @@ export class LancamentosService {
       throw new Error(`O total de débitos (R$ ${totalDebito.toFixed(2)}) deve ser igual ao total de créditos (R$ ${totalCredito.toFixed(2)}) na atualização.`);
     }
 
-    const contasExistentes = await Promise.all(contasUsadas.map(id_conta => this.contaRepository.findById(id_conta)));
+    const contasExistentes = await Promise.all(contasUsadas.map(id_conta => this.contaRepository.findById(id_conta, id_empresa)));
     const contasInvalidas = contasUsadas.filter((_, index) => !contasExistentes[index]);
 
     if (contasInvalidas.length > 0) {
@@ -172,7 +173,8 @@ export class LancamentosService {
       new Date(dadosMesclados.data),
       dadosMesclados.descricao,
       totalDebito,
-      dadosMesclados.partidas
+      dadosMesclados.partidas,
+      lancamentoExistente.id_empresa
     );
 
     return this.lancamentosRepository.Update(lancamentoParaAtualizar);
@@ -183,14 +185,14 @@ export class LancamentosService {
    * @param id O ID do lançamento a ser deletado.
    * @returns `true` se a deleção foi bem-sucedida, `false` caso contrário.
    */
-  public async deletarLancamento(id: number): Promise<boolean> {
+  public async deletarLancamento(id: number, id_empresa: number): Promise<boolean> {
     if (typeof id !== 'number' || id <= 0) {
       throw new Error('O ID do lançamento deve ser um número inteiro positivo.');
     }
-    const lancamentoExistente = await this.lancamentosRepository.Select(id);
+    const lancamentoExistente = await this.lancamentosRepository.Select(id, id_empresa);
     if (!lancamentoExistente) {
       return false;
     }
-    return this.lancamentosRepository.Delete(id);
+    return this.lancamentosRepository.Delete(id, id_empresa);
   }
 }
