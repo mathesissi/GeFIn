@@ -37,11 +37,13 @@
             <div class="content-area">
                 <h2>Selecione o Relatório</h2>
 
+                <!-- Seleção de relatórios -->
                 <div class="report-selection">
                     <div class="report-card" data-report="balancete">
                         <h3>Balancete de Verificação</h3>
                         <p>Analise os saldos devedores e credores de todas as contas em um período.</p>
                     </div>
+
 
                     <div class="report-card" data-report="balanco">
                         <h3>Balanço Patrimonial</h3>
@@ -104,9 +106,11 @@
                     </form>
                 </div>
 
+                <!-- Área de exibição dos relatórios -->
                 <div class="report-view" id="report-view-container" style="display: none;">
                     <h2 id="report-title" style="margin-bottom: 1.5rem;"></h2>
 
+                    <!-- Balancete -->
                     <div class="table-container" id="balancete-view" style="display: none;">
                         <table class="data-table">
                             <thead>
@@ -122,9 +126,9 @@
                         </table>
                     </div>
 
+                    <!-- Balanço Patrimonial -->
                     <div id="balanco-view" style="display: none;">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
-
                             <div class="table-container">
                                 <table class="data-table">
                                     <thead>
@@ -172,6 +176,7 @@
                                 </table>
                             </div>
 
+
                             <div class="table-container">
                                 <table class="data-table">
                                     <thead>
@@ -215,6 +220,7 @@
             </div>
         </main>
     </div>
+
 
     <script type="module" src="../js/Relatorios.js"></script>
 </body>

@@ -14,7 +14,6 @@ import { RegisterRoutes } from './route/routes'; // TSOA
 const app = express();
 const PORT = 3000;
 
-// ================= MIDDLEWARES =================
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
