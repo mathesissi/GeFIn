@@ -153,6 +153,31 @@
         .divider:not(:empty)::after {
             margin-left: .5em;
         }
+
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            width: 100%;
+            padding-right: 40px;
+            /* Espaço para o ícone */
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            cursor: pointer;
+            color: #777;
+            user-select: none;
+            /* Impede seleção do ícone ao clicar rápido */
+        }
+
+        .toggle-password:hover {
+            color: #333;
+        }
     </style>
     <link rel="stylesheet" href="/web/css/toast.css">
     <script src="/web/js/toast.js" defer></script>
@@ -172,7 +197,16 @@
 
             <div class="input-group">
                 <label for="password">Senha</label>
-                <input type="password" id="password" placeholder="********" required>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="********" required>
+                    <span id="btn-show-pass" class="toggle-password" title="Mostrar Senha">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </span>
+                </div>
             </div>
 
             <button type="submit" class="btn-primary">Entrar</button>

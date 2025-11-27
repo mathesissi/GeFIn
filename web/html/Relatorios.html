@@ -25,10 +25,19 @@
         </aside>
 
         <main class="main-content">
-            <header class="main-header">
+            <header class="main-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <h1>Relatórios Contábeis</h1>
-                <div class="user-profile">
-                    <span>Usuário</span>
+
+                <div class="user-actions">
+                    <div class="user-profile" id="btn-open-profile" title="Ver Perfil">
+                        <span id="header-username">Carregando...</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <button class="btn-logout" id="btn-logout">Sair</button>
                 </div>
             </header>
 
@@ -111,7 +120,6 @@
             </div>
         </main>
     </div>
-
     <script type="module" src="../js/Relatorios.js"></script>
 </body>
 

@@ -91,3 +91,18 @@ form.addEventListener('submit', async (event) => {
         submitButton.textContent = 'Entrar';
     }
 });
+const btnShowPass = document.getElementById('btn-show-pass');
+
+if (btnShowPass) {
+    btnShowPass.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        // Alterna o ícone (visual opcional: riscado ou normal)
+        if (type === 'text') {
+            btnShowPass.style.color = '#007bff'; // Fica azul quando visível
+        } else {
+            btnShowPass.style.color = '#777'; // Volta ao cinza
+        }
+    });
+}   

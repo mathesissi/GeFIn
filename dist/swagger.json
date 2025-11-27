@@ -205,6 +205,14 @@
 					"nivel": {
 						"type": "number",
 						"format": "double"
+					},
+					"analiseVertical": {
+						"type": "number",
+						"format": "double"
+					},
+					"analiseHorizontal": {
+						"type": "number",
+						"format": "double"
 					}
 				},
 				"required": [
@@ -704,6 +712,67 @@
 				]
 			}
 		},
+		"/livro-razao": {
+			"get": {
+				"operationId": "GetLivroRazao",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"message": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"message"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Relatórios"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "mes",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ano",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
 		"/lancamentos": {
 			"post": {
 				"operationId": "CriarLancamento",
@@ -984,6 +1053,49 @@
 					{
 						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/indicadores": {
+			"get": {
+				"operationId": "GetIndicadores",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Dashboard"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "mes",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ano",
 						"required": true,
 						"schema": {
 							"format": "double",

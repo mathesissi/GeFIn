@@ -1,7 +1,6 @@
 // web/js/api.js
 
 // CORREÇÃO: Usa a origem atual (seja localhost ou ngrok)
-// IMPORTANTE: Você deve acessar o site pela porta do servidor (3000)
 const API_BASE_URL = window.location.origin;
 
 // === HELPER: Cabeçalhos de Autenticação ===
@@ -43,10 +42,8 @@ async function fetchAPI(endpoint, options = {}) {
         const response = await fetch(url, config);
 
         if (response.status === 401) {
-            // Evita loop se já estiver na tela de login
             if (!window.location.pathname.includes('index.html') && window.location.pathname !== '/' && !window.location.pathname.includes('/web/')) {
                 alert("Sessão expirada. Faça login novamente.");
-                // Ajuste do caminho relativo dependendo de onde está
                 window.location.href = '../index.html';
             }
             throw new Error("Sessão inválida.");
@@ -112,5 +109,7 @@ export const createLancamento = (lancamentoData) => fetchAPI('/lancamentos', { m
 // ==========================================================
 export const getBalancete = (mes, ano) => fetchAPI(`/balancete?mes=${mes}&ano=${ano}`);
 export const getDRE = (mes, ano) => fetchAPI(`/dre?mes=${mes}&ano=${ano}`);
+export const getLivroRazao = (mes, ano) => fetchAPI(`/livro-razao?mes=${mes}&ano=${ano}`);
+export const getIndicadores = (mes, ano) => fetchAPI(`/indicadores?mes=${mes}&ano=${ano}`);
 export const getEmpresaByCnpj = (cnpj) => fetchAPI(`/empresas/cnpj/${cnpj}`);
 export const getEmpresaById = (id) => fetchAPI(`/empresas/${id}`);

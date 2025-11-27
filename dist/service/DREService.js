@@ -8,123 +8,73 @@ class DREService {
     constructor() {
         this.repository = DRERepository_1.DRERepository.getInstance();
     }
-    /**
-     * Gera a estrutura completa da DRE para o período solicitado.
-     */
     async gerarRelatorio(mes, ano, id_empresa) {
-        // 1. Busca os saldos agrupados do banco de dados
+        // 1. Busca dados brutos
         const receitasRaw = await this.repository.getTotaisPorTipoConta('Receita', mes, ano, id_empresa);
         const despesasRaw = await this.repository.getTotaisPorTipoConta('Despesa', mes, ano, id_empresa);
-        // 2. Separa "Custos" de "Despesas Operacionais"
-        // Como o banco não tem um tipo "Custo" explícito, usamos uma convenção:
-        // Se o nome da conta ou subtipo contiver "Custo", "CMV" ou "CPV", é Custo.
-        const custos = [];
-        const despesasOperacionais = [];
-        despesasRaw.forEach(d => {
-            const nome = d.nome.toLowerCase();
-            const subtipo = (d.subtipo || '').toLowerCase();
-            if (nome.includes('custo') || nome.includes('cmv') || subtipo.includes('custo')) {
-                custos.push(d);
-            }
-            else {
-                despesasOperacionais.push(d);
-            }
-        });
-        // 3. Montagem da Árvore (Tree Structure)
-        // Nó Raiz (Título)
-        const dreRoot = new DRELine_1.DRELine({
-            descricao: `Demonstração do Resultado - ${mes}/${ano}`,
-            tipo: "titulo", // Título não soma valor
-            valor: 0
-        });
-        // --- GRUPO 1: RECEITA OPERACIONAL BRUTA ---
-        const grupoReceita = new DRELine_1.DRELine({ descricao: "1. RECEITA OPERACIONAL BRUTA", tipo: "subtotal" });
+        // Estrutura Raiz
+        const dreRoot = new DRELine_1.DRELine({ descricao: "DEMONSTRAÇÃO DO RESULTADO DO EXERCÍCIO", tipo: "titulo", nivel: 0 });
+        // --- 1. RECEITA OPERACIONAL BRUTA ---
+        const receitaBrutaLine = new DRELine_1.DRELine({ descricao: "1. RECEITA OPERACIONAL BRUTA", tipo: "subtotal" });
+        let totalReceitaBruta = 0;
         receitasRaw.forEach(r => {
-            grupoReceita.addChild(new DRELine_1.DRELine({
-                codigo: r.codigo,
-                descricao: `(+) ${r.nome}`,
-                valor: r.valor,
-                tipo: "conta"
-            }));
+            // Assumindo que Receita Bruta são contas do grupo 7.1 (exceto financeiras)
+            if (!r.nome.includes("Financeira")) {
+                receitaBrutaLine.addChild(new DRELine_1.DRELine({ descricao: r.nome, valor: r.valor, codigo: r.codigo, tipo: "conta" }));
+            }
         });
-        grupoReceita.calcularTotal(); // Soma as receitas
-        dreRoot.addChild(grupoReceita);
-        // --- GRUPO 2: DEDUÇÕES DA RECEITA ---
-        // Simulação: 5% sobre a Receita Bruta (ou buscar contas específicas de impostos s/ vendas se houver)
-        const deducoesValor = -(grupoReceita.valor * 0.05);
-        const linhaDeducoes = new DRELine_1.DRELine({
-            descricao: "2. (-) DEDUÇÕES DA RECEITA (Impostos)",
-            valor: deducoesValor,
-            tipo: "calculo"
+        receitaBrutaLine.calcularTotal();
+        totalReceitaBruta = receitaBrutaLine.valor; // Base para Análise Vertical
+        dreRoot.addChild(receitaBrutaLine);
+        // --- 2. DEDUÇÕES DA RECEITA ---
+        const deducoesLine = new DRELine_1.DRELine({ descricao: "2. (-) DEDUÇÕES DA RECEITA BRUTA", tipo: "subtotal" });
+        // Procurar contas de impostos sobre vendas ou devoluções nos dados de Despesa ou Receita redutora
+        despesasRaw.filter(d => d.nome.includes("Imposto") || d.nome.includes("Devoluções")).forEach(d => {
+            deducoesLine.addChild(new DRELine_1.DRELine({ descricao: d.nome, valor: -d.valor, codigo: d.codigo, tipo: "conta" }));
         });
-        dreRoot.addChild(linhaDeducoes);
-        // --- CÁLCULO: RECEITA LÍQUIDA ---
-        const valReceitaLiquida = grupoReceita.valor + deducoesValor;
-        const linhaReceitaLiquida = new DRELine_1.DRELine({
-            descricao: "3. (=) RECEITA LÍQUIDA",
-            valor: valReceitaLiquida,
-            tipo: "subtotal" // Subtotal visual
+        deducoesLine.calcularTotal();
+        dreRoot.addChild(deducoesLine);
+        // --- 3. RECEITA OPERACIONAL LÍQUIDA ---
+        const rol = receitaBrutaLine.valor + deducoesLine.valor;
+        dreRoot.addChild(new DRELine_1.DRELine({ descricao: "3. (=) RECEITA OPERACIONAL LÍQUIDA", valor: rol, tipo: "calculo" }));
+        // --- 4. CUSTOS (CMV/CPV/CSP) ---
+        const custosLine = new DRELine_1.DRELine({ descricao: "4. (-) CUSTOS DAS VENDAS", tipo: "subtotal" });
+        despesasRaw.filter(d => d.nome.includes("CMV") || d.nome.includes("CPV") || d.nome.includes("CSP") || d.nome.includes("Custo")).forEach(d => {
+            custosLine.addChild(new DRELine_1.DRELine({ descricao: d.nome, valor: -d.valor, codigo: d.codigo, tipo: "conta" }));
         });
-        dreRoot.addChild(linhaReceitaLiquida);
-        // --- GRUPO 3: CUSTOS (CMV/CPV) ---
-        const grupoCustos = new DRELine_1.DRELine({ descricao: "4. (-) CUSTOS DOS PRODUTOS/SERVIÇOS", tipo: "subtotal" });
-        custos.forEach(c => {
-            grupoCustos.addChild(new DRELine_1.DRELine({
-                codigo: c.codigo,
-                descricao: `(-) ${c.nome}`,
-                valor: -Math.abs(c.valor), // Garante que entra subtraindo
-                tipo: "conta"
-            }));
+        custosLine.calcularTotal();
+        dreRoot.addChild(custosLine);
+        // --- 5. LUCRO BRUTO ---
+        const lucroBruto = rol + custosLine.valor;
+        dreRoot.addChild(new DRELine_1.DRELine({ descricao: "5. (=) LUCRO BRUTO", valor: lucroBruto, tipo: "calculo" }));
+        // --- 6. DESPESAS OPERACIONAIS ---
+        const despesasOpLine = new DRELine_1.DRELine({ descricao: "6. (-) DESPESAS OPERACIONAIS", tipo: "subtotal" });
+        // Filtra o que sobrou das despesas (não é custo, não é dedução, não é imposto de renda)
+        despesasRaw.filter(d => !d.nome.includes("CMV") && !d.nome.includes("CPV") && !d.nome.includes("Custo") &&
+            !d.nome.includes("Imposto") && !d.nome.includes("IRPJ") && !d.nome.includes("CSLL")).forEach(d => {
+            despesasOpLine.addChild(new DRELine_1.DRELine({ descricao: d.nome, valor: -d.valor, codigo: d.codigo, tipo: "conta" }));
         });
-        grupoCustos.calcularTotal();
-        dreRoot.addChild(grupoCustos);
-        // --- CÁLCULO: LUCRO BRUTO ---
-        const valLucroBruto = valReceitaLiquida + grupoCustos.valor;
-        dreRoot.addChild(new DRELine_1.DRELine({
-            descricao: "5. (=) LUCRO BRUTO",
-            valor: valLucroBruto,
-            tipo: "subtotal"
-        }));
-        // --- GRUPO 4: DESPESAS OPERACIONAIS ---
-        const grupoDespesas = new DRELine_1.DRELine({ descricao: "6. (-) DESPESAS OPERACIONAIS", tipo: "subtotal" });
-        despesasOperacionais.forEach(d => {
-            grupoDespesas.addChild(new DRELine_1.DRELine({
-                codigo: d.codigo,
-                descricao: `(-) ${d.nome}`,
-                valor: -Math.abs(d.valor), // Garante que entra subtraindo
-                tipo: "conta"
-            }));
-        });
-        grupoDespesas.calcularTotal();
-        dreRoot.addChild(grupoDespesas);
-        // --- CÁLCULO: RESULTADO ANTES DO IR (LAIR) ---
-        const valLAIR = valLucroBruto + grupoDespesas.valor;
-        dreRoot.addChild(new DRELine_1.DRELine({
-            descricao: "7. (=) RESULTADO ANTES DOS TRIBUTOS (LAIR)",
-            valor: valLAIR,
-            tipo: "calculo"
-        }));
-        // --- GRUPO 5: PROVISÃO IRPJ/CSLL (Simulado) ---
-        let irpj = 0;
-        let csll = 0;
-        if (valLAIR > 0) { // Só calcula se houver lucro
-            irpj = -(valLAIR * 0.15);
-            csll = -(valLAIR * 0.09);
-        }
-        const grupoImpostos = new DRELine_1.DRELine({ descricao: "8. (-) PROVISÃO PARA IRPJ E CSLL", tipo: "subtotal" });
-        grupoImpostos.addChild(new DRELine_1.DRELine({ descricao: "(-) IRPJ (15%)", valor: irpj, tipo: "calculo" }));
-        grupoImpostos.addChild(new DRELine_1.DRELine({ descricao: "(-) CSLL (9%)", valor: csll, tipo: "calculo" }));
-        grupoImpostos.calcularTotal();
-        dreRoot.addChild(grupoImpostos);
-        // --- RESULTADO FINAL ---
-        const valLucroLiquido = valLAIR + grupoImpostos.valor;
-        dreRoot.addChild(new DRELine_1.DRELine({
-            descricao: "9. (=) LUCRO LÍQUIDO DO EXERCÍCIO",
-            valor: valLucroLiquido,
-            tipo: "calculo" // Destaque final
-        }));
-        // Retorna o objeto DRE contendo a raiz da árvore
+        despesasOpLine.calcularTotal();
+        dreRoot.addChild(despesasOpLine);
+        // --- 7. RESULTADO ANTES FINANCEIRO E IMPOSTOS ---
+        const resultadoOp = lucroBruto + despesasOpLine.valor;
+        dreRoot.addChild(new DRELine_1.DRELine({ descricao: "7. (=) RESULTADO ANTES DO FINANCEIRO", valor: resultadoOp, tipo: "calculo" }));
+        // Calcular AV recursivamente
+        this.calcularAnaliseVertical(dreRoot, totalReceitaBruta);
         return new DRE_1.DRE(mes, ano, dreRoot);
+    }
+    calcularAnaliseVertical(line, base) {
+        if (base !== 0) {
+            // AV = (Valor da Conta / Receita Bruta) * 100
+            // Usa Math.abs para mostrar a representatividade independente do sinal
+            line.analiseVertical = parseFloat(((Math.abs(line.valor) / base) * 100).toFixed(2));
+        }
+        else {
+            line.analiseVertical = 0;
+        }
+        if (line.children) {
+            line.children.forEach(child => this.calcularAnaliseVertical(child, base));
+        }
     }
 }
 exports.DREService = DREService;

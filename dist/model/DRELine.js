@@ -9,15 +9,15 @@ class DRELine {
         this.tipo = params.tipo;
         this.children = params.children ?? [];
         this.nivel = params.nivel ?? 1;
+        this.analiseVertical = params.analiseVertical;
+        this.analiseHorizontal = params.analiseHorizontal;
     }
     addChild(line) {
         this.children.push(line);
     }
-    // Soma recursiva (Seus filhos somam os filhos deles, etc.)
     calcularTotal() {
         if (this.children.length > 0) {
             this.valor = this.children.reduce((acc, child) => {
-                // Se o filho também é um grupo, garante que ele calculou primeiro
                 if (child.children.length > 0)
                     child.calcularTotal();
                 return acc + child.valor;

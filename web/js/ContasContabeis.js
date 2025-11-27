@@ -1,6 +1,12 @@
 import { getContas, createConta, deleteConta, updateConta, getContaById } from './api.js';
+import { initUserProfile, checkAuthRedirect } from './UserProfile.js';
+if (!checkAuthRedirect()) {
+    throw new Error("Não autenticado");
+}
+const API_BASE_URL = window.location.origin;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async() => {
+    await initUserProfile(); 
     // --- Referências aos elementos do DOM ---
     const addBtn = document.getElementById('add-account-btn');
     const cancelBtn = document.getElementById('cancel-btn');

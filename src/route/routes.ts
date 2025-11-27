@@ -6,7 +6,11 @@ import {  fetchMiddlewares, ExpressTemplateService } from '@tsoa/runtime';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { UsuarioController } from './../controller/UsuarioController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { LivroRazaoController } from './../controller/LivroRazaoController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { LancamentosController } from './../controller/LancamentosController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { IndicadoresController } from './../controller/IndicadoresController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { EmpresaController } from './../controller/EmpresaController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -99,6 +103,8 @@ const models: TsoaRoute.Models = {
             "tipo": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["conta"]},{"dataType":"enum","enums":["subtotal"]},{"dataType":"enum","enums":["calculo"]},{"dataType":"enum","enums":["titulo"]}],"required":true},
             "children": {"dataType":"array","array":{"dataType":"refObject","ref":"DRELine"},"required":true},
             "nivel": {"dataType":"double","required":true},
+            "analiseVertical": {"dataType":"double"},
+            "analiseHorizontal": {"dataType":"double"},
         },
         "additionalProperties": false,
     },
@@ -352,6 +358,40 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsLivroRazaoController_getLivroRazao: Record<string, TsoaRoute.ParameterSchema> = {
+                mes: {"in":"query","name":"mes","required":true,"dataType":"double"},
+                ano: {"in":"query","name":"ano","required":true,"dataType":"double"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+                badRequestResponse: {"in":"res","name":"400","required":true,"dataType":"nestedObjectLiteral","nestedProperties":{"message":{"dataType":"string","required":true}}},
+        };
+        app.get('/livro-razao',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(LivroRazaoController)),
+            ...(fetchMiddlewares<RequestHandler>(LivroRazaoController.prototype.getLivroRazao)),
+
+            async function LivroRazaoController_getLivroRazao(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsLivroRazaoController_getLivroRazao, request, response });
+
+                const controller = new LivroRazaoController();
+
+              await templateService.apiHandler({
+                methodName: 'getLivroRazao',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         const argsLancamentosController_criarLancamento: Record<string, TsoaRoute.ParameterSchema> = {
                 dadosTransacao: {"in":"body","name":"dadosTransacao","required":true,"ref":"DadosTransacao"},
                 request: {"in":"request","name":"request","required":true,"dataType":"object"},
@@ -506,6 +546,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deletarLancamento',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsIndicadoresController_getIndicadores: Record<string, TsoaRoute.ParameterSchema> = {
+                mes: {"in":"query","name":"mes","required":true,"dataType":"double"},
+                ano: {"in":"query","name":"ano","required":true,"dataType":"double"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/indicadores',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(IndicadoresController)),
+            ...(fetchMiddlewares<RequestHandler>(IndicadoresController.prototype.getIndicadores)),
+
+            async function IndicadoresController_getIndicadores(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsIndicadoresController_getIndicadores, request, response });
+
+                const controller = new IndicadoresController();
+
+              await templateService.apiHandler({
+                methodName: 'getIndicadores',
                 controller,
                 response,
                 next,

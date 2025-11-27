@@ -1,18 +1,24 @@
-// dashboard.js
-
-// 1. CORREÇÃO: Apontar para a porta do Backend (3000)
+import { initUserProfile, checkAuthRedirect } from './UserProfile.js';
+if (!checkAuthRedirect()) {
+    throw new Error("Não autenticado");
+}
+// Define a URL base (ngrok ou localhost)
 const API_BASE_URL = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Gerenciar Usuário (LocalStorage)
-    verificarLoginEAtualizarDados();
-    setupProfileModal();
+    // 1. Inicia Perfil
+    await initUserProfile(); 
 
-    // 2. Carregar Dados do Dashboard
-    // Ajuste a data conforme necessário
-    carregarBalancete(10, 2025);
+    // 2. Define Data Atual (Mês e Ano)
+    const hoje = new Date();
+    // getMonth() retorna 0-11, então somamos +1
+    const mesAtual = hoje.getMonth() + 1; 
+    const anoAtual = hoje.getFullYear();
 
-    // Event listener do botão de relatório
+    // 3. Carrega o Dashboard com a data correta
+    await carregarBalancete(mesAtual, anoAtual);
+
+    // 4. Configura botão de relatório
     const btnRelatorio = document.getElementById('gerar-relatorio');
     if (btnRelatorio) {
         btnRelatorio.addEventListener('click', gerarMiniRelatorio);
@@ -20,136 +26,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ==========================================
-// LÓGICA DE USUÁRIO (LOCALSTORAGE)
-// ==========================================
-
-// ==========================================
-// LÓGICA DE USUÁRIO (LOCALSTORAGE + FETCH EMPRESA)
-// ==========================================
-
-async function verificarLoginEAtualizarDados() {
-    try {
-        let usuarioJson = localStorage.getItem('userData');
-        const token = localStorage.getItem('authToken');
-
-        // Fallback para usuário de teste se não houver login
-        if (!usuarioJson) {
-            console.warn("Nenhum usuário logado encontrado.");
-            const usuarioPadrao = {
-                id_empresa: 1, // ID fictício para teste
-                nome: "Usuário Teste",
-                email: "teste@exemplo.com"
-            };
-            // Não salvamos no localStorage para não sobrescrever login real futuro, 
-            // apenas usamos em memória ou mostramos aviso.
-            // Mas se quiser manter o comportamento anterior:
-            usuarioJson = JSON.stringify(usuarioPadrao);
-        }
-
-        const usuario = JSON.parse(usuarioJson);
-        
-        // 1. Atualiza dados básicos (Nome e Email) que já temos
-        const headerName = document.getElementById('header-username');
-        if (headerName) headerName.textContent = usuario.nome;
-
-        const elNome = document.getElementById('profile-nome');
-        const elEmail = document.getElementById('profile-email');
-        if (elNome) elNome.textContent = usuario.nome;
-        if (elEmail) elEmail.textContent = usuario.email;
-
-        // 2. Busca dados da Empresa se tivermos o ID
-        if (usuario.id_empresa) {
-            try {
-                // Faz a requisição para pegar Razão Social e CNPJ
-                const headers = { 'Content-Type': 'application/json' };
-                if (token) headers['Authorization'] = `Bearer ${token}`;
-
-                const res = await fetch(`${API_BASE_URL}/empresas/${usuario.id_empresa}`, {
-                    method: 'GET',
-                    headers: headers
-                });
-
-                if (res.ok) {
-                    const empresaInfo = await res.json();
-                    
-                    // Atualiza a interface com os dados vindos do banco
-                    const elEmpresa = document.getElementById('profile-empresa');
-                    const elCnpj = document.getElementById('profile-cnpj');
-                    
-                    if (elEmpresa) elEmpresa.textContent = empresaInfo.razao_social || "Nome indisponível";
-                    if (elCnpj) elCnpj.textContent = empresaInfo.cnpj || "CNPJ indisponível";
-                } else {
-                    console.error("Erro ao buscar empresa:", res.status);
-                }
-            } catch (erroEmpresa) {
-                console.error("Falha de conexão ao buscar empresa:", erroEmpresa);
-            }
-        } else {
-            // Se não tiver id_empresa no login
-            document.getElementById('profile-empresa').textContent = "Empresa não vinculada";
-        }
-
-    } catch (e) {
-        console.error("Erro ao carregar dados do usuário:", e);
-    }
-}
-
-function setupProfileModal() {
-    const modal = document.getElementById('profile-modal');
-    const btnOpen = document.getElementById('btn-open-profile');
-    const btnClose = document.getElementById('close-profile-btn');
-    const btnCloseAction = document.getElementById('btn-close-modal-action');
-    const btnLogout = document.getElementById('btn-logout');
-
-    if (!modal) return;
-
-    // Abrir modal
-    if (btnOpen) {
-        btnOpen.addEventListener('click', () => {
-            modal.style.display = 'block';
-        });
-    }
-
-    // Fechar modal
-    const fecharModal = () => { modal.style.display = 'none'; };
-    if (btnClose) btnClose.addEventListener('click', fecharModal);
-    if (btnCloseAction) btnCloseAction.addEventListener('click', fecharModal);
-    
-    // Fechar clicando fora
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) fecharModal();
-    });
-
-    // Logout
-    if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
-            if (confirm("Tem certeza que deseja sair?")) {
-                // Remove as credenciais corretas
-                localStorage.removeItem('userData');
-                localStorage.removeItem('authToken');
-                alert("Você saiu do sistema.");
-                window.location.href = '../index.html'; // Redireciona para o login
-            }
-        });
-    }
-}
-
-// ==========================================
 // LÓGICA DO DASHBOARD
 // ==========================================
 
 async function carregarBalancete(mes, ano) {
     try {
-        // 3. CORREÇÃO: Usar API_BASE_URL para chamar a porta 3000
-        // Além disso, precisamos passar o token de autenticação se sua API exigir
         const token = localStorage.getItem('authToken');
         
+        // Se não tiver token, nem tenta buscar (evita erro 401 desnecessário aqui)
+        if (!token) return;
+
         const headers = {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         };
-        
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`; // Adiciona token se existir
+
+        // Validação extra para garantir que não envie "undefined"
+        if (!mes || !ano) {
+            throw new Error("Mês e Ano são obrigatórios para buscar o balancete.");
         }
 
         const response = await fetch(`${API_BASE_URL}/balancete?mes=${mes}&ano=${ano}`, {
@@ -157,19 +51,25 @@ async function carregarBalancete(mes, ano) {
             headers: headers
         });
 
-        if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Erro HTTP: ${response.status}`);
+        }
 
         const data = await response.json();
         
-        // Ajuste para estrutura provável da resposta
-        // Se sua API retorna { contas: [...] }, mantenha. Se retorna array direto, ajuste.
+        // Ajuste para estrutura da resposta (pode vir array direto ou objeto { contas: [] })
         const listaContas = data.contas || data; 
 
         if (!listaContas || !Array.isArray(listaContas)) {
-            console.error('Formato de resposta inesperado:', data);
+            // Se vier vazio ou formato inesperado, tratamos como sem dados mas sem erro crítico
+            if (typeof showSystemNotification === 'function') {
+                showSystemNotification('Nenhum dado financeiro encontrado para este mês.', 'info');
+            }
             return;
         }
 
+        // Filtros das categorias
         const categorias = {
             saldoCaixa: [],
             contasPagar: [],
@@ -192,11 +92,17 @@ async function carregarBalancete(mes, ano) {
 
     } catch (error) {
         console.error('Erro ao carregar balancete:', error);
-        // Feedback visual opcional
+        
+        // CORREÇÃO: Usando o sistema de notificação (Toast)
+        if (typeof showSystemNotification === 'function') {
+            showSystemNotification(`Erro ao carregar dashboard: ${error.message}`, 'error');
+        }
+
+        // Feedback visual nos cards (opcional, para não deixar vazio)
         const containers = ['saldo-caixa', 'contas-pagar', 'contas-receber', 'resultado-mes'];
         containers.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.innerHTML = '<li style="color:red; font-size:0.8em">Erro de conexão com API</li>';
+            if (el) el.innerHTML = '<li style="color:#777; font-size:0.9em; font-style:italic">Não foi possível carregar</li>';
         });
     }
 }
@@ -215,17 +121,25 @@ function popularLista(elementId, contas) {
     contas.forEach(conta => {
         const li = document.createElement('li');
         
-        // Tratamento seguro para saldo_final (caso venha nulo ou string)
-        const saldoFinal = Number(conta.saldo_final) || 0;
+        // Calcula saldo (Débito - Crédito) ou usa saldo_final se disponível
+        const debito = Number(conta.total_debito || conta.movimento_debito || 0);
+        const credito = Number(conta.total_credito || conta.movimento_credito || 0);
+        const saldoFinal = Number(conta.saldo_final) || (debito - credito);
+
+        // Formatação de moeda
+        const valorFormatado = Math.abs(saldoFinal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const corValor = saldoFinal < 0 ? 'color: #dc3545;' : 'color: #28a745;'; // Vermelho ou Verde
 
         li.innerHTML = `
-            <label style="display:flex; align-items:center; width:100%; cursor:pointer;">
-                <input type="checkbox" 
-                       data-nome="${conta.nome_conta}" 
-                       data-debito="${saldoFinal > 0 ? saldoFinal : 0}" 
-                       data-credito="${saldoFinal < 0 ? Math.abs(saldoFinal) : 0}">
-                <span style="flex:1; margin-left: 8px;">${conta.nome_conta}</span>
-                <span style="font-weight:bold;">R$ ${Math.abs(saldoFinal).toFixed(2)}</span>
+            <label style="display:flex; align-items:center; width:100%; cursor:pointer; justify-content: space-between;">
+                <div style="display: flex; align-items: center;">
+                    <input type="checkbox" 
+                        data-nome="${conta.nome_conta}" 
+                        data-debito="${debito}" 
+                        data-credito="${credito}">
+                    <span style="margin-left: 8px;">${conta.nome_conta}</span>
+                </div>
+                <span style="font-weight:bold; ${corValor}">${valorFormatado}</span>
             </label>
         `;
         container.appendChild(li);
@@ -237,7 +151,11 @@ function gerarMiniRelatorio() {
     const containerRelatorio = document.getElementById('mini-relatorio');
 
     if (checked.length === 0) {
-        containerRelatorio.innerHTML = '<p>Nenhuma conta selecionada.</p>';
+        if (typeof showSystemNotification === 'function') {
+            showSystemNotification('Selecione pelo menos uma conta para gerar o relatório.', 'warning');
+        } else {
+            containerRelatorio.innerHTML = '<p>Nenhuma conta selecionada.</p>';
+        }
         return;
     }
 
@@ -253,18 +171,23 @@ function gerarMiniRelatorio() {
         totalDebito += debito;
         totalCredito += credito;
         
-        itensHtml += `<li>${nome} - D: ${debito.toFixed(2)} | C: ${credito.toFixed(2)}</li>`;
+        itensHtml += `<li><strong>${nome}</strong> - D: ${debito.toLocaleString('pt-BR', {minimumFractionDigits: 2})} | C: ${credito.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</li>`;
     });
 
     const saldo = totalDebito - totalCredito; 
+    const corSaldo = saldo >= 0 ? 'green' : 'red';
 
     containerRelatorio.innerHTML = `
         <h3>Mini Relatório Personalizado</h3>
-        <ul style="margin: 10px 0; padding-left: 20px;">${itensHtml}</ul>
-        <div style="margin-top: 10px; border-top: 1px solid #ccc; padding-top: 5px;">
-            <p><strong>Total Débito:</strong> R$ ${totalDebito.toFixed(2)}</p>
-            <p><strong>Total Crédito:</strong> R$ ${totalCredito.toFixed(2)}</p>
-            <p style="color: ${saldo >= 0 ? 'green' : 'red'}"><strong>Saldo Resultante:</strong> R$ ${saldo.toFixed(2)}</p>
+        <ul style="margin: 10px 0; padding-left: 20px; list-style: circle;">${itensHtml}</ul>
+        <div style="margin-top: 15px; border-top: 1px solid #ccc; padding-top: 10px;">
+            <p><strong>Total Débito:</strong> R$ ${totalDebito.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            <p><strong>Total Crédito:</strong> R$ ${totalCredito.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+            <p style="color: ${corSaldo}; font-size: 1.1em;"><strong>Saldo Resultante:</strong> R$ ${saldo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
         </div>
     `;
+    
+    if (typeof showSystemNotification === 'function') {
+        showSystemNotification('Relatório gerado com sucesso!', 'success');
+    }
 }

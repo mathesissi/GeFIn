@@ -1,7 +1,10 @@
 import { getContas, createLancamento } from './api.js'; 
-// Removido getLancamentos da importação pois não é mais usado aqui
-
+import { initUserProfile, checkAuthRedirect } from './UserProfile.js';
+if (!checkAuthRedirect()) {
+    throw new Error("Não autenticado");
+}
 document.addEventListener('DOMContentLoaded', async () => {
+    await initUserProfile(); 
     // --- Referências aos Elementos ---
     const lancamentoForm = document.getElementById('lancamento-form');
     const addPartidaBtn = document.getElementById('add-partida');

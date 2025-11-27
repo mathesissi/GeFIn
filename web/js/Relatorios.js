@@ -1,7 +1,11 @@
-// js/Relatorios.js
-import { getLivroRazao, getDRE, getIndicadores } from './api.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+import { getLivroRazao, getDRE, getIndicadores } from './api.js';
+import { initUserProfile, checkAuthRedirect} from './UserProfile.js';
+if (!checkAuthRedirect()) {
+    throw new Error("Não autenticado");
+}
+document.addEventListener('DOMContentLoaded', async() => {
+    await initUserProfile(); 
     // Elementos DOM
     const reportCards = document.querySelectorAll('.report-card');
     const filterForm = document.getElementById('report-filter-form');
@@ -200,30 +204,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('indicadores-container');
         container.innerHTML = '';
 
-        if (!indicadores) return;
+        if (!indicadores) {
+            container.innerHTML = '<p>Sem dados suficientes para calcular indicadores.</p>';
+            return;
+        }
 
-        // Helper para criar Card
-        const createCard = (titulo, valor, descricao, corClass = 'primary') => {
+        const createCard = (titulo, valor, descricao, corClass = 'primary', sulfixo = '') => {
             return `
                 <div class="indicator-card border-${corClass}">
                     <h5>${titulo}</h5>
-                    <div class="indicator-value">${valor}</div>
+                    <div class="indicator-value">${valor}${sulfixo}</div>
                     <p class="indicator-desc">${descricao}</p>
                 </div>
             `;
         };
 
-        // Liquidez
         const htmlLiquidez = `
-            ${createCard('Liquidez Corrente', indicadores.liquidez.corrente, 'Capacidade de pagar curto prazo', 'success')}
-            ${createCard('Liquidez Seca', indicadores.liquidez.seca, 'Capacidade sem contar estoques', 'warning')}
-            ${createCard('Liquidez Geral', indicadores.liquidez.geral, 'Solvência a longo prazo', 'info')}
+            ${createCard('Liquidez Corrente', indicadores.liquidez.corrente, 'Capacidade de pagar curto prazo (Ideal > 1)', indicadores.liquidez.corrente > 1 ? 'success' : 'warning')}
+            ${createCard('Liquidez Seca', indicadores.liquidez.seca, 'Capacidade sem contar estoques', 'info')}
+            ${createCard('Liquidez Geral', indicadores.liquidez.geral, 'Solvência a longo prazo', 'primary')}
         `;
 
-        // Rentabilidade
         const htmlRentabilidade = `
-            ${createCard('Margem Líquida', indicadores.rentabilidade.margemLiquida + '%', 'Lucro Líquido sobre Receita', 'success')}
-            ${createCard('ROE', indicadores.rentabilidade.roe + '%', 'Retorno sobre Patrimônio Líquido', 'primary')}
+            ${createCard('Margem Líquida', indicadores.rentabilidade.margemLiquida, 'Lucro Líquido sobre Receita', indicadores.rentabilidade.margemLiquida > 0 ? 'success' : 'danger', '%')}
+            ${createCard('ROE', indicadores.rentabilidade.roe, 'Retorno sobre Patrimônio Líquido', indicadores.rentabilidade.roe > 0 ? 'success' : 'danger', '%')}
         `;
 
         container.innerHTML = htmlLiquidez + htmlRentabilidade;

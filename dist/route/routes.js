@@ -5,7 +5,11 @@ const runtime_1 = require("@tsoa/runtime");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const UsuarioController_1 = require("./../controller/UsuarioController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+const LivroRazaoController_1 = require("./../controller/LivroRazaoController");
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const LancamentosController_1 = require("./../controller/LancamentosController");
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+const IndicadoresController_1 = require("./../controller/IndicadoresController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const EmpresaController_1 = require("./../controller/EmpresaController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -92,6 +96,8 @@ const models = {
             "tipo": { "dataType": "union", "subSchemas": [{ "dataType": "enum", "enums": ["conta"] }, { "dataType": "enum", "enums": ["subtotal"] }, { "dataType": "enum", "enums": ["calculo"] }, { "dataType": "enum", "enums": ["titulo"] }], "required": true },
             "children": { "dataType": "array", "array": { "dataType": "refObject", "ref": "DRELine" }, "required": true },
             "nivel": { "dataType": "double", "required": true },
+            "analiseVertical": { "dataType": "double" },
+            "analiseHorizontal": { "dataType": "double" },
         },
         "additionalProperties": false,
     },
@@ -293,6 +299,32 @@ function RegisterRoutes(app) {
         }
     });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    const argsLivroRazaoController_getLivroRazao = {
+        mes: { "in": "query", "name": "mes", "required": true, "dataType": "double" },
+        ano: { "in": "query", "name": "ano", "required": true, "dataType": "double" },
+        request: { "in": "request", "name": "request", "required": true, "dataType": "object" },
+        badRequestResponse: { "in": "res", "name": "400", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "message": { "dataType": "string", "required": true } } },
+    };
+    app.get('/livro-razao', authenticateMiddleware([{ "jwt": [] }]), ...((0, runtime_1.fetchMiddlewares)(LivroRazaoController_1.LivroRazaoController)), ...((0, runtime_1.fetchMiddlewares)(LivroRazaoController_1.LivroRazaoController.prototype.getLivroRazao)), async function LivroRazaoController_getLivroRazao(request, response, next) {
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = templateService.getValidatedArgs({ args: argsLivroRazaoController_getLivroRazao, request, response });
+            const controller = new LivroRazaoController_1.LivroRazaoController();
+            await templateService.apiHandler({
+                methodName: 'getLivroRazao',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+            });
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     const argsLancamentosController_criarLancamento = {
         dadosTransacao: { "in": "body", "name": "dadosTransacao", "required": true, "ref": "DadosTransacao" },
         request: { "in": "request", "name": "request", "required": true, "dataType": "object" },
@@ -406,6 +438,31 @@ function RegisterRoutes(app) {
             const controller = new LancamentosController_1.LancamentosController();
             await templateService.apiHandler({
                 methodName: 'deletarLancamento',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+            });
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    const argsIndicadoresController_getIndicadores = {
+        mes: { "in": "query", "name": "mes", "required": true, "dataType": "double" },
+        ano: { "in": "query", "name": "ano", "required": true, "dataType": "double" },
+        request: { "in": "request", "name": "request", "required": true, "dataType": "object" },
+    };
+    app.get('/indicadores', authenticateMiddleware([{ "jwt": [] }]), ...((0, runtime_1.fetchMiddlewares)(IndicadoresController_1.IndicadoresController)), ...((0, runtime_1.fetchMiddlewares)(IndicadoresController_1.IndicadoresController.prototype.getIndicadores)), async function IndicadoresController_getIndicadores(request, response, next) {
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = templateService.getValidatedArgs({ args: argsIndicadoresController_getIndicadores, request, response });
+            const controller = new IndicadoresController_1.IndicadoresController();
+            await templateService.apiHandler({
+                methodName: 'getIndicadores',
                 controller,
                 response,
                 next,
