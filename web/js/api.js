@@ -42,6 +42,7 @@ async function fetchAPI(endpoint, options = {}) {
         const response = await fetch(url, config);
 
         if (response.status === 401) {
+            // Verifica se já não está na página de login para evitar loop
             if (!window.location.pathname.includes('index.html') && window.location.pathname !== '/' && !window.location.pathname.includes('/web/')) {
                 alert("Sessão expirada. Faça login novamente.");
                 window.location.href = '../index.html';
@@ -111,5 +112,10 @@ export const getBalancete = (mes, ano) => fetchAPI(`/balancete?mes=${mes}&ano=${
 export const getDRE = (mes, ano) => fetchAPI(`/dre?mes=${mes}&ano=${ano}`);
 export const getLivroRazao = (mes, ano) => fetchAPI(`/livro-razao?mes=${mes}&ano=${ano}`);
 export const getIndicadores = (mes, ano) => fetchAPI(`/indicadores?mes=${mes}&ano=${ano}`);
+
+// --- NOVOS RELATÓRIOS (Adicionados) ---
+export const getLivroDiario = (mes, ano) => fetchAPI(`/livro-diario?mes=${mes}&ano=${ano}`);
+export const getBalancoPatrimonial = (mes, ano) => fetchAPI(`/balanco-patrimonial?mes=${mes}&ano=${ano}`);
+
 export const getEmpresaByCnpj = (cnpj) => fetchAPI(`/empresas/cnpj/${cnpj}`);
 export const getEmpresaById = (id) => fetchAPI(`/empresas/${id}`);

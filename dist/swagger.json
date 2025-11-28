@@ -315,6 +315,81 @@
 				"type": "object",
 				"description": "Make all properties in T optional"
 			},
+			"BalancoLine": {
+				"properties": {
+					"codigo_conta": {
+						"type": "string"
+					},
+					"nome_conta": {
+						"type": "string"
+					},
+					"saldo_atual": {
+						"type": "number",
+						"format": "double"
+					},
+					"tipo": {
+						"type": "string",
+						"enum": [
+							"grupo",
+							"conta",
+							"total"
+						]
+					},
+					"nivel": {
+						"type": "number",
+						"format": "double"
+					},
+					"children": {
+						"items": {
+							"$ref": "#/components/schemas/BalancoLine"
+						},
+						"type": "array"
+					},
+					"natureza": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"codigo_conta",
+					"nome_conta",
+					"saldo_atual",
+					"tipo",
+					"nivel",
+					"children"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BalancoPatrimonialReport": {
+				"properties": {
+					"mes": {
+						"type": "number",
+						"format": "double"
+					},
+					"ano": {
+						"type": "number",
+						"format": "double"
+					},
+					"ativo": {
+						"$ref": "#/components/schemas/BalancoLine"
+					},
+					"passivo": {
+						"$ref": "#/components/schemas/BalancoLine"
+					},
+					"patrimonioLiquido": {
+						"$ref": "#/components/schemas/BalancoLine"
+					}
+				},
+				"required": [
+					"mes",
+					"ano",
+					"ativo",
+					"passivo",
+					"patrimonioLiquido"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"BalanceteReport": {
 				"properties": {
 					"mes": {
@@ -739,6 +814,49 @@
 									],
 									"type": "object"
 								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Relatórios"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "mes",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ano",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/livro-diario": {
+			"get": {
+				"operationId": "GetLivroDiario",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {}
 							}
 						}
 					}
@@ -1670,6 +1788,51 @@
 					{
 						"in": "path",
 						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/balanco-patrimonial": {
+			"get": {
+				"operationId": "GetBalancoPatrimonial",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/BalancoPatrimonialReport"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Relatórios"
+				],
+				"security": [
+					{
+						"jwt": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "query",
+						"name": "mes",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "ano",
 						"required": true,
 						"schema": {
 							"format": "double",

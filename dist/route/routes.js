@@ -7,6 +7,8 @@ const UsuarioController_1 = require("./../controller/UsuarioController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const LivroRazaoController_1 = require("./../controller/LivroRazaoController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+const LivroDiarioController_1 = require("./../controller/LivroDiarioController");
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const LancamentosController_1 = require("./../controller/LancamentosController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const IndicadoresController_1 = require("./../controller/IndicadoresController");
@@ -16,6 +18,8 @@ const EmpresaController_1 = require("./../controller/EmpresaController");
 const DREController_1 = require("./../controller/DREController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const ContasController_1 = require("./../controller/ContasController");
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+const BalancoPatrimonialController_1 = require("./../controller/BalancoPatrimonialController");
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 const BalanceteController_1 = require("./../controller/BalanceteController");
 const authentication_1 = require("./../authentication");
@@ -134,6 +138,32 @@ const models = {
     "Partial__nome_conta-string--tipo_conta-TipoConta--codigo_conta-string--subtipo_conta_63_-string--subtipo_secundario_63_-string__": {
         "dataType": "refAlias",
         "type": { "dataType": "nestedObjectLiteral", "nestedProperties": { "nome_conta": { "dataType": "string" }, "tipo_conta": { "ref": "TipoConta" }, "codigo_conta": { "dataType": "string" }, "subtipo_conta": { "dataType": "string" }, "subtipo_secundario": { "dataType": "string" } }, "validators": {} },
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BalancoLine": {
+        "dataType": "refObject",
+        "properties": {
+            "codigo_conta": { "dataType": "string", "required": true },
+            "nome_conta": { "dataType": "string", "required": true },
+            "saldo_atual": { "dataType": "double", "required": true },
+            "tipo": { "dataType": "union", "subSchemas": [{ "dataType": "enum", "enums": ["grupo"] }, { "dataType": "enum", "enums": ["conta"] }, { "dataType": "enum", "enums": ["total"] }], "required": true },
+            "nivel": { "dataType": "double", "required": true },
+            "children": { "dataType": "array", "array": { "dataType": "refObject", "ref": "BalancoLine" }, "required": true },
+            "natureza": { "dataType": "string" },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BalancoPatrimonialReport": {
+        "dataType": "refObject",
+        "properties": {
+            "mes": { "dataType": "double", "required": true },
+            "ano": { "dataType": "double", "required": true },
+            "ativo": { "ref": "BalancoLine", "required": true },
+            "passivo": { "ref": "BalancoLine", "required": true },
+            "patrimonioLiquido": { "ref": "BalancoLine", "required": true },
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "BalanceteReport": {
@@ -313,6 +343,31 @@ function RegisterRoutes(app) {
             const controller = new LivroRazaoController_1.LivroRazaoController();
             await templateService.apiHandler({
                 methodName: 'getLivroRazao',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+            });
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    const argsLivroDiarioController_getLivroDiario = {
+        mes: { "in": "query", "name": "mes", "required": true, "dataType": "double" },
+        ano: { "in": "query", "name": "ano", "required": true, "dataType": "double" },
+        request: { "in": "request", "name": "request", "required": true, "dataType": "object" },
+    };
+    app.get('/livro-diario', authenticateMiddleware([{ "jwt": [] }]), ...((0, runtime_1.fetchMiddlewares)(LivroDiarioController_1.LivroDiarioController)), ...((0, runtime_1.fetchMiddlewares)(LivroDiarioController_1.LivroDiarioController.prototype.getLivroDiario)), async function LivroDiarioController_getLivroDiario(request, response, next) {
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = templateService.getValidatedArgs({ args: argsLivroDiarioController_getLivroDiario, request, response });
+            const controller = new LivroDiarioController_1.LivroDiarioController();
+            await templateService.apiHandler({
+                methodName: 'getLivroDiario',
                 controller,
                 response,
                 next,
@@ -685,6 +740,31 @@ function RegisterRoutes(app) {
             const controller = new ContasController_1.ContasController();
             await templateService.apiHandler({
                 methodName: 'deletarConta',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+            });
+        }
+        catch (err) {
+            return next(err);
+        }
+    });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    const argsBalancoPatrimonialController_getBalancoPatrimonial = {
+        mes: { "in": "query", "name": "mes", "required": true, "dataType": "double" },
+        ano: { "in": "query", "name": "ano", "required": true, "dataType": "double" },
+        request: { "in": "request", "name": "request", "required": true, "dataType": "object" },
+    };
+    app.get('/balanco-patrimonial', authenticateMiddleware([{ "jwt": [] }]), ...((0, runtime_1.fetchMiddlewares)(BalancoPatrimonialController_1.BalancoPatrimonialController)), ...((0, runtime_1.fetchMiddlewares)(BalancoPatrimonialController_1.BalancoPatrimonialController.prototype.getBalancoPatrimonial)), async function BalancoPatrimonialController_getBalancoPatrimonial(request, response, next) {
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        let validatedArgs = [];
+        try {
+            validatedArgs = templateService.getValidatedArgs({ args: argsBalancoPatrimonialController_getBalancoPatrimonial, request, response });
+            const controller = new BalancoPatrimonialController_1.BalancoPatrimonialController();
+            await templateService.apiHandler({
+                methodName: 'getBalancoPatrimonial',
                 controller,
                 response,
                 next,

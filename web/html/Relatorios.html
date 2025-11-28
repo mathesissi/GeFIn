@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,15 +26,9 @@
         <main class="main-content">
             <header class="main-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <h1>Relatórios Contábeis</h1>
-
                 <div class="user-actions">
                     <div class="user-profile" id="btn-open-profile" title="Ver Perfil">
                         <span id="header-username">Carregando...</span>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
                     </div>
                     <button class="btn-logout" id="btn-logout">Sair</button>
                 </div>
@@ -56,9 +49,9 @@
                                 <option value="7">Julho</option>
                                 <option value="8">Agosto</option>
                                 <option value="9">Setembro</option>
-                                <option value="10" selected>Outubro</option>
+                                <option value="10">Outubro</option>
                                 <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
+                                <option value="12" selected>Dezembro</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -72,29 +65,76 @@
                 <div class="report-selection" style="margin-top: 20px;">
                     <div class="report-card" data-report="livro-razao">
                         <h3>Livro Razão</h3>
-                        <p>Detalhamento de todas as transações por conta.</p>
+                        <p>Detalhamento por conta.</p>
+                    </div>
+
+                    <div class="report-card" data-report="livro-diario">
+                        <h3>Livro Diário</h3>
+                        <p>Histórico cronológico.</p>
+                    </div>
+
+                    <div class="report-card" data-report="balanco-patrimonial">
+                        <h3>Balanço Patrimonial</h3>
+                        <p>Ativo, Passivo e PL.</p>
                     </div>
 
                     <div class="report-card" data-report="dre">
                         <h3>DRE</h3>
-                        <p>Resultado do exercício (Lucro ou Prejuízo).</p>
+                        <p>Resultado (Lucro/Prejuízo).</p>
                     </div>
 
                     <div class="report-card" data-report="indicadores">
                         <h3>Indicadores</h3>
-                        <p>Análise de Liquidez e Rentabilidade.</p>
+                        <p>Liquidez e Rentabilidade.</p>
                     </div>
                 </div>
 
                 <div id="report-view-container" class="report-view" style="display: none;">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                         <h2 id="report-title">Título do Relatório</h2>
-                        <button id="btn-print" class="btn btn-secondary">Imprimir / PDF</button>
+                        <button id="btn-print" class="btn btn-secondary" onclick="window.print()">Imprimir / PDF</button>
                     </div>
 
                     <div id="livro-razao-view" style="display: none;">
-                        <div id="livro-razao-container">
+                        <div id="livro-razao-container"></div>
+                    </div>
+
+                    <div id="livro-diario-view" style="display: none;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th width="15%">Data</th>
+                                    <th width="40%">Descrição</th>
+                                    <th colspan="2"></th>
+                                    <th width="15%" class="text-right">Valor Total</th>
+                                    <th width="5%" class="text-center">Det.</th>
+                                </tr>
+                            </thead>
+                            <tbody id="livro-diario-tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="balanco-patrimonial-view" style="display: none;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start;">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead><tr><th colspan="2">ATIVO</th></tr></thead>
+                                    <tbody id="balanco-ativo-tbody"></tbody>
+                                    <tfoot id="balanco-ativo-tfoot"></tfoot>
+                                </table>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead><tr><th colspan="2">PASSIVO</th></tr></thead>
+                                    <tbody id="balanco-passivo-tbody"></tbody>
+                                    <tfoot id="balanco-passivo-tfoot"></tfoot>
+                                </table>
+                                <table class="data-table" style="margin-top: 2rem;">
+                                    <thead><tr><th colspan="2">PATRIMÔNIO LÍQUIDO</th></tr></thead>
+                                    <tbody id="balanco-pl-tbody"></tbody>
+                                    <tfoot id="balanco-pl-tfoot"></tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -113,8 +153,7 @@
                     </div>
 
                     <div id="indicadores-view" style="display: none;">
-                        <div class="indicadores-grid" id="indicadores-container">
-                        </div>
+                        <div class="indicadores-grid" id="indicadores-container"></div>
                     </div>
                 </div>
             </div>
@@ -122,5 +161,4 @@
     </div>
     <script type="module" src="../js/Relatorios.js"></script>
 </body>
-
 </html>

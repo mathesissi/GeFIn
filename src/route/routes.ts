@@ -8,6 +8,8 @@ import { UsuarioController } from './../controller/UsuarioController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { LivroRazaoController } from './../controller/LivroRazaoController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { LivroDiarioController } from './../controller/LivroDiarioController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { LancamentosController } from './../controller/LancamentosController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { IndicadoresController } from './../controller/IndicadoresController';
@@ -17,6 +19,8 @@ import { EmpresaController } from './../controller/EmpresaController';
 import { DREController } from './../controller/DREController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { ContasController } from './../controller/ContasController';
+// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+import { BalancoPatrimonialController } from './../controller/BalancoPatrimonialController';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { BalanceteController } from './../controller/BalanceteController';
 import { expressAuthentication } from './../authentication';
@@ -141,6 +145,32 @@ const models: TsoaRoute.Models = {
     "Partial__nome_conta-string--tipo_conta-TipoConta--codigo_conta-string--subtipo_conta_63_-string--subtipo_secundario_63_-string__": {
         "dataType": "refAlias",
         "type": {"dataType":"nestedObjectLiteral","nestedProperties":{"nome_conta":{"dataType":"string"},"tipo_conta":{"ref":"TipoConta"},"codigo_conta":{"dataType":"string"},"subtipo_conta":{"dataType":"string"},"subtipo_secundario":{"dataType":"string"}},"validators":{}},
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BalancoLine": {
+        "dataType": "refObject",
+        "properties": {
+            "codigo_conta": {"dataType":"string","required":true},
+            "nome_conta": {"dataType":"string","required":true},
+            "saldo_atual": {"dataType":"double","required":true},
+            "tipo": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["grupo"]},{"dataType":"enum","enums":["conta"]},{"dataType":"enum","enums":["total"]}],"required":true},
+            "nivel": {"dataType":"double","required":true},
+            "children": {"dataType":"array","array":{"dataType":"refObject","ref":"BalancoLine"},"required":true},
+            "natureza": {"dataType":"string"},
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "BalancoPatrimonialReport": {
+        "dataType": "refObject",
+        "properties": {
+            "mes": {"dataType":"double","required":true},
+            "ano": {"dataType":"double","required":true},
+            "ativo": {"ref":"BalancoLine","required":true},
+            "passivo": {"ref":"BalancoLine","required":true},
+            "patrimonioLiquido": {"ref":"BalancoLine","required":true},
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "BalanceteReport": {
@@ -381,6 +411,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'getLivroRazao',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsLivroDiarioController_getLivroDiario: Record<string, TsoaRoute.ParameterSchema> = {
+                mes: {"in":"query","name":"mes","required":true,"dataType":"double"},
+                ano: {"in":"query","name":"ano","required":true,"dataType":"double"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/livro-diario',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(LivroDiarioController)),
+            ...(fetchMiddlewares<RequestHandler>(LivroDiarioController.prototype.getLivroDiario)),
+
+            async function LivroDiarioController_getLivroDiario(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsLivroDiarioController_getLivroDiario, request, response });
+
+                const controller = new LivroDiarioController();
+
+              await templateService.apiHandler({
+                methodName: 'getLivroDiario',
                 controller,
                 response,
                 next,
@@ -865,6 +928,39 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deletarConta',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        const argsBalancoPatrimonialController_getBalancoPatrimonial: Record<string, TsoaRoute.ParameterSchema> = {
+                mes: {"in":"query","name":"mes","required":true,"dataType":"double"},
+                ano: {"in":"query","name":"ano","required":true,"dataType":"double"},
+                request: {"in":"request","name":"request","required":true,"dataType":"object"},
+        };
+        app.get('/balanco-patrimonial',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(BalancoPatrimonialController)),
+            ...(fetchMiddlewares<RequestHandler>(BalancoPatrimonialController.prototype.getBalancoPatrimonial)),
+
+            async function BalancoPatrimonialController_getBalancoPatrimonial(request: ExRequest, response: ExResponse, next: any) {
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args: argsBalancoPatrimonialController_getBalancoPatrimonial, request, response });
+
+                const controller = new BalancoPatrimonialController();
+
+              await templateService.apiHandler({
+                methodName: 'getBalancoPatrimonial',
                 controller,
                 response,
                 next,
