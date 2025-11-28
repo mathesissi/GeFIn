@@ -5,8 +5,9 @@ const MySql_1 = require("../database/MySql");
 class BalancoPatrimonialService {
     async gerarBalanco(idEmpresa, mes, ano) {
         // Data corte: último dia do mês selecionado
-        const dataCorte = `${ano}-${mes}-31 23:59:59`;
-        // 1. Busca todas as contas e saldos acumulados
+        // Ajuste para pegar o último segundo do mês corretamente
+        const dataCorte = `${ano}-${mes.toString().padStart(2, '0')}-31 23:59:59`;
+        // 1. Busca todas as contas e saldos acumulados até a data de corte
         const sql = `
             SELECT 
                 c.id_conta, c.codigo_conta, c.nome_conta, c.tipo_conta,
@@ -17,51 +18,48 @@ class BalancoPatrimonialService {
             LEFT JOIN transacoes t ON p.id_transacao = t.id_transacao 
                 AND t.data <= ? AND t.id_empresa = ?
             WHERE c.id_empresa = ?
-            GROUP BY c.id_conta
+            GROUP BY c.id_conta, c.codigo_conta, c.nome_conta, c.tipo_conta
             ORDER BY c.codigo_conta ASC
         `;
         const rows = await (0, MySql_1.executarComandoSQL)(sql, [dataCorte, idEmpresa, idEmpresa]);
+        // Constrói a árvore completa
         const arvore = this.construirArvore(rows);
         // 2. Separa os nós Raiz
-        const ativo = arvore.find(n => n.codigo_conta.startsWith('1')) || this.emptyNode('ATIVO');
-        const grupo2 = arvore.find(n => n.codigo_conta.startsWith('2')); // Grupo 2 contém Passivo + PL
-        // 3. Lógica de Separação (Passivo vs PL)
-        let passivo = this.emptyNode('PASSIVO');
-        let patrimonioLiquido = this.emptyNode('PATRIMÔNIO LÍQUIDO');
-        if (grupo2) {
-            const childrenPassivo = [];
-            const childrenPL = [];
-            // Itera sobre os filhos do grupo 2 (ex: 2.1, 2.2, 2.3)
-            grupo2.children.forEach(child => {
-                // Critério: Código começa com 2.3 OU Tipo é PatrimonioLiquido OU Nome contém "Patrimônio"
-                const isPL = child.codigo_conta.startsWith('2.3') ||
-                    child.natureza === 'PatrimonioLiquido' ||
-                    child.nome_conta.toUpperCase().includes('PATRIMÔNIO');
-                if (isPL) {
-                    childrenPL.push(child);
-                }
-                else {
-                    childrenPassivo.push(child);
-                }
-            });
-            // Reconstrói o Passivo (apenas obrigações)
-            passivo = {
-                ...grupo2,
-                nome_conta: 'PASSIVO EXIGÍVEL',
-                children: childrenPassivo,
-                saldo_atual: childrenPassivo.reduce((acc, c) => acc + c.saldo_atual, 0)
-            };
-            // Reconstrói o PL
-            patrimonioLiquido = {
-                codigo_conta: '2.3', // Código virtual para o grupo
-                nome_conta: 'PATRIMÔNIO LÍQUIDO',
-                tipo: 'grupo',
-                nivel: 1,
-                saldo_atual: childrenPL.reduce((acc, c) => acc + c.saldo_atual, 0),
-                children: childrenPL,
-                natureza: 'PatrimonioLiquido'
-            };
+        // Tenta encontrar a raiz "1" (Ativo) e "2" (Passivo)
+        let ativo = arvore.find(n => n.codigo_conta.startsWith('1') && n.nivel === 1);
+        // Se não achar raiz exata "1", cria uma fake e agrupa todos que começam com 1
+        if (!ativo) {
+            ativo = this.criarGrupoArtificial('ATIVO', '1', arvore.filter(n => n.codigo_conta.startsWith('1')));
         }
+        // Para Passivo e PL, a lógica é mais complexa pois podem estar juntos ou separados
+        const rootsPassivoPL = arvore.filter(n => n.codigo_conta.startsWith('2'));
+        let passivo;
+        let patrimonioLiquido;
+        const nosPL = [];
+        const nosPassivo = [];
+        // Função para identificar se é PL (Código 2.3 ou Natureza)
+        const isPL = (n) => n.codigo_conta.startsWith('2.3') || n.natureza === 'PatrimonioLiquido';
+        // Separa os filhos
+        rootsPassivoPL.forEach(node => {
+            // Se o nó já for a raiz "2", olhamos seus filhos
+            if (node.codigo_conta === '2') {
+                node.children.forEach(child => {
+                    if (isPL(child))
+                        nosPL.push(child);
+                    else
+                        nosPassivo.push(child);
+                });
+            }
+            else {
+                // Se forem nós soltos (ex: 2.1 e 2.3 na raiz)
+                if (isPL(node))
+                    nosPL.push(node);
+                else
+                    nosPassivo.push(node);
+            }
+        });
+        passivo = this.criarGrupoArtificial('PASSIVO', '2', nosPassivo);
+        patrimonioLiquido = this.criarGrupoArtificial('PATRIMÔNIO LÍQUIDO', '2.3', nosPL);
         return {
             mes,
             ano,
@@ -73,49 +71,45 @@ class BalancoPatrimonialService {
     construirArvore(contas) {
         const map = new Map();
         const roots = [];
-        // Instancia os nós
+        // 1. Cria todos os nós
         contas.forEach(c => {
-            let saldo = Number(c.total_debito) - Number(c.total_credito);
-            // Inverte sinal para contas credoras ficarem positivas no relatório visual
+            let saldo = Number(c.total_debito || 0) - Number(c.total_credito || 0);
+            // Inverte sinal para contas de natureza Credora (Passivo, PL, Receita)
+            // Obs: Receita/Despesa tecnicamente zeram no fim do exercício, mas no Balancete acumulado aparecem.
             if (['Passivo', 'PatrimonioLiquido', 'Receita'].includes(c.tipo_conta)) {
                 saldo = saldo * -1;
             }
+            // Define o nível baseado nos pontos (ex: 1.1.1 = nível 3)
+            const nivel = c.codigo_conta.split('.').length;
             map.set(c.codigo_conta, {
                 codigo_conta: c.codigo_conta,
                 nome_conta: c.nome_conta,
                 saldo_atual: saldo,
                 tipo: 'conta',
-                nivel: c.codigo_conta.split('.').length,
+                nivel: nivel,
                 children: [],
-                natureza: c.tipo_conta // Guarda o tipo original para filtragem posterior
+                natureza: c.tipo_conta
             });
         });
-        // Monta a hierarquia
+        // 2. Monta a hierarquia (Parent/Child)
+        // Ordena chaves para garantir que pais venham antes ou sejam processados corretamente
         const sortedKeys = Array.from(map.keys()).sort();
         sortedKeys.forEach(key => {
             const node = map.get(key);
-            // Procura o pai (ex: para 1.1.1, o pai é 1.1)
-            // Lógica: remove o último segmento após o ponto
+            // Lógica para achar o pai: 1.1.1 -> pai é 1.1
             const lastDotIndex = key.lastIndexOf('.');
             const parentKey = lastDotIndex > -1 ? key.substring(0, lastDotIndex) : null;
-            // Se pai não encontrado pela lógica de ponto, tenta substring simples (ex: pai de 11 é 1)
-            // Mas o padrão mais seguro é o do ponto. Se não tiver ponto, assume raiz.
             if (parentKey && map.has(parentKey)) {
                 const parent = map.get(parentKey);
                 parent.children.push(node);
-                parent.tipo = 'grupo';
-                // Opcional: Recalcular saldo do pai somando filhos (Roll-up)
-                // Se o banco já traz o saldo correto da conta sintética, não precisa somar aqui.
-                // Assumindo que o banco traz saldos individuais, seria ideal somar:
-                // parent.saldo_atual += node.saldo_atual;
+                parent.tipo = 'grupo'; // Se tem filho, vira grupo
             }
             else {
-                // Se não tem pai (ex: '1' ou '2'), é raiz
                 roots.push(node);
             }
         });
-        // Função recursiva para garantir que os saldos dos grupos (sintéticos) sejam a soma dos filhos (analíticos)
-        // Isso corrige casos onde o banco não tem lançamentos diretos na conta pai
+        // 3. Recalcula saldos dos grupos (Soma dos filhos)
+        // Isso garante que o saldo do grupo "1.1" seja a soma de todos os "1.1.x"
         this.calcularSaldosRecursivos(roots);
         return roots;
     }
@@ -123,13 +117,21 @@ class BalancoPatrimonialService {
         nodes.forEach(node => {
             if (node.children.length > 0) {
                 this.calcularSaldosRecursivos(node.children);
-                // O saldo do grupo é a soma dos filhos
+                // O saldo do pai é a soma dos saldos dos filhos
                 node.saldo_atual = node.children.reduce((acc, child) => acc + child.saldo_atual, 0);
             }
         });
     }
-    emptyNode(nome) {
-        return { codigo_conta: '', nome_conta: nome, saldo_atual: 0, tipo: 'grupo', nivel: 0, children: [] };
+    criarGrupoArtificial(nome, codigo, children) {
+        const saldoTotal = children.reduce((acc, c) => acc + c.saldo_atual, 0);
+        return {
+            codigo_conta: codigo,
+            nome_conta: nome,
+            saldo_atual: saldoTotal,
+            tipo: 'grupo',
+            nivel: 0,
+            children: children
+        };
     }
 }
 exports.BalancoPatrimonialService = BalancoPatrimonialService;
